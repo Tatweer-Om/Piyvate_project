@@ -266,11 +266,11 @@ $.ajax({
                             <div class="form-group">
                                 <label class="col-form-label">Product Type:</label>
                                 <div class="form-check">
-                                    <input class="form-check-input product_sale_${count}" type="radio" name="product_type[${count}]" id="product_sale_${count}" value="2">
+                                    <input class="form-check-input product_sale_${count}" type="radio" name="product_type_${count}" id="product_sale_${count}" value="2">
                                     <label class="form-check-label" for="product_sale_${count}">Sale</label>
                                 </div>
                                 <div class="form-check">
-                                    <input class="form-check-input product_sale_${count}" type="radio" name="product_type[${count}]" id="product_clinic_${count}" value="1">
+                                    <input class="form-check-input product_sale_${count}" type="radio" name="product_type_${count}" id="product_clinic_${count}" value="1">
                                     <label class="form-check-label" for="product_clinic_${count}">Clinic</label>
                                 </div>
                             </div>

@@ -395,7 +395,8 @@ class PurchaseController extends Controller
                  $request->file('stock_image_'.$checkbox)->move(public_path('images/product_images'), $product_image);
             }
 
-
+            $product_type = $request['product_type_'.$checkbox];
+             
             $purchase_detail->purchase_id=$purchase_id;
             $purchase_detail->invoice_no=$invoice_no;
             $purchase_detail->product_id=$product_ids;
@@ -408,16 +409,16 @@ class PurchaseController extends Controller
             $purchase_detail->sale_price=$sale_price[$i];
             $purchase_detail->tax=$tax[$i];
             $purchase_detail->quantity=$quantity[$i];
-            $purchase_detail->product_type = $product_type[$i] ?? null;
+            $purchase_detail->product_type = $product_type ?? null;
             $purchase_detail->description=$description[$i];
             $purchase_detail->stock_image=$product_image;
             $purchase_detail->added_by = $user;
             $purchase_detail->user_id = $user_id;
             $purchase_detail->save();
 
-            // $product_type = $request['product_type_'.$checkbox];
+            
             $product = new Product();
-           $product->purchase_id=$purchase_id;
+            $product->purchase_id=$purchase_id;
            $product->invoice_no=$invoice_no;
            $product->product_id=$product_ids;
            $product->store_id=$store_id[$i];
@@ -425,13 +426,13 @@ class PurchaseController extends Controller
            $product->supplier_id=$supplier_id;
            $product->barcode=$barcode[$i];
            $product->purchase_price=$purchase_price[$i];
-           // $product->total_purchase=$total_purchase[$i];
+        //    $product->total_purchase=$total_purchase[$i];
            $product->product_name=$product_name[$i];
            $product->sale_price=$sale_price[$i];
            $product->tax=$tax[$i];
            $product->quantity=$quantity[$i];
-           $product->product_type = $product_type[$i] ?? null;
-            $product->description=$description[$i];
+           $product->product_type = $product_type ?? null;
+           $product->description=$description[$i];
            $product->stock_image=$product_image;
            $product->added_by = $user;
            $product->user_id = $user_id;
@@ -440,7 +441,7 @@ class PurchaseController extends Controller
             // purchase and product imei
         }
 
-        dd(1);
+        // exit;
 
         // purchase bill
         $purchase_bill = new Purchase_bill();
