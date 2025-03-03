@@ -1156,24 +1156,24 @@ $.ajax({
     // search barcode
 
     // view_purchase
-    $('#all_purchase').DataTable({
-        "sAjaxSource": "<?php echo url('show_purchase'); ?>",
-        "bFilter": true,
-        "sDom": 'fBtlpi',
-        'pagingType': 'numbers',
-        "ordering": true,
-        "language": {
-            search: ' ',
-            sLengthMenu: '_MENU_',
-            searchPlaceholder: '<?php echo trans('messages.search_lang', [], session('locale')); ?>',
-            info: "_START_ - _END_ of _TOTAL_ items",
-        },
-        initComplete: (settings, json) => {
-            $('.dataTables_filter').appendTo('#tableSearch');
-            $('.dataTables_filter').appendTo('.search-input');
-        },
+    // $('#all_purchase').DataTable({
+    //     "sAjaxSource": "<?php echo url('show_purchase'); ?>",
+    //     "bFilter": true,
+    //     "sDom": 'fBtlpi',
+    //     'pagingType': 'numbers',
+    //     "ordering": true,
+    //     "language": {
+    //         search: ' ',
+    //         sLengthMenu: '_MENU_',
+    //         searchPlaceholder: '<?php echo trans('messages.search_lang', [], session('locale')); ?>',
+    //         info: "_START_ - _END_ of _TOTAL_ items",
+    //     },
+    //     initComplete: (settings, json) => {
+    //         $('.dataTables_filter').appendTo('#tableSearch');
+    //         $('.dataTables_filter').appendTo('.search-input');
+    //     },
 
-    });
+    // });
 
     // approve prodcuts
     function approved_products(id) {

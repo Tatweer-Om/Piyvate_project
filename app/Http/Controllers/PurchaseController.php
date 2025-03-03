@@ -23,6 +23,7 @@ use App\Models\Purchase_payment;
 use Illuminate\Support\Facades\DB;
 use App\Models\Product_qty_history;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\File;
 
 
@@ -37,7 +38,7 @@ class PurchaseController extends Controller
 
         // if ($permit_array && in_array('2', $permit_array)) {
 
-            return view('stock.purchase');
+            return view('purchase.show_purchase');
         // } else {
 
         //     return redirect()->route('home');
@@ -45,6 +46,8 @@ class PurchaseController extends Controller
 
 
     }
+
+
     public function show_purchase()
     {
         $sno=0;
@@ -100,23 +103,50 @@ class PurchaseController extends Controller
 
 
 
-                $supplier_name = getColumnValue('suppliers','id',$value->supplier_id,'supplier_name');
+                $supplier_name = Supplier::where('id' ,$value->supplier_id)->value('supplier_name');
                 $add_data=Carbon::parse($value->created_at)->format('d-m-Y (h:i a)');
 
                 $user= User::where('id', $value->user_id)->first();
                 $added_by= $user->username ?? '';
 
+                $file_path = asset('images/purchase_images/' . $value->receipt_file);
+                $file_extension = pathinfo($value->receipt_file, PATHINFO_EXTENSION);
+                $download_path = url('download-receipt/' . $value->receipt_file); // Route for download
+
+                // Define dummy icons for non-image files
+                $dummy_icons = [
+                    'pdf'  => asset('images/dummy_images/pdf.png'),
+                    'doc'  => asset('images/dummy_images/word.jpeg'),
+                    'docx' => asset('images/dummy_images/word.jpeg'),
+                    'xls'  => asset('images/dummy_images/excel.jpeg'),
+                    'xlsx' => asset('images/dummy_images/excel.jpeg'),
+                ];
+
+                $download_icon = "<a href='{$download_path}' download title='Download'><img src='" . asset('images/dummy_images/download.png') . "' alt='Download' width='20'></a>";
+
+                // Check if the file exists
+                if (!empty($value->receipt_file) && file_exists(public_path('images/purchase_images/' . $value->receipt_file))) {
+                    if (in_array(strtolower($file_extension), ['jpg', 'jpeg', 'png', 'gif'])) {
+                        $file_display = "<img src='{$file_path}' alt='Receipt' width='30' height='30'> {$download_icon}";
+                    } else {
+                        $icon_path = $dummy_icons[$file_extension] ?? asset('images/dummy_images/file.png');
+                        $file_display = "<a href='{$file_path}' target='_blank'><img src='{$icon_path}' alt='File' width='30' height='30'></a> {$download_icon}";
+                    }
+                } else {
+                    // Show "No Image" placeholder
+                    $no_image = asset('images/dummy_images/no_image.jpg');
+                    $file_display = "<img src='{$no_image}' alt='No Image' width='50' height='50'>";
+                }
+
                 $sno++;
                 $json[]= array(
                             $sno,
                             $invoice_no,
-                            $status,
                             $supplier_name,
                             $value->purchase_date,
-                            $sumTotalPurchase,
+                            $value->invoice_price,
                             $value->total_shipping,
-                            $value->total_tax,
-                            $grand_total,
+                            $file_display,
                             $added_by,
                             $add_data,
                             $modal
@@ -1482,4 +1512,15 @@ class PurchaseController extends Controller
         return response()->json(['status' => $tax_active]);
     }
 
+
+    public function downloadReceipt($filename)
+    {
+        $filePath = public_path('images/purchase_images/' . $filename);
+
+        if (File::exists($filePath)) {
+            return Response::download($filePath);
+        } else {
+            return back()->with('error', 'File not found.');
+        }
+    }
 }

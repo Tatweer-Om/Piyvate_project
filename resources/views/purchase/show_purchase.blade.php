@@ -2,7 +2,7 @@
 
 @section('main')
     @push('title')
-        <title> {{ trans('messages.products_lang', [], session('locale')) }}</title>
+        <title> {{ trans('messages.purchases_lang', [], session('locale')) }}</title>
     @endpush
     <style>
     /* Make button full-width on small screens */
@@ -56,12 +56,12 @@
         <div class="page-titles">
             <ol class="breadcrumb">
                 <li class=""><a href="javascript:void(0)">Dashboard/</a></li>
-                <li class="active"><a href="javascript:void(0)">product</a></li>
+                <li class="active"><a href="javascript:void(0)">purchase</a></li>
             </ol>
         </div>
         {{-- <div class="form-head d-flex mb-3 mb-md-4 align-items-start flex-wrap">
             <div class="me-auto mb-3 mb-md-0">
-                <a href="javascript:void();" class="btn btn-primary btn-rounded add-staff" data-bs-toggle="modal" data-bs-target="#add_product_modal">+ Add product</a>
+                <a href="javascript:void();" class="btn btn-primary btn-rounded add-staff" data-bs-toggle="modal" data-bs-target="#add_purchase_modal">+ Add purchase</a>
             </div>
 
 
@@ -72,18 +72,19 @@
                 <div class="card">
                     <div class="card-body p-0">
                         <div class="table-responsive">
-                            <table id="all_product" class="table table-striped patient-list mb-4 dataTablesCard fs-14">
+                            <table id="all_purchase" class="table table-striped patient-list mb-4 dataTablesCard fs-14">
                                 <thead>
                                     <tr>
                                         <th>Sr No</th>
-                                        <th>product Name</th>
-                                        <th>Barcode</th>
-                                        <th>Product Type </th>
-                                        <th>Purchase Price </th>
-                                        <th>Sales Price </th>
-                                        <th>Quantity  </th>
+                                        <th>Invoice No</th>
+                                        <th>Supplier Name</th>
+                                        <th>Purchase Date</th>
+                                        <th>Invoice Price</th>
+                                        <th>Shipping Cost</th>
+                                        {{-- <th>Paid Amount</th>
+                                        <th>Remaining Amount</th> --}}
+                                        <th>Document</th>
                                         <th>Added By</th>
-
                                         <th>Added On </th>
                                         <th class="text-center">Action</th>
                                     </tr>
@@ -99,25 +100,25 @@
         </div>
     </div>
 
-    <div class="modal fade" id="add_product_modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal fade" id="add_purchase_modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
       <div class="modal-dialog modal-md" role="document">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title" id="exampleModalLabel">product Model</h5>
+            <h5 class="modal-title" id="exampleModalLabel">purchase Model</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
             </button>
           </div>
           <div class="modal-body">
-            <form class="add_product">
+            <form class="add_purchase">
                 @csrf
                 <div class="row">
                     <div class="col-lg-12 col-xl-12">
                         <div class="form-group">
-                            <label class="col-form-label">product Name</label>
-                            <input type="text" class="form-control product_name" id="name1" name="product_name" placeholder="product Name" >
+                            <label class="col-form-label">purchase Name</label>
+                            <input type="text" class="form-control purchase_name" id="name1" name="purchase_name" placeholder="purchase Name" >
                         </div>
                     </div>
-                    <input type="hidden" class="product_id" name="product_id">
+                    <input type="hidden" class="purchase_id" name="purchase_id">
 
 
                         <div class=" col-lg-12 col-12 col-md-12 col-xl-12">
