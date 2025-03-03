@@ -6,7 +6,9 @@
         <title> {{ trans('messages.doctors_list_lang', [], session('locale')) }}</title>
     @endpush
 
-<div class="content-body">
+
+
+
     <!-- row -->
     <div class="container-fluid">
         <div class="page-titles">

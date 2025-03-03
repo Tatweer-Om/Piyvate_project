@@ -9,9 +9,7 @@ class HomeController extends Controller
     public function index(){
         return view ('dashboard.index');
     }
-    public function login_page(){
-        return view ('pages.login');
-    }
+
 
     public function switchLanguage($locale)
 {

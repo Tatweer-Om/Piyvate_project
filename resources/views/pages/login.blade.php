@@ -20,9 +20,13 @@
 	<link rel="shortcut icon" type="image/x-icon" href="images/favicon.png">
     <link href="{{ asset('vendor/bootstrap-select/dist/css/bootstrap-select.min.css') }}" rel="stylesheet">
     <link class="main-css" href="{{ asset('css/style.css') }}" rel="stylesheet">
+    <link rel="stylesheet" href="{{  asset('vendor/toastr/css/toastr.min.css')}}">
+
+
 
 
 </head>
+
 <body class="vh-100">
 
 	<div class="authincation h-100">
@@ -34,40 +38,29 @@
                             <div class="col-xl-12">
                                 <div class="auth-form">
 									<div class="text-center mb-3">
-										<a href="index.html"><img src="images/logo-full.png" alt=""></a>
+										<a><img src="{{ asset('images/logo/piyalogo-1.png')}}" alt=""></a>
 									</div>
                                     <h4 class="text-center mb-4">Sign in your account</h4>
-                                    <form action="https://eres.dexignzone.com/xhtml/index.html">
+                                    <form class="login_form">
+                                        @csrf
                                         <div class="form-group">
-                                            <label class="form-label">Email</label>
-                                            <input type="email" class="form-control" value="hello@example.com">
+                                            <label class="form-label">User Name Or Email</label>
+                                            <input type="text" class="form-control user_name" name="user_name">
                                         </div>
 										<label class="form-label">Password</label>
                                         <div class="mb-3 position-relative">
-											<input type="password" id="dz-password" class="form-control" value="123456">
+											<input type="password" id="dz-password" name="password" class="form-control password" >
 											<span class="show-pass eye">
 												<i class="fa fa-eye-slash"></i>
 												<i class="fa fa-eye"></i>
 											</span>
                                         </div>
-                                        <div class="form-row d-flex justify-content-between flex-wrap mt-4 mb-2">
-                                            <div class="form-group">
-                                               <div class="form-check custom-checkbox ms-1">
-													<input type="checkbox" class="form-check-input" id="basic_checkbox_1">
-													<label class="form-check-label" for="basic_checkbox_1">Remember my preference</label>
-												</div>
-                                            </div>
-                                            {{-- <div class="form-group">
-                                                <a href="page-forgot-password.html">Forgot Password?</a>
-                                            </div> --}}
-                                        </div>
+
                                         <div class="text-center">
                                             <button type="submit" class="btn btn-primary btn-block">Sign Me In</button>
                                         </div>
                                     </form>
-                                    {{-- <div class="new-account mt-3">
-                                        <p class="mb-0">Don't have an account? <a class="text-primary" href="page-register.html">Sign up</a></p>
-                                    </div> --}}
+
                                 </div>
 							</div>
                         </div>
@@ -76,10 +69,20 @@
             </div>
         </div>
     </div>
+    @include('custom_js.custom_js')
 
-    <!--**********************************
-        Scripts
-    ***********************************-->
+    @php
+
+    $routeName = Route::currentRouteName();
+    $segments = explode('.', $routeName);
+    $route_name = isset($segments[0]) ? $segments[0] : null;
+
+@endphp
+
+    @if ($route_name == 'login_page')
+        @include('custom_js.login_js')
+    @endif
+
     <!-- Required vendors -->
     <script src="{{ asset('vendor/global/global.min.js') }}"></script>
     <script src="{{ asset('vendor/bootstrap-select/dist/js/bootstrap-select.min.js') }}"></script>
@@ -87,6 +90,8 @@
     <script src="{{ asset('js/deznav-init.js') }}"></script>
     <script src="{{ asset('js/demo.js') }}"></script>
     <script src="{{ asset('js/styleSwitcher.js') }}"></script>
+    <script src="{{ asset('vendor/toastr/js/toastr.min.js')}}"></script>
+    <script src="{{ asset('js/plugins-init/toastr-init.js')}}"></script>
 
 
 </body>
