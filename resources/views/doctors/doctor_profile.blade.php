@@ -5,6 +5,7 @@
         <title> {{ trans('messages.doctor_profile_lang', [], session('locale')) }}</title>
     @endpush
 
+
     <div class="content-body">
         <!-- row -->
         <div class="container-fluid">
@@ -393,6 +394,8 @@
         </div>
       </div>
     </div>
+
+
 
     @include('layouts.footer')
 @endsection

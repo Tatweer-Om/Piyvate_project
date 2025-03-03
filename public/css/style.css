@@ -4,8 +4,8 @@
     Name                 : Eres
     Author               : DexignZone
     Author Portfolio     : https://themeforest.net/user/dexignzone/portfolio
-    
-	
+
+
     Table of Sass Contents
 
     1. Abstracts
@@ -15,7 +15,7 @@
         _mixin
         _variable
 
-    2. bootstrap 
+    2. bootstrap
         -Here goes all official bootstrap scss files
 
     3. Global/Base
@@ -9549,7 +9549,7 @@ textarea.form-control-lg {
 
 * {
   outline: none;
-  padding: 0; }
+  padding: -0.65rem; }
   *::after {
     margin: 0;
     padding: 0; }
