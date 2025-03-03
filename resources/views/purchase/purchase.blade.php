@@ -359,13 +359,13 @@
                                     <div class="form-group">
                                         <label class="col-form-label">Product Type:</label>
                                         <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="product_type[]"
+                                            <input class="form-check-input" type="radio" name="product_type_1"
                                                 id="product_sale_1" value="2">
                                             <label class="form-check-label" for="product_sale_1">Sale</label>
                                         </div>
                                         <div class="form-check">
                                             <input class="form-check-input product_clinic_1" type="radio"
-                                                name="product_type[]" id="product_clinic_1" value="1">
+                                                name="product_type_1" id="product_clinic_1" value="1">
                                             <label class="form-check-label" for="product_clinic_1">Clinic</label>
                                         </div>
                                     </div>
