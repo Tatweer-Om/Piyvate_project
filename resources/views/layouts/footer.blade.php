@@ -16,6 +16,8 @@
     <script src="{{ asset('vendor/bootstrap-select/dist/js/bootstrap-select.min.js') }}"></script>
     <script src="{{ asset('vendor/chart.js/chart.bundle.min.js') }}"></script>
     <script src="{{ asset('vendor/owl-carousel/owl.carousel.js') }}"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+
 
     <!-- Apex Chart -->
     <script src="{{ asset('vendor/apexchart/apexchart.js') }}"></script>
@@ -163,6 +165,10 @@
         @include('custom_js.account_js')
         @elseif ($route_name == 'addproduct')
         @include('custom_js.purchase_js')
+        @elseif ($route_name == 'purchases')
+        @include('custom_js.show_purchase_js')
+        @elseif ($route_name == 'products')
+        @include('custom_js.product_js')
         @elseif ($route_name == 'category')
         @include('custom_js.category_js')
         @elseif ($route_name == 'expense_category')

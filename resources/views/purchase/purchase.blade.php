@@ -69,16 +69,7 @@
                                     </div>
                                 </div>
                             </div>
-                            {{-- <div class="col-xl-3 mb-3">
-                                        <div class="form-group">
-                                            <label class="col-form-label">{{ trans('messages.total_tax_lang', [], session('locale')) }}:</label>
-                                            <div class="input-group">
-                                                <span class="input-group-text">OMR</span>
-                                                <input type="text" class="form-control" id="total_tax" value="0.000" name="total_tax">
-                                                <input type="hidden" id="total_tax_input" >
-                                            </div>
-                                        </div>
-                                    </div> --}}
+
                             <div class="col-xl-3 mb-3">
                                 <div class="form-group">
                                     <label
@@ -286,8 +277,10 @@
                                         <div class="input-group">
                                             <span class="input-group-text">OMR</span>
                                             <input type="text" class="form-control purchase_price_1 isnumber"
-                                                onkeyup="get_profit_percent(1)" onkeyup="calculateTotalPurchasePrice(1)"
+                                                onkeyup="calculateTotalPurchasePrice(1)"
                                                 name="purchase_price[]">
+                                                <input type="text" class="form-control purchase_price_old_1"
+                                                name="purchase_price_old[]" hidden>
                                         </div>
                                     </div>
                                 </div>
@@ -297,6 +290,8 @@
                                         <div class="input-group">
                                             <span class="input-group-text">OMR</span>
                                             <input type="text" class="form-control sale_price_1 isnumber" id="sale_price_1" onkeyup="updateSalesPrice(1)" name="sale_price[]">
+                                            <input type="text" class="form-control sale_price_old_1"
+                                            name="sale_price_old[]" hidden>
                                         </div>
                                     </div>
                                 </div>
@@ -304,6 +299,8 @@
                                     <div class="form-group">
                                         <label class="col-form-label">Quantity:</label>
                                         <input type="text" class="form-control quantity_1 isnumber1" onkeyup="check_qty(1)" name="quantity[]">
+                                        <input type="text" class="form-control quantity_old_1"
+                                        name="quantity_old[]" hidden>
                                     </div>
                                 </div>
                                 <div class="col-xl-3">

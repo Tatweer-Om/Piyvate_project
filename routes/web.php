@@ -164,7 +164,6 @@ Route::post('get_selected_new_data', [PurchaseController::class, 'get_selected_n
 Route::post('search_invoice', [PurchaseController::class, 'search_invoice'])->name('search_invoice');
 Route::get('search_barcode', [PurchaseController::class, 'search_barcode'])->name('search_barcode');
 Route::post('get_product_data', [PurchaseController::class, 'get_product_data'])->name('get_product_data');
-Route::post('approved_purchase', [PurchaseController::class, 'approved_purchase'])->name('approved_purchase');
 Route::post('delete_purchase', [PurchaseController::class, 'delete_purchase'])->name('delete_purchase');
 Route::get('purchase_view/{invoice_no}', [PurchaseController::class, 'purchase_view'])->name('purchase_view');
 Route::get('purchase_detail/{invoice_no}', [PurchaseController::class, 'purchase_view'])->name('purchase_view');
@@ -177,6 +176,8 @@ Route::get('edit_purchase/{id}', [PurchaseController::class, 'edit_purchase'])->
 Route::post('update_purchase', [PurchaseController::class, 'update_purchase'])->name('update_purchase');
 Route::post('complete_purchase', [PurchaseController::class, 'complete_purchase'])->name('complete_purchase');
 Route::post('check_tax_active', [PurchaseController::class, 'check_tax_active'])->name('check_tax_active');
+Route::get('download-receipt/{filename}', [PurchaseController::class, 'downloadReceipt']);
+
 
 
 

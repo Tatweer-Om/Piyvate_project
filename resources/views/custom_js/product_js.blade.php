@@ -1,6 +1,6 @@
 <script>
     $(document).ready(function() {
-        JsBarcode(".barcode").init();
+        // JsBarcode(".barcode").init();
         // show all products
         $('#all_product').DataTable({
             "sAjaxSource": "{{ url('show_product') }}",

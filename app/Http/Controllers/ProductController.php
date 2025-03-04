@@ -2,26 +2,30 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use App\Models\User;
 use App\Models\Brand;
+use App\Models\Branch;
 use App\Models\Product;
 use App\Models\Category;
-use App\Models\Product_imei;
-use App\Models\Purchase_imei;
-use App\Models\Purchase_detail;
-use Illuminate\Http\Request;
-use App\Models\Product_qty_history;
 use App\Models\Purchase;
+use App\Models\Supplier;
+use App\Models\Product_imei;
+use Illuminate\Http\Request;
+use App\Models\Purchase_imei;
 use App\Models\PosOrderDetail;
+use App\Models\Purchase_detail;
+use Illuminate\Support\Facades\DB;
+use App\Models\Product_qty_history;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\DB;
 
 class ProductController extends Controller
 {
     public function index()
     {
         $categories= Category::all();
+        $stores= Branch::all();
 
         $user = Auth::user();
         $permit = User::find($user->id)->permit_type;
@@ -29,7 +33,7 @@ class ProductController extends Controller
 
         // if ($permit_array && in_array('2', $permit_array)) {
 
-            return view('purchase.products');
+            return view('purchase.products', compact('categories', 'stores'));
         // } else {
 
         //     return redirect()->route('home');
@@ -61,59 +65,71 @@ class ProductController extends Controller
                 }
 
                 // damage undo button
-                $product_qty_history_count = Product_qty_history::where('product_id', $value->id)
-                                                                ->where('source', 'damage')
-                                                                ->where('status', 1)
-                                                                ->count();
-                if($product_qty_history_count>0)
-                {
-                    $modal.='<a class="me-3 confirm-text text-danger" onclick=undo_damage_product("'.$value->id.'")><i class="fas fa-undo"></i></a>';
-                }
-                //
-                // imei product
-                if($value->check_imei==1)
-                {
-                    $modal.='<a class="me-3 confirm-text text-warning" onclick=replace_pro_imei("'.$value->id.'")><i class="fas fa-exchange-alt"></i></a>';
-                }
+                // $product_qty_history_count = Product_qty_history::where('product_id', $value->id)
+                //                                                 ->where('source', 'damage')
+                //                                                 ->where('status', 1)
+                //                                                 ->count();
+                // if($product_qty_history_count>0)
+                // {
+                //     $modal.='<a class="me-3 confirm-text text-danger" onclick=undo_damage_product("'.$value->id.'")><i class="fas fa-undo"></i></a>';
+                // }
 
-                // not sold item and multiple fatora
-                $pro_sold = PosOrderDetail::where('product_id', $value->id)
-                                                                ->count();
-                if($pro_sold<=0)
-                {
-                    $purchase_invoice = Purchase_Detail::where('barcode', $value->barcode)
-                                    ->pluck('invoice_no')
-                                    ->unique();
+                // if($value->check_imei==1)
+                // {
+                //     $modal.='<a class="me-3 confirm-text text-warning" onclick=replace_pro_imei("'.$value->id.'")><i class="fas fa-exchange-alt"></i></a>';
+                // }
 
-                    $invoice_count = $purchase_invoice->count();
-                    if ($invoice_count == 1) {
-                        $single_invoice_no = $purchase_invoice->first();
-                        $purchase_data = Purchase::where('invoice_no', $single_invoice_no)->first();
-                        if($purchase_data->status == 1)
-                        {
-                            $modal.='<a class="me-3 confirm-text text-danger" onclick=send_item_back("'.$value->id.'")><i class="fas fa-backspace"></i></a>';
-                        }
-                    }
-                }
+                // $pro_sold = PosOrderDetail::where('product_id', $value->id)
+                //                                                 ->count();
+                // if($pro_sold<=0)
+                // {
+                //     $purchase_invoice = Purchase_Detail::where('barcode', $value->barcode)
+                //                     ->pluck('invoice_no')
+                //                     ->unique();
+
+                //     $invoice_count = $purchase_invoice->count();
+                //     if ($invoice_count == 1) {
+                //         $single_invoice_no = $purchase_invoice->first();
+                //         $purchase_data = Purchase::where('invoice_no', $single_invoice_no)->first();
+                //         if($purchase_data->status == 1)
+                //         {
+                //             $modal.='<a class="me-3 confirm-text text-danger" onclick=send_item_back("'.$value->id.'")><i class="fas fa-backspace"></i></a>';
+                //         }
+                //     }
+                // }
 
 
                 // check remaining
-                $category = getColumnValue('categories','id',$value->category_id,'category_name');
-                $brand = getColumnValue('brands','id',$value->brand_id,'brand_name');
-                $store = getColumnValue('stores','id',$value->store_id,'store_name');
-                $supplier = getColumnValue('suppliers','id',$value->supplier_id,'supplier_name');
-                $add_data=get_date_only($value->created_at);
+                $category = Category::where('id', $value->category_id)->value('category_name');
+                $branch = Branch::where('id', $value->store_id)->value('branch_name');
+                $supplier = Supplier::where('id', $value->supplier_id)->value('supplier_name');
+
+
+
+                $add_data=Carbon::parse($value->created_at)->format('d-m-Y (h:i a)');
+                $product_type = "";
+                if ($value->product_type == 1) { // Use == for comparison
+                    $product_type = 'Clinic Use';
+                } else {
+                    $product_type = 'For Sale';
+                }
+
+                $total_purchase = $value->purchase_price * $value->quantity;
+
 
                 $sno++;
                 $json[]= array(
                             $sno,
                             $title,
-                            $value->barcode,
                             $category,
-                            $brand,
-                            $store,
+                            $value->barcode,
+                            $value->purchase_price,
                             $value->quantity,
+                            $total_purchase,
                             $value->sale_price,
+                            $product_type,
+                            $branch,
+                            // $value->quantity,
                             $value->added_by,
                             $add_data,
                             $modal
