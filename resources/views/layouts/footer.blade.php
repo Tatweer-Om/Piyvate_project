@@ -16,6 +16,8 @@
     <script src="{{ asset('vendor/bootstrap-select/dist/js/bootstrap-select.min.js') }}"></script>
     <script src="{{ asset('vendor/chart.js/chart.bundle.min.js') }}"></script>
     <script src="{{ asset('vendor/owl-carousel/owl.carousel.js') }}"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+
 
     <!-- Apex Chart -->
     <script src="{{ asset('vendor/apexchart/apexchart.js') }}"></script>

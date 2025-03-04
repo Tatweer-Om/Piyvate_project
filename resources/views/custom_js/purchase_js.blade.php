@@ -1,6 +1,60 @@
 <script>
     $(document).ready(function() {
 
+
+        $('.invoice_no').keyup(function() {
+        var invoice_no = $('.invoice_no').val();
+        $('.invoice_err').html(
+            '<span class="text text-warning"> <?php echo trans('messages.checking_invoice#_lang', [], session('locale')); ?> <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span></span>'
+        );
+        var csrfToken = $('meta[name="csrf-token"]').attr('content');
+        $.ajax({
+            url: "<?php echo url('search_invoice'); ?>",
+            method: "POST",
+            data: {
+                search: $('.invoice_no').val(),
+                _token: csrfToken
+            },
+            success: function(data) {
+                if (data.error_code == 1) {
+                    Swal.fire({
+                        text: '<?php echo trans('messages.invoice_no_already_exists_lang', [], session('locale')); ?>',
+                        type: "warning",
+                        showCancelButton: !0,
+                        confirmButtonColor: "#3085d6",
+                        cancelButtonColor: "#d33",
+                        confirmButtonText: '<?php echo trans('messages.yes_lang', [], session('locale')); ?>',
+                        confirmButtonClass: "btn btn-primary",
+                        cancelButtonClass: "btn btn-danger ml-1",
+                        buttonsStyling: !1
+                    }).then(function(result) {
+                        if (result.value) {
+                            window.location.href = '<?php echo url('edit_purchase'); ?>' + '/' + data
+                                .purchase_id;
+                        } else if (result.dismiss === Swal.DismissReason.cancel) {
+                            $('.invoice_no').val('');
+                            $('.invoice_no').keyup();
+                        }
+                    });
+                    $('.invoice_err').html('<span class="text text-danger">' + data.error +
+                        '</span>');
+                    // $('.submit_form').attr('disabled',true);
+                } else {
+                    $('.invoice_err').html('');
+                    $('.submit_form').attr('disabled', false);
+                }
+
+            },
+            error: function(data) {
+                $('#global-loader').hide();
+                after_submit();
+                show_notification('error', '<?php echo trans('messages.search_data_failed_lang', [], session('locale')); ?>');
+                console.log(data);
+                return false;
+            }
+        });
+    });
+
         $('.add_purchase_product').off().on('submit', function(e) {
 
 
@@ -174,8 +228,8 @@ $.ajax({
                                     <label class="col-form-label">Barcode Generator:</label>
                                     <div class="input-group">
                                         <input type="text" class="form-control barcodes barcode_${count}"
-                                            onkeyup="search_barcode('1')"
-                                            onchange="search_barcode('1')"
+                                            onkeyup="search_barcode(${count})"
+                                            onchange="search_barcode(${count})"
                                             name="barcode[]"
                                             >
 
@@ -314,147 +368,9 @@ $.ajax({
         });
 
 
-        function search_barcode(i) {
-            var enteredBarcodes = {};
-            var duplicate_barcodes = '';
-            $('.barcodes').each(function() {
-                var barcode = $(this).val();
-                if (enteredBarcodes.hasOwnProperty(barcode)) {
-                    duplicate_barcodes = duplicate_barcodes + barcode + ', '
-                } else {
-                    enteredBarcodes[barcode] = true;
-                }
-            });
-
-            if (duplicate_barcodes != "") {
-                show_notification('error', duplicate_barcodes + '<?php echo trans('messages.duplicate barcode_lang', [], session('locale')); ?>');
-                return false;
-            }
-            var csrfToken = $('meta[name="csrf-token"]').attr('content');
-            $('.barcode_' + i).autocomplete({
-                autoFocus: true,
-                source: function(request, response) {
-                    $.ajax({
-                        url: "<?php echo url('search_barcode'); ?>",
-                        dataType: 'json',
-                        data: {
-                            search: request.term,
-                            _token: csrfToken
-                        },
-                        success: function(data) {
-                            $('.barcode_err_' + i).html('');
-                            response(data);
-                        }
-                    });
-                },
-                select: function(event, ui) {
-                    $.ajax({
-                        dataType: 'JSON',
-                        url: "<?php echo url('get_product_data'); ?>",
-                        method: "POST",
-                        data: {
-                            result: ui.item.value,
-                            _token: csrfToken
-                        },
-                        success: function(data) {
-                            if (data != "") {
-                                setTimeout(function() {
-                                    $('.category_id_' + i).val(data.category_id)
-                                        .trigger(
-                                            'change');
-                                    $('.store_id_' + i).val(data.store_id)
-                                        .trigger(
-                                            'change');
-
-                                }, 1000);
-                                $(".product_name_" + i).val(data.product_name);
-                                $(".barcode_" + i).val(data.barcode);
-                                $(".purchase_price_" + i).val(data.purchase_price);
-                                $(".sale_price_" + i).val(data.sale_price);
-                                $(".tax_" + i).val(data.tax);
-
-                                $('input[type="radio"][name="product_type_' + i +
-                                    '"][value="' +
-                                    data.product_type + '"]').prop('checked', true);
 
 
-                                $(".quantity_old_" + i).val(data.quantity);
-                                $(".sale_price_old_" + i).val(data.sale_price);
-                                $(".description_" + i).val(data.description);
-                                var imagePath = '<?php echo asset('images/dummy_image/no_image.png'); ?>';
-                                $('#stock_img_tag_' + i).attr('src', imagePath);
-                                if (data.stock_image != "") {
-                                    imagePath = '<?php echo asset('images/product_images/'); ?>/' + data
-                                        .stock_image;
-                                    $('#stock_img_tag_' + i).attr('src', imagePath);
-                                }
 
-                                // get the total and total purchase
-                                $('.all_purchase_price').trigger('keyup');
-
-                            }
-                        }
-                    });
-                }
-            });
-        }
-
-        // $('.add_supplier').off().on('submit', function(e) {
-        //     e.preventDefault();
-        //     var formdatas = new FormData($('.add_supplier')[0]);
-        //     var title = $('.supplier_name').val();
-        //     var phone = $('.supplier_phone').val();
-        //     var id = $('.supplier_id').val();
-
-        //     if (id == '') {
-
-
-        //         if (title == "") {
-        //             show_notification('error', '<?php echo trans('messages.add_supplier_name_lang', [], session('locale')); ?>');
-        //             return false;
-
-        //         }
-        //         if (phone == "") {
-        //             show_notification('error', '<?php echo trans('messages.add_supplier_phone_lang', [], session('locale')); ?>');
-        //             return false;
-        //         }
-        //         $('#global-loader').show();
-        //         before_submit();
-        //         var str = $(".add_supplier").serialize();
-        //         $.ajax({
-        //             type: "POST",
-        //             url: "<?php echo url('add_supplier'); ?>",
-        //             data: formdatas,
-        //             contentType: false,
-        //             processData: false,
-        //             success: function(data) {
-        //                 $('#global-loader').hide();
-        //                 after_submit();
-        //                 $('#all_supplier').DataTable().ajax.reload();
-        //                 show_notification('success', '<?php echo trans('messages.data_add_success_lang', [], session('locale')); ?>');
-        //                 $('#add_supplier_modal').modal('hide');
-        //                 $(".add_supplier")[0].reset();
-        //                 get_selected_new_data(1, 'supplier')
-        //                 setTimeout(function() {
-        //                     $('.supplier_id').val(data.supplier_id).trigger(
-        //                         'change');
-        //                 }, 2000);
-        //                 return false;
-        //             },
-        //             error: function(data) {
-        //                 $('#global-loader').hide();
-        //                 after_submit();
-        //                 show_notification('error', '<?php echo trans('messages.data_add_failed_lang', [], session('locale')); ?>');
-        //                 $('#all_supplier').DataTable().ajax.reload();
-
-        //                 return false;
-        //             }
-        //         });
-
-        //     }
-
-        // });
-        // supplier
     });
     // stock_number
     function stock_number(i) {
@@ -1099,81 +1015,10 @@ $.ajax({
     //
 
     // search invoice no
-    $('.invoice_no').keyup(function() {
-        var invoice_no = $('.invoice_no').val();
-        $('.invoice_err').html(
-            '<span class="text text-warning"> <?php echo trans('messages.checking_invoice#_lang', [], session('locale')); ?> <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span></span>'
-        );
-        var csrfToken = $('meta[name="csrf-token"]').attr('content');
-        $.ajax({
-            url: "<?php echo url('search_invoice'); ?>",
-            method: "POST",
-            data: {
-                search: $('.invoice_no').val(),
-                _token: csrfToken
-            },
-            success: function(data) {
-                if (data.error_code == 1) {
-                    Swal.fire({
-                        text: '<?php echo trans('messages.invoice_no_already_exists_lang', [], session('locale')); ?>',
-                        type: "warning",
-                        showCancelButton: !0,
-                        confirmButtonColor: "#3085d6",
-                        cancelButtonColor: "#d33",
-                        confirmButtonText: '<?php echo trans('messages.yes_lang', [], session('locale')); ?>',
-                        confirmButtonClass: "btn btn-primary",
-                        cancelButtonClass: "btn btn-danger ml-1",
-                        buttonsStyling: !1
-                    }).then(function(result) {
-                        if (result.value) {
-                            window.location.href = '<?php echo url('edit_purchase'); ?>' + '/' + data
-                                .purchase_id;
-                        } else if (result.dismiss === Swal.DismissReason.cancel) {
-                            $('.invoice_no').val('');
-                            $('.invoice_no').keyup();
-                        }
-                    });
-                    $('.invoice_err').html('<span class="text text-danger">' + data.error +
-                        '</span>');
-                    // $('.submit_form').attr('disabled',true);
-                } else {
-                    $('.invoice_err').html('');
-                    $('.submit_form').attr('disabled', false);
-                }
 
-            },
-            error: function(data) {
-                $('#global-loader').hide();
-                after_submit();
-                show_notification('error', '<?php echo trans('messages.search_data_failed_lang', [], session('locale')); ?>');
-                console.log(data);
-                return false;
-            }
-        });
-    });
     //
 
-    // search barcode
 
-    // view_purchase
-    // $('#all_purchase').DataTable({
-    //     "sAjaxSource": "<?php echo url('show_purchase'); ?>",
-    //     "bFilter": true,
-    //     "sDom": 'fBtlpi',
-    //     'pagingType': 'numbers',
-    //     "ordering": true,
-    //     "language": {
-    //         search: ' ',
-    //         sLengthMenu: '_MENU_',
-    //         searchPlaceholder: '<?php echo trans('messages.search_lang', [], session('locale')); ?>',
-    //         info: "_START_ - _END_ of _TOTAL_ items",
-    //     },
-    //     initComplete: (settings, json) => {
-    //         $('.dataTables_filter').appendTo('#tableSearch');
-    //         $('.dataTables_filter').appendTo('.search-input');
-    //     },
-
-    // });
 
     // approve prodcuts
     function approved_products(id) {
@@ -1536,6 +1381,97 @@ document.addEventListener("DOMContentLoaded", function() {
 
 
 
+
+function search_barcode(i) {
+
+
+      var enteredBarcodes = {};
+      var duplicate_barcodes = '';
+      $('.barcodes').each(function() {
+          var barcode = $(this).val();
+          if (enteredBarcodes.hasOwnProperty(barcode)) {
+              duplicate_barcodes = duplicate_barcodes + barcode + ', '
+          } else {
+              enteredBarcodes[barcode] = true;
+          }
+      });
+
+      if (duplicate_barcodes != "") {
+          show_notification('error', duplicate_barcodes + '<?php echo trans('messages.duplicate barcode_lang', [], session('locale')); ?>');
+          return false;
+      }
+      var csrfToken = $('meta[name="csrf-token"]').attr('content');
+      $('.barcode_' + i).autocomplete({
+          autoFocus: true,
+          source: function(request, response) {
+              $.ajax({
+                  url: "<?php echo url('search_barcode'); ?>",
+                  dataType: 'json',
+                  data: {
+                      search: request.term,
+                      _token: csrfToken
+                  },
+                  success: function(data) {
+                      $('.barcode_err_' + i).html('');
+                      response(data);
+                  }
+              });
+          },
+          select: function(event, ui) {
+              $.ajax({
+                  dataType: 'JSON',
+                  url: "<?php echo url('get_product_data'); ?>",
+                  method: "POST",
+                  data: {
+                      result: ui.item.value,
+                      _token: csrfToken
+                  },
+                  success: function(data) {
+                      if (data != "") {
+                        setTimeout(function() {
+                                if ($('.category_id_' + i).length) {
+                                    $('.category_id_' + i).val(data.category_id).trigger('change');
+                                }
+
+                                if ($('.store_id_' + i).length) {
+                                    $('.store_id_' + i).val(data.store_id).trigger('change');
+                                }
+
+                                if ($.fn.selectpicker) {
+                                    $('.default-select').selectpicker('refresh');
+                                }
+                            }, 1000);
+                          $(".product_name_" + i).val(data.product_name);
+                          $(".barcode_" + i).val(data.barcode);
+                          $(".purchase_price_" + i).val(data.purchase_price);
+                          $(".sale_price_" + i).val(data.sale_price);
+                          $(".tax_" + i).val(data.tax);
+                          $(".quantity_" + i).val(data.quantity);
+
+                          $('input[type="radio"][name="product_type_' + i +
+                              '"][value="' +
+                              data.product_type + '"]').prop('checked', true);
+                          $(".quantity_old_" + i).val(data.quantity);
+                          $(".sale_price_old_" + i).val(data.sale_price);
+                          $(".purchase_price_old_" + i).val(data.sale_price);
+
+                          $(".description_" + i).val(data.description);
+                          var imagePath = '<?php echo asset('images/dummy_image/no_image.png'); ?>';
+                          $('#stock_img_tag_' + i).attr('src', imagePath);
+                          if (data.stock_image != "") {
+                              imagePath = '<?php echo asset('images/product_images/'); ?>/' + data
+                                  .stock_image;
+                              $('#stock_img_tag_' + i).attr('src', imagePath);
+                          }
+
+                          // get the total and total purchase
+
+                      }
+                  }
+              });
+          }
+      });
+  }
 
 
 </script>

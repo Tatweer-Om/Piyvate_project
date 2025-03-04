@@ -25,6 +25,7 @@ class ProductController extends Controller
     public function index()
     {
         $categories= Category::all();
+        $stores= Branch::all();
 
         $user = Auth::user();
         $permit = User::find($user->id)->permit_type;
@@ -32,7 +33,7 @@ class ProductController extends Controller
 
         // if ($permit_array && in_array('2', $permit_array)) {
 
-            return view('purchase.products');
+            return view('purchase.products', compact('categories', 'stores'));
         // } else {
 
         //     return redirect()->route('home');
@@ -100,22 +101,35 @@ class ProductController extends Controller
 
                 // check remaining
                 $category = Category::where('id', $value->category_id)->value('category_name');
-                $branch = Branch::where('id', $value->branch_id)->value('branch_name');
+                $branch = Branch::where('id', $value->store_id)->value('branch_name');
                 $supplier = Supplier::where('id', $value->supplier_id)->value('supplier_name');
 
 
 
                 $add_data=Carbon::parse($value->created_at)->format('d-m-Y (h:i a)');
+                $product_type = "";
+                if ($value->product_type == 1) { // Use == for comparison
+                    $product_type = 'Clinic Use';
+                } else {
+                    $product_type = 'For Sale';
+                }
+
+                $total_purchase = $value->purchase_price * $value->quantity;
+
 
                 $sno++;
                 $json[]= array(
                             $sno,
                             $title,
-                            $value->barcode,
                             $category,
-                            $branch,
+                            $value->barcode,
+                            $value->purchase_price,
                             $value->quantity,
+                            $total_purchase,
                             $value->sale_price,
+                            $product_type,
+                            $branch,
+                            // $value->quantity,
                             $value->added_by,
                             $add_data,
                             $modal
