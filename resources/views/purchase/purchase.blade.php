@@ -222,7 +222,7 @@
                                 <div class="col-xl-3">
                                     <div class="form-group">
                                         <label class="col-form-label">stores:</label>
-                                        <select class="store_id_1 form-control select2" id="store_id_1"
+                                        <select class="store_id_1 form-control " id="store_id_1"
                                             name="store_id_stk[]">
                                             <option value="">choose</option>
                                             @foreach ($stores as $store)
@@ -234,7 +234,7 @@
                                 <div class="col-xl-3">
                                     <div class="form-group">
                                         <label class="col-form-label">Category:</label>
-                                        <select class="category_id_1 form-control select2" id="category_id_1"
+                                        <select class="category_id_1 form-control " id="category_id_1"
                                             name="category_id_stk[]">
                                             <option value="">choose</option>
                                             @foreach ($categorys as $category)
@@ -279,8 +279,8 @@
                                             <input type="text" class="form-control purchase_price_1 isnumber"
                                                 onkeyup="calculateTotalPurchasePrice(1)"
                                                 name="purchase_price[]">
-                                                <input type="text" class="form-control purchase_price_old_1"
-                                                name="purchase_price_old[]" hidden>
+                                                <input type="text" class="form-control old_purchase_price_1"
+                                                name="old_purchase_price[]" hidden>
                                         </div>
                                     </div>
                                 </div>
@@ -290,8 +290,8 @@
                                         <div class="input-group">
                                             <span class="input-group-text">OMR</span>
                                             <input type="text" class="form-control sale_price_1 isnumber" id="sale_price_1" onkeyup="updateSalesPrice(1)" name="sale_price[]">
-                                            <input type="text" class="form-control sale_price_old_1"
-                                            name="sale_price_old[]" hidden>
+                                            <input type="text" class="form-control old_sales_price_1"
+                                            name="old_sales_price[]" hidden>
                                         </div>
                                     </div>
                                 </div>
