@@ -94,7 +94,7 @@
         </div>
     </div>
 
-    <<div class="modal fade" id="add_product_modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal fade" id="add_product_modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content">
           <div class="modal-header">
@@ -111,8 +111,8 @@
                         <div class="col-xl-4">
                             <div class="form-group">
                                 <label class="col-form-label">stores:</label>
-                                <select class="store_id_1 form-control select2" id="store_id_1"
-                                    name="store_id_stk[]">
+                                <select class="store_id form-control " id="store_id"
+                                    name="store_id_stk">
                                     <option value="">choose</option>
                                     @foreach ($stores as $store)
                                         <option value="{{ $store->id }}">{{ $store->branch_name }}</option>
@@ -123,8 +123,8 @@
                         <div class="col-xl-4">
                             <div class="form-group">
                                 <label class="col-form-label">Category:</label>
-                                <select class="category_id_1 form-control select2" id="category_id_1"
-                                    name="category_id_stk[]">
+                                <select class="category_id form-control " id="category_id"
+                                    name="category_id_stk">
                                     <option value="">choose</option>
                                     @foreach ($categories as $category)
                                         <option value="{{ $category->id }}">{{ $category->category_name }}</option>
@@ -136,7 +136,7 @@
                         <div class="col-xl-4">
                             <div class="form-group">
                                 <label class="col-form-label">Product_name:</label>
-                                <input type="text" class="form-control product_name_1" name="product_name[]">
+                                <input type="text" class="form-control product_name" name="product_name">
                             </div>
                         </div>
 
@@ -149,16 +149,16 @@
                             <div class="form-group">
                                 <label class="col-form-label">Barcode Generator:</label>
                                 <div class="input-group">
-                                    <input type="text" class="form-control barcodes barcode_1"
+                                    <input type="text" class="form-control barcodes barcode"
                                         onkeyup="search_barcode('1')" onchange="search_barcode('1')"
-                                        name="barcode[]">
+                                        name="barcode">
 
                                     <span class="input-group-text" onclick="get_rand_barcode(1)">
                                         <i class="fas fa-barcode"></i>
                                     </span>
 
                                 </div>
-                                <span class="barcode_err_1 text-danger small"></span>
+                                <span class="barcode_err text-danger small"></span>
                             </div>
                         </div>
                         <div class="col-xl-3">
@@ -166,11 +166,11 @@
                                 <label class="col-form-label">Purchase Price:</label>
                                 <div class="input-group">
                                     <span class="input-group-text">OMR</span>
-                                    <input type="text" class="form-control purchase_price_1 isnumber"
+                                    <input type="text" class="form-control purchase_price isnumber"
                                         onkeyup="calculateTotalPurchasePrice(1)"
-                                        name="purchase_price[]">
-                                        <input type="text" class="form-control purchase_price_old_1"
-                                        name="purchase_price_old[]" hidden>
+                                        name="purchase_price">
+                                        <input type="text" class="form-control purchase_price_old"
+                                        name="purchase_price_old" hidden>
                                 </div>
                             </div>
                         </div>
@@ -179,18 +179,18 @@
                                 <label class="col-form-label">Sales Price:</label>
                                 <div class="input-group">
                                     <span class="input-group-text">OMR</span>
-                                    <input type="text" class="form-control sale_price_1 isnumber" id="sale_price_1" onkeyup="updateSalesPrice(1)" name="sale_price[]">
-                                    <input type="text" class="form-control sale_price_old_1"
-                                    name="sale_price_old[]" hidden>
+                                    <input type="text" class="form-control sale_price isnumber" id="sale_price" onkeyup="updateSalesPrice(1)" name="sale_price">
+                                    <input type="text" class="form-control sale_price_old"
+                                    name="sale_price_old" hidden>
                                 </div>
                             </div>
                         </div>
                         <div class="col-xl-3">
                             <div class="form-group">
                                 <label class="col-form-label">Quantity:</label>
-                                <input type="text" class="form-control quantity_1 isnumber1" onkeyup="check_qty(1)" name="quantity[]">
-                                <input type="text" class="form-control quantity_old_1"
-                                name="quantity_old[]" hidden>
+                                <input type="text" class="form-control quantity isnumber1" onkeyup="check_qty(1)" name="quantity" readonly>
+                                <input type="text" class="form-control quantity_old"
+                                name="quantity_old" hidden>
                             </div>
                         </div>
 
@@ -203,7 +203,7 @@
                                 <label class="col-form-label">Tax:</label>
                                 <div class="input-group">
                                     <span class="input-group-text">%</span>
-                                    <input type="text" class="form-control tax_1 isnumber" id="tax_1" onkeyup="updateSalesPriceWithTax(1)" name="tax[]">
+                                    <input type="text" class="form-control tax isnumber" id="tax" onkeyup="updateSalesPriceWithTax(1)" name="tax">
                                 </div>
                             </div>
                         </div>
@@ -213,38 +213,39 @@
                                 <label class="col-form-label">Upload Image</label>
 
                                 <!-- Hidden File Input -->
-                                <input type="file" class="d-none image" name="stock_image_1" id="stock_img_1"
+                                <input type="file" class="d-none image stock_image" name="stock_image" id="stock_img"
                                     accept="image/*"
-                                    onchange="previewImage(event, 'stock_img_tag_1', 'remove_stock_img')">
+                                    onchange="previewImage(event, 'stock_img_tag', 'remove_stock_img')">
 
                                 <!-- Clickable Image Preview -->
-                                <label for="stock_img_1">
+                                <label for="stock_img">
                                     <img src="{{ asset('images/dummy_images/no_image.jpg') }}"
-                                        id="stock_img_tag_1" class="img-thumbnail mt-2"
+                                        id="stock_img_tag" class="img-thumbnail mt-2"
                                         style="width: 100px; cursor: pointer;">
                                 </label>
 
                                 <!-- Remove Button (X) -->
                                 <span id="remove_stock_img"
                                     class="position-absolute top-0 end-0 bg-danger text-white rounded-circle px-2"
-                                    style="cursor: pointer; display: none;"
-                                    onclick="removeImage('stock_img_tag_1', 'stock_img_1', 'remove_stock_img')">
+                                    style="cursor: pointer; display: none; font-size: 18px;"
+                                    onclick="removeImage('stock_img_tag', 'stock_img', 'remove_stock_img')">
                                     &times;
                                 </span>
                             </div>
+
                         </div>
                         <div class="col-xl-4 mt-4">
                             <div class="form-group">
                                 <label class="col-form-label">Product Type:</label>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="product_type_1"
-                                        id="product_sale_1" value="2">
-                                    <label class="form-check-label" for="product_sale_1">Sale</label>
+                                    <input class="form-check-input product_sale" type="radio" name="product_type"
+                                        id="product_sale" value="2">
+                                    <label class="form-check-label" for="product_sale">Sale</label>
                                 </div>
                                 <div class="form-check">
-                                    <input class="form-check-input product_clinic_1" type="radio"
-                                        name="product_type_1" id="product_clinic_1" value="1">
-                                    <label class="form-check-label" for="product_clinic_1">Clinic</label>
+                                    <input class="form-check-input product_clinic" type="radio"
+                                        name="product_type" id="product_clinic" value="1">
+                                    <label class="form-check-label" for="product_clinic">Clinic</label>
                                 </div>
                             </div>
                         </div>
@@ -253,7 +254,7 @@
                         <div class="col-xl-12">
                             <div class="form-group">
                                 <label class="col-form-label">Description:</label>
-                                <textarea class="form-control description_1" name="description[]" rows="3"></textarea>
+                                <textarea class="form-control description" name="description" rows="3"></textarea>
                             </div>
                         </div>
 

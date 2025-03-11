@@ -1,0 +1,376 @@
+@font-face {
+    font-family: 'Droid';
+    src: url('/fonts/webfonts/alfont_com_DroidNaskh-Bold.ttf') format('woff2')
+    
+    /* Add more src URLs for different font file formats if necessary */
+}
+body {
+    font-family: Droid;
+}
+
+.table_image
+{
+    width: 50px;
+    height: 50px;
+}
+.form_group_input
+{
+    margin-bottom: 10px;
+}
+.plus_i_class
+{
+    color: #fff;
+}
+.product_radio_class
+{
+    margin-top: 24px;
+}
+.display_none
+{
+    display: none;
+}
+.module_image
+{
+    width: 150px;
+    height: 150px;
+}
+
+.header-left #toggle_btn {
+    background: #8845BC;
+}
+
+.user-menu.nav > li > a .badge {
+    background: #8845BC;
+
+}
+.add-icon a {
+    background: #1F85AB;
+
+}
+.sidebar .sidebar-menu > ul li.active svg {
+    color: #1F85AB;
+}
+.sidebar .sidebar-menu > ul > li.submenu-open ul > li.active a {
+    color: #8845BC;
+}
+.sidebar .sidebar-menu .submenu-open .submenu ul li a:hover
+{
+    color: #9459C1;
+}
+.sidebar .sidebar-menu > ul > li.submenu-open ul li a:hover
+{
+    color: #9459C1;
+}
+.pagination li.active a.page-link
+{
+    background: #1F85AB;
+    border-color: #146482;
+}
+.page-header .btn-added
+{
+    background: #8845BC;
+}
+.customizer-links{
+    display: none;
+}
+.btn-submit
+{
+    background: #8845BC;
+}
+.btn-cancel
+{
+    background: #7d8386;
+}
+.btn-submit:hover
+{
+    background: #6e8792;
+}
+.header-left #toggle_btn:hover
+{
+    background: #7923bb;
+}
+.ribbon.ribbon-primary
+{
+    background: #0376A2;
+}
+.form-group input[type="text"]:focus
+{
+    border-color: #8A48BC;
+    background: #fff9f9;
+}
+
+ /* need to check */
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus,
+.selection:focus,
+.select2:focus {
+    border-color: #8A48BC;
+    background: #fff9f9;
+}
+
+.select2-container--default .select2-results__option--highlighted[aria-selected]
+{
+    background: #6BA8BF;
+}
+.select2-container--focus .select2-selection--single {
+    border-color: #8A48BC;
+    background: #fff9f9;
+}
+.form-control:focus {
+    border-color: #8A48BC;
+}
+.checkboxs input:checked ~ .checkmarks
+{
+    background-color: #8845BC;
+}
+.form-check-input:checked
+{
+    background-color: #2286ad;
+    border-color: #0e3979;
+}
+h1
+{
+    font-size: 24px;
+}
+.bootstrap-tagsinput .tag
+{
+    background-color: #8845BC;
+
+}
+.badges_table
+{
+    font-size:10px!important;
+    min-width: 36px!important;
+}
+.report_btn
+{
+    position: absolute;
+    top: 39px;
+}
+/* prelaoder */
+
+#global-loader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+ }
+ #preloader-img img {
+    width: 150px; /* Adjust as needed */
+    /*animation: bounce 1s infinite;*/
+    animation: fadeInOut 2s ease-in-out infinite alternate;
+}
+@keyframes fadeInOut {
+  0%, 100% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Add any other styling you need */
+#cat_products {
+    height: 50vh;
+    overflow: auto;
+}
+/* scroll */
+.product-wrap
+{
+    height: 45vh;
+    overflow: auto;
+}
+
+/* draw style */
+/* LiveBox Start */
+.livebox-container {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    background-color: aliceblue;
+    border-radius: 10px;
+    align-items: center;
+    text-align: center;
+}
+
+/* slideshow */
+
+#livebox-slideshow {
+    display: flex;
+    flex: 1;
+    min-height: 150px;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    text-transform: uppercase;
+    list-style: none;
+    -webkit-perspective: 700;
+    perspective: 700;
+}
+
+#livebox-slideshow li {
+    position: absolute;
+    border-width: 2px;
+    border-color: #fff;
+    transform-origin: 0 100%;
+}
+
+#livebox-slideshow li.current {
+    transition: all 0.3s ease-out;
+    opacity: 1.0;
+}
+
+#livebox-slideshow li.in {
+    opacity: 0.0;
+    transform: rotate3d(1, 0, 0, -90deg);
+}
+
+#livebox-slideshow li.out {
+    transition: all 0.3s ease-out;
+    opacity: 0.0;
+    transform: rotate3d(1, 0, 0, 90deg);
+}
+
+
+/* calculator
+/* Calculator */
+#calculator {
+	width: 325px;
+	height: auto;
+	margin: 100px auto;
+	padding: 20px 20px 9px;
+	/* background: #none; */
+	/* background: linear-gradient(#c9dd84, #9fcb96); */
+	border-radius: 5px;
+}
+
+/* Top */
+.top  span.clear{
+	float: left;
+}
+
+/* Screen styling */
+
+
+.top .screen {
+  height:90px;
+	width: 100%;
+	padding: 0 10px;
+	background: rgba(154, 185, 188, 0.8);
+	border-radius: 5px;
+  margin-bottom:10px;
+	/* Typography */
+	font-size: 30px;
+	line-height: 90px;
+	color: white;
+	text-align: right;
+  overflow:auto;
+}
+
+/* Clear floats */
+.keys  {
+  overflow: hidden;
+}
+
+/* Keys */
+.keys span, .top span.clear {
+	float: left;
+	position: relative;
+	top: 0;
+	background: #523d98;
+	font-size:27px;
+	cursor: pointer;
+	width: 94px;
+	height: 60px;
+	border-radius: 5px;
+	box-shadow: 0px 4px rgba(0, 0, 0, 0.2);
+	margin: 0 21px 11px 0;
+	color: #f1c851;
+	line-height: 46px;
+	text-align: center;
+	user-select: none;
+  outline: 0 solid;
+	/* hover and active state transitions */
+	transition: all 0.2s ease;
+}
+
+/* Unique key styling */
+.keys span.operator {
+	background: #536ea5;
+	margin-right: 0;
+}
+
+.keys span.operator sup {
+  font-size: 50%;
+  vertical-align: top;
+  color:#f1c851;
+}
+
+.keys span.eval {
+	background: #d6643f;
+	box-shadow: 0px 4px #c3502b;
+	color: #f1c851;
+  width: 212px;
+}
+
+span.clear {
+	background: #523d98;
+	box-shadow: 0px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* hover effects */
+.keys span:hover {
+	background: #795ebd;
+	color: white;
+}
+
+.keys span.eval:hover {
+	background: #f37c4c;
+	box-shadow: 0px 4px #d65f3d;
+	color: #ffffff;
+}
+
+.keys span.operator:hover {
+	background: #5d7bba;
+	color: #ffffff;
+}
+
+.top span.clear:hover {
+	background: #f68991;
+	box-shadow: 0px 4px #d3545d;
+	color: white;
+}
+
+/* Simulating "pressed" effect */
+.keys span:active {
+	box-shadow: 0px 0px #6b54d3;
+	top: 4px;
+}
+
+.keys span.eval:active {
+	box-shadow: 0px 0px #717a33;
+	top: 4px;
+}
+
+.top span.clear:active {
+	top: 4px;
+	box-shadow: 0px 0px #d3545d;
+} 
+.pos_item_td
+{
+    font-size: 16px;
+    padding: 10px;
+    width: 72px;
+}
+.td_font
+{
+    font-size: 18px;
+    font-weight: bold;
+}

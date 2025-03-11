@@ -20,6 +20,8 @@ return new class extends Migration
             $table->integer('branch_id');
             $table->json('previous_data')->nullable();
             $table->json('updated_data')->nullable();
+            $table->json('added_data')->nullable();
+
             $table->string('added_by');
             $table->integer('user_id');
             $table->timestamps();

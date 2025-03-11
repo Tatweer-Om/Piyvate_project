@@ -2,6 +2,7 @@
     $(document).ready(function() {
 
 
+
         $('.invoice_no').keyup(function() {
         var invoice_no = $('.invoice_no').val();
         $('.invoice_err').html(
@@ -253,6 +254,8 @@ $.ajax({
                                     <div class="input-group">
                                         <span class="input-group-text">OMR</span>
                                         <input type="text" class="form-control purchase_price_${count} isnumber" onkeyup="calculateTotalPurchasePrice(${count})" onkeyup="get_profit_percent(1)" name="purchase_price[]">
+                                           <input type="text" class="form-control old_purchase_price_${count}"
+                                                name="old_purchase_price[]" hidden>
                                     </div>
                                 </div>
                             </div>
@@ -264,6 +267,9 @@ $.ajax({
                                             <input type="text" class="form-control sale_price_${count} isnumber"
                                                 id="sale_price_${count}" onkeyup="updateSalesPrice(${count})"
                                                 name="sale_price[]">
+                                                <input type="text" class="form-control old_sales_price_${count}"
+                                                name="old_sales_price[]" hidden>
+
                                         </div>
                                     </div>
                                 </div>
@@ -272,6 +278,8 @@ $.ajax({
                                 <div class="form-group">
                                     <label class="col-form-label">Quantity:</label>
                                     <input type="text" class="form-control quantity_${count} isnumber1" onkeyup="check_qty(1)" name="quantity[]">
+                                     <input type="text" class="form-control quantity_old_${count}"
+                                        name="quantity_old[]" hidden>
                                 </div>
                             </div>
 
@@ -823,335 +831,202 @@ $.ajax({
     //
 
     // update purhase
-    $('.update_purchase').off().on('submit', function(e) {
+    // $('.update_purchase').off().on('submit', function(e) {
 
-        e.preventDefault();
-        var formdatas = new FormData($('.update_purchase')[0]);
-        var supplier_id = $('.supplier_id').val();
-        var invoice_no = $('.invoice_no').val();
-        var purchase_date = $('.purchase_date').val();
-        var shipping_cost = $('.shipping_cost').val();
-        var invoice_price = $('.invoice_price').val();
+    //     e.preventDefault();
+    //     var formdatas = new FormData($('.update_purchase')[0]);
+    //     var supplier_id = $('.supplier_id').val();
+    //     var invoice_no = $('.invoice_no').val();
+    //     var purchase_date = $('.purchase_date').val();
+    //     var shipping_cost = $('.shipping_cost').val();
+    //     var invoice_price = $('.invoice_price').val();
 
 
-        // invoice validation
-        if (invoice_no == "") {
-            show_notification('error', '<?php echo trans('messages.provide_invoice#_lang', [], session('locale')); ?>');
-            return false;
-        }
-        if (supplier_id == "") {
-            show_notification('error', '<?php echo trans('messages.provide_supplier_first_lang', [], session('locale')); ?>');
-            return false;
-        }
-        if (purchase_date == "") {
-            show_notification('error', '<?php echo trans('messages.provide_purchase_date_lang', [], session('locale')); ?>');
-            return false;
-        }
-        if (shipping_cost == "") {
-            show_notification('error', '<?php echo trans('messages.provide_shipping_cost_lang', [], session('locale')); ?>');
-            return false;
-        }
-        if (invoice_price == "") {
-            show_notification('error', '<?php echo trans('messages.provide_invoice_price_lang', [], session('locale')); ?>');
-            return false;
-        }
+    //     // invoice validation
+    //     if (invoice_no == "") {
+    //         show_notification('error', '<?php echo trans('messages.provide_invoice#_lang', [], session('locale')); ?>');
+    //         return false;
+    //     }
+    //     if (supplier_id == "") {
+    //         show_notification('error', '<?php echo trans('messages.provide_supplier_first_lang', [], session('locale')); ?>');
+    //         return false;
+    //     }
+    //     if (purchase_date == "") {
+    //         show_notification('error', '<?php echo trans('messages.provide_purchase_date_lang', [], session('locale')); ?>');
+    //         return false;
+    //     }
+    //     if (shipping_cost == "") {
+    //         show_notification('error', '<?php echo trans('messages.provide_shipping_cost_lang', [], session('locale')); ?>');
+    //         return false;
+    //     }
+    //     if (invoice_price == "") {
+    //         show_notification('error', '<?php echo trans('messages.provide_invoice_price_lang', [], session('locale')); ?>');
+    //         return false;
+    //     }
 
-        // product validation
-        var stocks_class = $('.stocks_class').length;
-        // if(stocks_class <=0)
-        // {
-        //     show_notification('error','<?php echo trans('messages.please_add_product_in_list_lang', [], session('locale')); ?>');
-        //     return false;
-        // }
-        for (var i = 1; i <= stocks_class; i++) {
+    //     // product validation
+    //     var stocks_class = $('.stocks_class').length;
+    //     // if(stocks_class <=0)
+    //     // {
+    //     //     show_notification('error','<?php echo trans('messages.please_add_product_in_list_lang', [], session('locale')); ?>');
+    //     //     return false;
+    //     // }
+    //     for (var i = 1; i <= stocks_class; i++) {
 
-            if ($('.store_id_' + i).val() == "") {
-                show_notification('error', +i + '<?php echo trans('messages.provide_store_lang', [], session('locale')); ?>');
-                return false;
-            }
-            if ($('.category_id_' + i).val() == "") {
-                show_notification('error', +i + '<?php echo trans('messages.provide_category_lang', [], session('locale')); ?>');
-                return false;
-            }
-            if ($('.brand_id_' + i).val() == "") {
-                show_notification('error', +i + '<?php echo trans('messages.provide_brand_lang', [], session('locale')); ?>');
-                return false;
-            }
-            if ($('.product_name_' + i).val() == "" && $('.product_name_ar_' + i).val() == "") {
-                show_notification('error', +i + '<?php echo trans('messages.provide_product_name_lang', [], session('locale')); ?>');
-                return false;
-            }
-            if ($('.barcode_' + i).val() == "") {
-                show_notification('error', +i + '<?php echo trans('messages.provide_barcode_lang', [], session('locale')); ?>');
-                return false;
-            }
-            if ($('.purchase_price_' + i).val() == "") {
-                show_notification('error', +i + '<?php echo trans('messages.provide_purchase_price_lang', [], session('locale')); ?>');
-                return false;
-            }
-            if ($('.profit_percent_' + i).val() == "") {
-                show_notification('error', +i + '<?php echo trans('messages.provide_profit_percent_lang', [], session('locale')); ?>');
-                return false;
-            }
-            if ($('.quantity_' + i).val() == "") {
-                show_notification('error', +i + '<?php echo trans('messages.provide_quantity_lang', [], session('locale')); ?>');
-                return false;
-            }
-            if ($('.notification_limit_' + i).val() == "") {
-                show_notification('error', +i + '<?php echo trans('messages.provide_notification_limit_first_lang', [], session('locale')); ?>');
-                return false;
-            }
-            if ($('input[name="warranty_type_' + i + '"]:checked').val() != 3) {
-                if ($('.warranty_days_' + i).val() == "") {
-                    show_notification('error', +i + '<?php echo trans('messages.provide_warranty_days_lang', [], session('locale')); ?>');
-                    return false;
-                }
-            }
-            if ($('#whole_sale_' + i).is(':checked')) {
-                if ($('.bulk_quantity_' + i).val() == "") {
-                    show_notification('error', +i + '<?php echo trans('messages.provide_bulk_quantity_lang', [], session('locale')); ?>');
-                    return false;
-                }
-                if ($('.bulk_price_' + i).val() == "") {
-                    show_notification('error', +i + '<?php echo trans('messages.provide_bulk_price_lang', [], session('locale')); ?>');
-                    return false;
-                }
-            }
+    //         if ($('.store_id_' + i).val() == "") {
+    //             show_notification('error', +i + '<?php echo trans('messages.provide_store_lang', [], session('locale')); ?>');
+    //             return false;
+    //         }
+    //         if ($('.category_id_' + i).val() == "") {
+    //             show_notification('error', +i + '<?php echo trans('messages.provide_category_lang', [], session('locale')); ?>');
+    //             return false;
+    //         }
+    //         if ($('.brand_id_' + i).val() == "") {
+    //             show_notification('error', +i + '<?php echo trans('messages.provide_brand_lang', [], session('locale')); ?>');
+    //             return false;
+    //         }
+    //         if ($('.product_name_' + i).val() == "" && $('.product_name_ar_' + i).val() == "") {
+    //             show_notification('error', +i + '<?php echo trans('messages.provide_product_name_lang', [], session('locale')); ?>');
+    //             return false;
+    //         }
+    //         if ($('.barcode_' + i).val() == "") {
+    //             show_notification('error', +i + '<?php echo trans('messages.provide_barcode_lang', [], session('locale')); ?>');
+    //             return false;
+    //         }
+    //         if ($('.purchase_price_' + i).val() == "") {
+    //             show_notification('error', +i + '<?php echo trans('messages.provide_purchase_price_lang', [], session('locale')); ?>');
+    //             return false;
+    //         }
+    //         if ($('.profit_percent_' + i).val() == "") {
+    //             show_notification('error', +i + '<?php echo trans('messages.provide_profit_percent_lang', [], session('locale')); ?>');
+    //             return false;
+    //         }
+    //         if ($('.quantity_' + i).val() == "") {
+    //             show_notification('error', +i + '<?php echo trans('messages.provide_quantity_lang', [], session('locale')); ?>');
+    //             return false;
+    //         }
+    //         if ($('.notification_limit_' + i).val() == "") {
+    //             show_notification('error', +i + '<?php echo trans('messages.provide_notification_limit_first_lang', [], session('locale')); ?>');
+    //             return false;
+    //         }
+    //         if ($('input[name="warranty_type_' + i + '"]:checked').val() != 3) {
+    //             if ($('.warranty_days_' + i).val() == "") {
+    //                 show_notification('error', +i + '<?php echo trans('messages.provide_warranty_days_lang', [], session('locale')); ?>');
+    //                 return false;
+    //             }
+    //         }
+    //         if ($('#whole_sale_' + i).is(':checked')) {
+    //             if ($('.bulk_quantity_' + i).val() == "") {
+    //                 show_notification('error', +i + '<?php echo trans('messages.provide_bulk_quantity_lang', [], session('locale')); ?>');
+    //                 return false;
+    //             }
+    //             if ($('.bulk_price_' + i).val() == "") {
+    //                 show_notification('error', +i + '<?php echo trans('messages.provide_bulk_price_lang', [], session('locale')); ?>');
+    //                 return false;
+    //             }
+    //         }
 
-            if ($('#imei_check_' + i).is(':checked')) {
-                if ($('.imei_no_' + i).val() == "") {
-                    show_notification('error', ' ' + i + '<?php echo trans('messages.provide_imei_product_lang', [], session('locale')); ?>');
-                    return false;
-                }
-            }
+    //         if ($('#imei_check_' + i).is(':checked')) {
+    //             if ($('.imei_no_' + i).val() == "") {
+    //                 show_notification('error', ' ' + i + '<?php echo trans('messages.provide_imei_product_lang', [], session('locale')); ?>');
+    //                 return false;
+    //             }
+    //         }
 
-        }
+    //     }
 
-        var allIMEIs = []; // Array to store all IMEIs
-        var enteredIMEIs = {}; // Object to store entered IMEIs
-        var duplicate_imeis = ''; // String to store duplicate IMEIs
+    //     var allIMEIs = []; // Array to store all IMEIs
+    //     var enteredIMEIs = {}; // Object to store entered IMEIs
+    //     var duplicate_imeis = ''; // String to store duplicate IMEIs
 
-        // Iterate through each tag input
-        $('.tags').each(function() {
-            var imeis = $(this).val().split(','); // Split the input value into an array of IMEIs
+    //     // Iterate through each tag input
+    //     $('.tags').each(function() {
+    //         var imeis = $(this).val().split(','); // Split the input value into an array of IMEIs
 
-            // Iterate through each IMEI in the current tag input
-            imeis.forEach(function(imei) {
-                var trimmedIMEI = imei.trim();
-                if (trimmedIMEI !== "") { // Skip empty strings
-                    allIMEIs.push(trimmedIMEI); // Push IMEI to the array
-                    if (enteredIMEIs.hasOwnProperty(trimmedIMEI)) {
-                        enteredIMEIs[trimmedIMEI]++;
-                    } else {
-                        enteredIMEIs[trimmedIMEI] = 1;
-                    }
-                }
-            });
-        });
+    //         // Iterate through each IMEI in the current tag input
+    //         imeis.forEach(function(imei) {
+    //             var trimmedIMEI = imei.trim();
+    //             if (trimmedIMEI !== "") { // Skip empty strings
+    //                 allIMEIs.push(trimmedIMEI); // Push IMEI to the array
+    //                 if (enteredIMEIs.hasOwnProperty(trimmedIMEI)) {
+    //                     enteredIMEIs[trimmedIMEI]++;
+    //                 } else {
+    //                     enteredIMEIs[trimmedIMEI] = 1;
+    //                 }
+    //             }
+    //         });
+    //     });
 
-        // Iterate through all IMEIs to find duplicates
-        for (var imei in enteredIMEIs) {
-            if (enteredIMEIs.hasOwnProperty(imei) && enteredIMEIs[imei] > 1) {
-                duplicate_imeis += imei + ', '; // Append duplicate IMEI to the string
-            }
-        }
+    //     // Iterate through all IMEIs to find duplicates
+    //     for (var imei in enteredIMEIs) {
+    //         if (enteredIMEIs.hasOwnProperty(imei) && enteredIMEIs[imei] > 1) {
+    //             duplicate_imeis += imei + ', '; // Append duplicate IMEI to the string
+    //         }
+    //     }
 
-        // If there are duplicate IMEIs, show error notification and return false
-        if (duplicate_imeis !== "") {
-            show_notification('error', duplicate_imeis + '<?php echo trans('messages.duplicate_imei_lang', [], session('locale')); ?>');
-            $('#global-loader').hide(); // Hide loader
-            after_submit(); // Call after_submit function
-            return false; // Return false
-        }
+    //     // If there are duplicate IMEIs, show error notification and return false
+    //     if (duplicate_imeis !== "") {
+    //         show_notification('error', duplicate_imeis + '<?php echo trans('messages.duplicate_imei_lang', [], session('locale')); ?>');
+    //         $('#global-loader').hide(); // Hide loader
+    //         after_submit(); // Call after_submit function
+    //         return false; // Return false
+    //     }
 
-        // Store entered barcodes in an object
-        var enteredBarcodes = {};
-        var duplicate_barcodes = '';
-        $('.barcodes').each(function() {
-            var barcode = $(this).val();
-            if (enteredBarcodes.hasOwnProperty(barcode)) {
-                duplicate_barcodes = duplicate_barcodes + barcode + ', '
-            } else {
-                enteredBarcodes[barcode] = true;
-            }
-        });
+    //     // Store entered barcodes in an object
+    //     var enteredBarcodes = {};
+    //     var duplicate_barcodes = '';
+    //     $('.barcodes').each(function() {
+    //         var barcode = $(this).val();
+    //         if (enteredBarcodes.hasOwnProperty(barcode)) {
+    //             duplicate_barcodes = duplicate_barcodes + barcode + ', '
+    //         } else {
+    //             enteredBarcodes[barcode] = true;
+    //         }
+    //     });
 
-        before_submit();
-        $('#global-loader').show();
+    //     before_submit();
+    //     $('#global-loader').show();
 
-        if (duplicate_barcodes != "") {
-            show_notification('error', duplicate_barcodes + '<?php echo trans('messages.duplicate barcode_lang', [], session('locale')); ?>');
-            $('#global-loader').hide();
-            after_submit();
-            return false;
-        }
-        var str = $(".update_purchase").serialize();
+    //     if (duplicate_barcodes != "") {
+    //         show_notification('error', duplicate_barcodes + '<?php echo trans('messages.duplicate barcode_lang', [], session('locale')); ?>');
+    //         $('#global-loader').hide();
+    //         after_submit();
+    //         return false;
+    //     }
+    //     var str = $(".update_purchase").serialize();
 
-        $.ajax({
-            type: "POST",
-            url: "<?php echo url('update_purchase'); ?>",
-            data: formdatas,
-            contentType: false,
-            processData: false,
-            success: function(html) {
-                $('#global-loader').hide();
+    //     $.ajax({
+    //         type: "POST",
+    //         url: "<?php echo url('update_purchase'); ?>",
+    //         data: formdatas,
+    //         contentType: false,
+    //         processData: false,
+    //         success: function(html) {
+    //             $('#global-loader').hide();
 
-                if (html.status == 3) {
-                    show_notification('error', html.duplicate_imeis + ' <?php echo trans('messages.duplicate_imei_lang', [], session('locale')); ?>');
-                    after_submit();
-                    return false;
-                }
-                after_submit();
-                show_notification('success', '<?php echo trans('messages.purchase_update_success_lang', [], session('locale')); ?>');
-                // location.reload();
-            },
-            error: function(html) {
-                show_notification('error', '<?php echo trans('messages.purchase_update_failed_lang', [], session('locale')); ?>');
-                console.log(html);
-            }
-        });
-    });
-
-    //
-
-    // search invoice no
-
-    //
+    //             if (html.status == 3) {
+    //                 show_notification('error', html.duplicate_imeis + ' <?php echo trans('messages.duplicate_imei_lang', [], session('locale')); ?>');
+    //                 after_submit();
+    //                 return false;
+    //             }
+    //             after_submit();
+    //             show_notification('success', '<?php echo trans('messages.purchase_update_success_lang', [], session('locale')); ?>');
+    //             // location.reload();
+    //         },
+    //         error: function(html) {
+    //             show_notification('error', '<?php echo trans('messages.purchase_update_failed_lang', [], session('locale')); ?>');
+    //             console.log(html);
+    //         }
+    //     });
+    // });
 
 
 
-    // approve prodcuts
-    function approved_products(id) {
-        get_purchase_products(id);
-    }
-    // approve purchase
 
-    function complete_purchase(id) {
-        var csrfToken = $('meta[name="csrf-token"]').attr('content');
-        Swal.fire({
-            title: '<?php echo trans('messages.sure_lang', [], session('locale')); ?>',
-            text: '<?php echo trans('messages.want_complete_purchase_lang', [], session('locale')); ?>',
-            type: "warning",
-            showCancelButton: !0,
-            confirmButtonColor: "#3085d6",
-            cancelButtonColor: "#d33",
-            confirmButtonText: '<?php echo trans('messages.complete_it_lang', [], session('locale')); ?>',
-            confirmButtonClass: "btn btn-primary",
-            cancelButtonClass: "btn btn-danger ml-1",
-            buttonsStyling: !1
-        }).then(function(result) {
-            if (result.value) {
-                $('#global-loader').show();
-                $.ajax({
-                    url: "<?php echo url('complete_purchase'); ?>",
-                    type: 'POST',
-                    data: {
-                        id: id,
-                        _token: csrfToken
-                    },
-                    error: function() {
-                        $('#global-loader').hide();
-                        $('#all_purchase').DataTable().ajax.reload();
-                        show_notification('error', '<?php echo trans('messages.complete_purchase_lang', [], session('locale')); ?>');
-                    },
-                    success: function(data) {
-                        if (data.msg == 401) {
-                            show_notification('error', data.error);
-                            $('#global-loader').hide();
-                            $('#all_purchase').DataTable().ajax.reload();
-                            return false;
-                        }
-                        $('#global-loader').hide();
-                        $('#all_purchase').DataTable().ajax.reload();
-                        show_notification('success', '<?php echo trans('messages.complete_purchase_lang', [], session('locale')); ?>');
-                    }
-                });
-            } else if (result.dismiss === Swal.DismissReason.cancel) {
-                show_notification('success', '<?php echo trans('messages.safe_lang', [], session('locale')); ?>');
-            }
-        });
 
-    }
 
-    // select all
-    $(document).on('click', '#all_select', function(e) {
-        // Check if the "All" option is checked
-        if ($(this).prop('checked')) {
-            // If "All" is checked, select all select boxes with the class "all_products"
-            $('.all_products').prop('checked', true);
-        } else {
-            // If "All" is not checked, deselect all select boxes with the class "all_products"
-            $('.all_products').prop('checked', false);
-        }
-    });
 
-    // get purchase payment
-    function get_purchase_products(id) {
-        $('#global-loader').show();
-        var csrfToken = $('meta[name="csrf-token"]').attr('content');
-        $.ajax({
-            url: "<?php echo url('get_purchase_products'); ?>",
-            method: "POST",
-            data: {
-                id: id,
-                _token: csrfToken
-            },
-            success: function(data) {
-                $('#global-loader').hide();
-                if (data.msg == 1) {
-                    $('#purchase_products_div').html(data.purchase_product_div);
-                    $('.approve_purchase_id').val(id)
-                    $('#purchase_product_modal').modal('show');
-                } else {
-                    show_notification('error', '<?php echo trans('messages.validation_no_purchase_product_lang', [], session('locale')); ?>');
-                }
 
-            },
-            error: function(data) {
-                $('#global-loader').hide();
-                after_submit();
-                show_notification('error', '<?php echo trans('messages.get_data_failed_lang', [], session('locale')); ?>');
-                console.log(data);
-                return false;
-            }
-        });
-    }
-    // add purchase payment
-    $('.approved_purchase').off().on('submit', function(e) {
-        e.preventDefault();
-        var formdatas = new FormData($('.approved_purchase')[0]);
-        if ($('.all_products:checked').length <= 0) {
-            show_notification('error', '<?php echo trans('messages.at_least_one_pro_check_lang', [], session('locale')); ?>');
-            return false;
-        }
-
-        $('#global-loader').show();
-        before_submit();
-        var str = $(".approved_purchase").serialize();
-        $.ajax({
-            type: "POST",
-            url: "<?php echo url('approved_purchase'); ?>",
-            data: formdatas,
-            contentType: false,
-            processData: false,
-            success: function(data) {
-                $('#global-loader').hide();
-                after_submit();
-                $('#all_purchase').DataTable().ajax.reload();
-                show_notification('success', '<?php echo trans('messages.purchase_approved_lang', [], session('locale')); ?>');
-                $('#purchase_product_modal').modal('hide');
-                return false;
-            },
-            error: function(data) {
-                $('#global-loader').hide();
-                after_submit();
-                show_notification('error', '<?php echo trans('messages.data_add_failed_lang', [], session('locale')); ?>');
-                $('#all_purchase').DataTable().ajax.reload();
-                console.log(data);
-                return false;
-            }
-        });
-    });
 
     // delete purchase
     function del_purchase(id) {
@@ -1195,63 +1070,8 @@ $.ajax({
 
 
     // get purchase payment
-    function get_purchase_payment(id) {
-        $('#global-loader').show();
-        var csrfToken = $('meta[name="csrf-token"]').attr('content');
-        $.ajax({
-            url: "<?php echo url('get_purchase_payment'); ?>",
-            method: "POST",
-            data: {
-                id: id,
-                _token: csrfToken
-            },
-            success: function(data) {
-                $('#global-loader').hide();
-                if (data.remaining_price > 0) {
-                    $('.grand_total').val(data.grand_total);
-                    $('.remaining_price').val(data.remaining_price);
-                    $('.bill_id').val(data.bill_id);
-                    $('.purchase_id').val(id);
-                    $('#purchase_payment_modal').modal('show');
-                } else {
-                    show_notification('error', '<?php echo trans('messages.purchase_payment_paid_lang', [], session('locale')); ?>');
-                }
 
-            },
-            error: function(data) {
-                $('#global-loader').hide();
-                after_submit();
-                show_notification('error', '<?php echo trans('messages.purchase_payment_failed_lang', [], session('locale')); ?>');
-                console.log(data);
-                return false;
-            }
-        });
-    }
 
-    // check paid amount
-    $('.paid_amount').keyup(function() {
-        var remaining_price = $('.remaining_price').val();
-        if (parseFloat($(this).val()) > parseFloat(remaining_price)) {
-            show_notification('error', '<?php echo trans('messages.paid_amount_cannot_be_greater_lang', [], session('locale')); ?>');
-            $(this).val("")
-            return false;
-        }
-    });
-    //
-
-    // check payment_method
-    $('.payment_method').change(function() {
-        var selectedOption = $(this).find(':selected');
-        var status = selectedOption.attr('status');
-        if (status != 1) {
-            $('.payment_reference_no_div').show();
-            $('.payment_reference_no').val("");
-        } else {
-            $('.payment_reference_no_div').hide();
-            $('.payment_reference_no').val("");
-        }
-    });
-    //
 
     // add purchase payment
     $('.add_purchase_payment').off().on('submit', function(e) {
@@ -1337,6 +1157,7 @@ $.ajax({
 
 
 
+
     function updateSalesPriceWithTax(index) {
     // Get the sales price and tax input elements
     const salesPriceInput = document.getElementById(`sale_price_${index}`);
@@ -1378,7 +1199,6 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     });
 });
-
 
 
 
@@ -1428,19 +1248,13 @@ function search_barcode(i) {
                   },
                   success: function(data) {
                       if (data != "") {
-                        setTimeout(function() {
-                                if ($('.category_id_' + i).length) {
-                                    $('.category_id_' + i).val(data.category_id).trigger('change');
-                                }
 
-                                if ($('.store_id_' + i).length) {
-                                    $('.store_id_' + i).val(data.store_id).trigger('change');
-                                }
 
-                                if ($.fn.selectpicker) {
-                                    $('.default-select').selectpicker('refresh');
-                                }
-                            }, 1000);
+                            $('.category_id_' + i).val(data.category_id);
+                            $('.store_id_' + i).val(data.store_id);
+                            $('.store_id_' + i).selectpicker('refresh');
+                            $('.category_id_' + i).selectpicker('refresh');
+
                           $(".product_name_" + i).val(data.product_name);
                           $(".barcode_" + i).val(data.barcode);
                           $(".purchase_price_" + i).val(data.purchase_price);
@@ -1473,5 +1287,41 @@ function search_barcode(i) {
       });
   }
 
+  $(document).ready(function() {
+    function get_purchase_payment(id) {
+        alert('1');
+        $('#global-loader').show();
+        var csrfToken = $('meta[name="csrf-token"]').attr('content');
+        $.ajax({
+            url: "<?php echo url('get_purchase_payment'); ?>",
+            method: "POST",
+            data: {
+                id: id,
+                _token: csrfToken
+            },
+            success: function(data) {
+                $('#global-loader').hide();
+                if (data.remaining_price > 0) {
+                    $('.total_price').val(data.total_price);
+                    $('.supplier_name').val(data.supplier_name);
+                    $('.purchase_date').val(data.purchase_date);
+                    $('.remaining_price').val(data.remaining_price);
+                    $('.invoice_no').val(data.invoice_no);
+                    $('.purchase_id').val(purchase_id);
+                    $('#purchase_payment_modal').modal('show');
+                } else {
+                    show_notification('error', '<?php echo trans('messages.purchase_payment_paid_lang', [], session('locale')); ?>');
+                }
+            },
+            error: function(data) {
+                $('#global-loader').hide();
+                after_submit();
+                show_notification('error', '<?php echo trans('messages.purchase_payment_failed_lang', [], session('locale')); ?>');
+                console.log(data);
+                return false;
+            }
+        });
+    }
+});
 
 </script>
