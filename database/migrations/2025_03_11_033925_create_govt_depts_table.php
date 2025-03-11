@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('govt_depts', function (Blueprint $table) {
             $table->id();
-            $table->string('govt_name'); // Changed from category_name
+            $table->string('govt_name');
             $table->longText('notes')->nullable();
             $table->string('govt_phone')->nullable();
             $table->string('govt_email')->nullable();
