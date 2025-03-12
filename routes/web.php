@@ -23,6 +23,7 @@ use App\Http\Controllers\ExpensecatController;
 use App\Http\Controllers\SpecialityController;
 use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\GovtController;
+use App\Http\Controllers\SessionCONTROLLER;
 
 Route::get('/', function () {
     return view('welcome');
@@ -95,6 +96,14 @@ Route::post('update_offer', [OfferController::class, 'update_offer'])->name('upd
 Route::post('delete_offer', [OfferController::class, 'delete_offer'])->name('delete_offer');
 
 
+//offercontroller
+
+Route::get('session', [SessionCONTROLLER::class, 'index'])->name('session');
+Route::post('add_session', [SessionCONTROLLER::class, 'add_session'])->name('add_session');
+Route::get('show_session', [SessionCONTROLLER::class, 'show_session'])->name('show_session');
+Route::post('edit_session', [SessionCONTROLLER::class, 'edit_session'])->name('edit_session');
+Route::post('update_session', [SessionCONTROLLER::class, 'update_session'])->name('update_session');
+Route::post('delete_session', [SessionCONTROLLER::class, 'delete_session'])->name('delete_session');
 // exepnsecat
 Route::get('expense_category', [ExpensecatController::class, 'index'])->name('expense_category');
 Route::post('add_expense_category', [ExpensecatController::class, 'add_expense_category'])->name('add_expense_category');

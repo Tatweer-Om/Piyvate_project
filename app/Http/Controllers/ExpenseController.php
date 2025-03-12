@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Illuminate\Validation\Validator;
+use Illuminate\Support\Facades\Response;
 
 class ExpenseController extends Controller
 {
@@ -64,14 +65,45 @@ class ExpenseController extends Controller
 
                 $add_data=Carbon::parse($value->created_at)->format('d-m-Y (h:i a)');
 
+                $file_path = asset('uploads/expense_files/' . $value->expense_image);
+                $file_extension = pathinfo($value->expense_image, PATHINFO_EXTENSION);
+                $download_path = url('download_expense_image/' . $value->expense_image); // Route for download
+
+                // Define dummy icons for non-image files
+                $dummy_icons = [
+                    'pdf'  => asset('images/dummy_images/pdf.png'),
+                    'doc'  => asset('images/dummy_images/word.jpeg'),
+                    'docx' => asset('images/dummy_images/word.jpeg'),
+                    'xls'  => asset('images/dummy_images/excel.jpeg'),
+                    'xlsx' => asset('images/dummy_images/excel.jpeg'),
+                ];
+
+                $download_icon = "<a href='{$download_path}' download title='Download'><img src='" . asset('images/dummy_images/download.png') . "' alt='Download' width='20'></a>";
+
+                // Check if the file exists
+                if (!empty($value->expense_image) && file_exists(public_path('uploads/expense_files/' . $value->expense_image))) {
+                    if (in_array(strtolower($file_extension), ['jpg', 'jpeg', 'png', 'gif'])) {
+                        $file_display = "<img src='{$file_path}' alt='Receipt' width='30' height='30'> {$download_icon}";
+                    } else {
+                        $icon_path = $dummy_icons[$file_extension] ?? asset('images/dummy_images/file.png');
+                        $file_display = "<a href='{$file_path}' target='_blank'><img src='{$icon_path}' alt='File' width='30' height='30'></a> {$download_icon}";
+                    }
+                } else {
+                    // Show "No Image" placeholder
+                    $no_image = asset('images/dummy_images/no_image.jpg');
+                    $file_display = "<img src='{$no_image}' alt='No Image' width='50' height='50'>";
+                }
+
                 $sno++;
                 $json[]= array(
                             $sno,
                             $cat_name,
                             $expense_name,
+
                             $value->amount,
                             $value->expense_date,
                             $payment_method,
+                            $file_display,
                             $value->added_by,
                             $add_data,
                             $modal
@@ -338,14 +370,12 @@ class ExpenseController extends Controller
     // download
     public function download_expense_image($filename)
     {
-        $filePath = public_path('customer_images/expense_images/' . $filename);
+        $filePath = public_path('uploads/expense_files/' . $filename);
 
-        // Check if file exists
-        if (file_exists($filePath)) {
-            return response()->download($filePath, $filename);
+        if (File::exists($filePath)) {
+            return Response::download($filePath, $filename);
+        } else {
+            return redirect()->back()->with('error', 'File not found!');
         }
-
-        // File not found
-        abort(404);
     }
 }
