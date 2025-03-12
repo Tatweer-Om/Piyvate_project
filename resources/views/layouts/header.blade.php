@@ -995,6 +995,8 @@
                         <ul aria-expanded="false">
                             <li><a href="{{ url('patient_list') }}">Patients</a></li>
                             <li><a href="{{ url('patient_profile') }}">Patient Profie</a></li>
+                            <li><a href="{{ url('govt') }}">Govt agencies</a></li>
+
                         </ul>
                     </li>
                     <li><a href="javascript:void(0);" class="ai-icon has-arrow" aria-expanded="false">
@@ -1004,6 +1006,8 @@
                         <ul aria-expanded="false">
                             <li><a href="{{ url('doctor_list') }}">Doctors</a></li>
                             <li><a href="{{ url('doctor_profile') }}">Doctor Profie</a></li>
+                            <li><a href="{{ url('speciality') }}">Doctors specialities</a></li>
+
                         </ul>
                     </li>
                     <li><a href="javascript:void(0);" class="ai-icon has-arrow" aria-expanded="false">
@@ -1068,14 +1072,6 @@
 
                 </ul>
 
-                {{-- <div class="plus-box">
-					<p class="fs-16 font-w500 mb-1">Check your job schedule</p>
-					<a class="text-white fs-26" href="javascript:;"><i class="las la-long-arrow-alt-right"></i></a>
-				</div>
-				<div class="copyright">
-					<p class="fs-14 font-w200"><strong class="font-w400">Eres Hospital Admin Dashboard</strong> © 2023 All Rights Reserved</p>
-					<p class="fs-12">Made with <span class="heart"></span> by TatweerSoft</p>
-				</div> --}}
             </div>
         </div>
         <!--**********************************

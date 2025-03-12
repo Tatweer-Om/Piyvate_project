@@ -199,6 +199,8 @@
         @include('custom_js.branch_js')
         @elseif ($route_name == 'offer')
         @include('custom_js.offer_js')
+        @elseif ($route_name == 'session')
+        @include('custom_js.session_js')
     @endif
 
 </body>

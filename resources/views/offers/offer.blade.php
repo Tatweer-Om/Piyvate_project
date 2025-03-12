@@ -122,6 +122,7 @@
                             <input type="number" class="form-control sessions"  name="sessions" placeholder="Sessions">
                         </div>
                     </div>
+
                     <div class="col-lg-4 col-xl-4">
                         <div class="form-group">
                             <label class="col-form-label">Offer Price</label>

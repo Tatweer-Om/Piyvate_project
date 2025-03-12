@@ -81,6 +81,7 @@
                                         <th>Amount</th>
                                         <th>Expense Date</th>
                                         <th>Account</th>
+                                        <th>file</th>
 
                                         <th>Added By </th>
                                         <th>Added On </th>
@@ -191,6 +192,62 @@
                                 <div id="fileName" style="margin-top: 10px;"></div>
                             </div>
                         </div>
+                        <script>
+                            document.getElementById('fileUpload').addEventListener('change', function(event) {
+                                let file = event.target.files[0];
+                                let preview = document.getElementById('filePreview');
+                                let fileNameDisplay = document.getElementById('fileName');
+                                let removeButton = document.getElementById('removeFile');
+
+                                if (file) {
+                                    let fileName = file.name.toLowerCase();
+                                    let fileType = file.type;
+
+                                    // Set file name display
+                                    fileNameDisplay.textContent = file.name;
+
+                                    // Handle image preview
+                                    if (fileType.startsWith('image')) {
+                                        let reader = new FileReader();
+                                        reader.onload = function(e) {
+                                            preview.src = e.target.result;
+                                        };
+                                        reader.readAsDataURL(file);
+                                    } else {
+                                        // Handle document previews
+                                        if (fileName.endsWith('.pdf')) {
+                                            preview.src = "{{ asset('images/dummy_images/pdf.png') }}";
+                                        } else if (fileName.endsWith('.doc') || fileName.endsWith('.docx')) {
+                                            preview.src = "{{ asset('images/dummy_images/word.jpeg') }}";
+                                        } else if (fileName.endsWith('.xls') || fileName.endsWith('.xlsx')) {
+                                            preview.src = "{{ asset('images/dummy_images/excel.jpeg') }}";
+                                        } else {
+                                            preview.src = "{{ asset('images/dummy_images/file.png') }}";
+                                        }
+                                    }
+
+                                    // Show remove (×) button
+                                    removeButton.style.display = 'block';
+                                }
+                            });
+
+                            document.getElementById('removeFile').addEventListener('click', function() {
+                                let preview = document.getElementById('filePreview');
+                                let fileNameDisplay = document.getElementById('fileName');
+                                let fileInput = document.getElementById('fileUpload');
+                                let removeButton = document.getElementById('removeFile');
+
+                                // Reset file input
+                                fileInput.value = '';
+
+                                // Reset preview and file name
+                                preview.src = "{{ asset('images/dummy_images/cover-image-icon.png') }}";
+                                fileNameDisplay.textContent = '';
+
+                                // Hide remove (×) button
+                                removeButton.style.display = 'none';
+                            });
+                        </script>
 
 
 
