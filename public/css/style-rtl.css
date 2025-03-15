@@ -9605,7 +9605,7 @@ a {
   white-space: nowrap; }
 
 .content-body .container {
-  margin-top: 40px; }
+  margin-top: 20px; }
 
 .content-body .container-fluid, .content-body .container-sm, .content-body .container-md, .content-body .container-lg, .content-body .container-xl, .content-body .container-xxl {
   padding-top: 40px;
@@ -21925,7 +21925,7 @@ fieldset:disabled .btn {
     border-color: #d7dae3;
     position: relative;
     background: transparent;
-    padding: 1.5rem 1.875rem 1.25rem;
+    padding: 0.3rem 1.875rem 1rem;
     display: flex;
     justify-content: space-between;
     align-items: center; }
