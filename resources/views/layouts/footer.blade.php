@@ -177,6 +177,8 @@
         @include('custom_js.govt_agency_js')
         @elseif ($route_name == 'expense_category')
         @include('custom_js.expensecat_js')
+		  @elseif ($route_name == 'appointments')
+        @include('custom_js.appointment_js')
         @elseif ($route_name == 'supplier')
         @include('custom_js.supplier_js')
         @elseif ($route_name == 'expense')

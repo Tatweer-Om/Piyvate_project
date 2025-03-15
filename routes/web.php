@@ -55,6 +55,10 @@ Route::get('staff_profile', [StaffController::class, 'staff_profile'])->name('st
 //appointmentController
 
 Route::get('appointments', [AppointmentController::class, 'appointments'])->name('appointments');
+Route::get('show_appointments', [AppointmentController::class, 'show_appointments'])->name('show_appointments');
+Route::post('add_appointment', [AppointmentController::class, 'add_appointment'])->name('add_appointment');
+
+
 
 
 //SettingController

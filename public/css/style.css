@@ -9547,6 +9547,11 @@ textarea.form-control-lg {
 .c-pointer {
   cursor: pointer; }
 
+
+  .dataTables_wrapper{
+    margin:0.8rem !important;
+  }
+
 * {
   outline: none;
   padding: -0.65rem; }
@@ -9605,7 +9610,7 @@ a {
   white-space: nowrap; }
 
 .content-body .container {
-  margin-top: 40px; }
+  margin-top: 20px; }
 
 .content-body .container-fluid, .content-body .container-sm, .content-body .container-md, .content-body .container-lg, .content-body .container-xl, .content-body .container-xxl {
   padding-top: 40px;
@@ -21925,7 +21930,7 @@ fieldset:disabled .btn {
     border-color: #d7dae3;
     position: relative;
     background: transparent;
-    padding: 1.5rem 1.875rem 1.25rem;
+    padding: 0.3rem 1.875rem 1rem;
     display: flex;
     justify-content: space-between;
     align-items: center; }
@@ -26013,3 +26018,46 @@ input[type="time"]::-webkit-calendar-picker-indicator {
     font-size: 12px; } }
 
 /*# sourceMappingURL=style.css.map */
+.form-head .add-staff {
+  width: auto;
+}
+
+.search-area {
+  max-width: 250px;
+  width: 100%;
+}
+
+/* Adjust table font size and padding for smaller screens */
+@media (max-width: 767px) {
+  .form-head {
+      flex-direction: column;
+      align-items: flex-start;
+  }
+
+  .form-head .add-staff {
+      width: 100%;
+      margin-bottom: 10px;
+  }
+
+  .table-responsive {
+      margin-top: 20px;
+  }
+
+  .table th, .table td {
+      padding: 10px 8px;
+      font-size: 12px;
+  }
+
+  .table {
+      font-size: 12px;
+  }
+
+  .checkbox {
+      padding: 0;
+  }
+}
+
+/* Adjust the padding for the form fields */
+.input-group {
+  max-width: 300px;
+}
