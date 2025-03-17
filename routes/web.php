@@ -55,8 +55,16 @@ Route::get('staff_profile', [StaffController::class, 'staff_profile'])->name('st
 //appointmentController
 
 Route::get('appointments', [AppointmentController::class, 'appointments'])->name('appointments');
-Route::get('show_appointments', [AppointmentController::class, 'show_appointments'])->name('show_appointments');
+Route::get('show_appointment', [AppointmentController::class, 'show_appointment'])->name('show_appointment');
 Route::post('add_appointment', [AppointmentController::class, 'add_appointment'])->name('add_appointment');
+Route::get('all_appointments', [AppointmentController::class, 'all_appointments'])->name('all_appointments');
+Route::get('sessions_list', [AppointmentController::class, 'sessions_list'])->name('sessions_list');
+Route::post('/get-session-price', [AppointmentController::class, 'getSessionPrice'])->name('get.session.price');
+
+
+
+
+Route::get('/get-session-data/{appointment_id}', [AppointmentController::class, 'getSessionData']);
 
 
 
@@ -104,6 +112,9 @@ Route::post('delete_offer', [OfferController::class, 'delete_offer'])->name('del
 
 Route::get('session', [SessionCONTROLLER::class, 'index'])->name('session');
 Route::post('add_session', [SessionCONTROLLER::class, 'add_session'])->name('add_session');
+Route::get('session_detail/{id}', [SessionCONTROLLER::class, 'session_detail'])->name('session_detail');
+Route::get('/session_detail2/{id}', [SessionCONTROLLER::class, 'session_detail2'])->name('session_detail2');
+
 Route::get('show_session', [SessionCONTROLLER::class, 'show_session'])->name('show_session');
 Route::post('edit_session', [SessionCONTROLLER::class, 'edit_session'])->name('edit_session');
 Route::post('update_session', [SessionCONTROLLER::class, 'update_session'])->name('update_session');
