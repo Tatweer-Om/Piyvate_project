@@ -35,7 +35,7 @@
     <link rel="stylesheet" href="{{ asset('vendor/toastr/css/toastr.min.css') }}">
     <link href="{{ asset('vendor/sweetalert2/dist/sweetalert2.min.css') }}">
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
-    <link class="main-css" href="{{ asset('css/style.css') }}" rel="stylesheet">
+    <link href="{{ url('css/style.css') }}" rel="stylesheet">
     <link class="main-css" href="{{ asset('css/style-rtl.css') }}" rel="stylesheet">
 
 

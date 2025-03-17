@@ -23,9 +23,13 @@ return new class extends Migration
             $table->string('country_id')->nullable();
             $table->string('doctor_id')->nullable();
             $table->date('appointment_date')->nullable();
+            $table->string('appointment_fee')->nullable();
             $table->time('time_from')->nullable();
             $table->time('time_to')->nullable();
             $table->longText('notes')->nullable();
+            $table->string('user_id', 255)->nullable();
+            $table->string('branch_id', 255)->nullable();
+            $table->string('added_by')->nullable();
             $table->timestamps();
         });
     }

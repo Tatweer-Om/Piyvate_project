@@ -11,14 +11,21 @@
 
             <!-- /add -->
             <div class="card">
-                <div class="card-body">
-                    <div class="card-header">
-                        <h5 class="card-title">Appointment</h5>
-
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">Sessions</h5>
+                    <div class="d-flex align-items-center gap-2">
+                        <label class="col-form-label mb-0">Session Type:</label>
+                        <div class="d-flex gap-2">
+                            <input type="radio"  name="session_type" value="normal" checked> Normal
+                            <input type="radio"  name="session_type" value="offer"> Offer
+                            <input type="radio" name="session_type" value="ministry"> Pact
+                        </div>
                     </div>
+                </div>
 
-                   <form class="add_appointment">
-                     @csrf
+                <div class="card-body">
+                    <form class="add_session">
+                        @csrf
                         <div class="row g-2">
                             <div class="col-md-3">
                                 <label class="col-form-label">Title:</label>
@@ -67,35 +74,59 @@
                                     @endforeach
                                 </select>
                             </div>
-                            <div class="col-md-3">
-                                <label class="col-form-label">Appointment Date:</label>
-                                <input type="date" class="form-control form-control-sm" id="appointment_date" name="appointment_date">
-                            </div>
-                            <div class="col-md-2">
-                                <label class="col-form-label">From:</label>
-                                <div class="input-group clockpicker">
-                                    <input type="text" class="form-control form-control-sm" id="time_from" name="time_from" value="09:30">
-                                    <span class="input-group-text"><i class="fas fa-clock"></i></span>
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <label class="col-form-label">To:</label>
-                                <div class="input-group clockpicker">
-                                    <input type="text" class="form-control form-control-sm" id="time_to" name="time_to" value="10:30">
-                                    <span class="input-group-text"><i class="fas fa-clock"></i></span>
-                                </div>
+                              <div class="col-md-2" id="session_select_box">
+                                <label class="col-form-label"> Session Type:</label>
+                                <select class="form-control form-control-sm session_cat" id="session_cat" name="session_cat">
+                                    <option value="">Choose...</option>
+                                    <option value="OT">OT</option>
+                                    <option value="PT">PT</option>
+                                    <option value="CT">CT</option>
+                                </select>
                             </div>
 
+                            <!-- Offer Dropdown (Hidden Initially) -->
+                            <div class="col-md-3" id="offer_select_box" style="display: none;">
+                                <label class="col-form-label">Select Offer:</label>
+                                <select class="form-control form-control-sm" name="offer_id">
+                                    <option value="">Choose...</option>
+                                    @foreach ($offers as $offer)
+                                        <option value="{{ $offer->id }}">{{ $offer->offer_name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
 
-                            <!-- Select Box for Session (Initially Hidden) -->
+                            <!-- Ministry Dropdown (Hidden Initially) -->
+                            <div class="col-md-3" id="ministry_select_box" style="display: none;">
+                                <label class="col-form-label">Select Ministry:</label>
+                                <select class="form-control form-control-sm" name="ministry_id">
+                                    <option value="">Choose...</option>
+                                    @foreach ($ministries as $ministry)
+                                        <option value="{{ $ministry->id }}">{{ $ministry->govt_name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
 
                             <div class="col-md-2">
-                                <label class="col-form-label">Appointment Fee:</label>
-                                <div class="alert alert-info p-2" id="appointment_fee" style="font-weight: bold;">
+                                <label class="col-form-label">Sessions:</label>
+                                <input type="number" class="form-control form-control-sm number" id="no_of_sessions" name="no_of_sessions">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="col-form-label">Interval:</label>
+                                <input type="number" class="form-control form-control-sm number" id="session_gap" name="session_gap">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="col-form-label">First Session:</label>
+                                <input type="date" class="form-control form-control-sm " id="session_date" name="session_date">
+                            </div>
+
+                            <div class="col-md-2">
+                                <label class="col-form-label">Session Fee:</label>
+                                <div class="alert alert-info p-2" id="session_fee" style="font-weight: bold;">
                                     OMR 0.00
                                 </div>
-                            </div>
+                                <input type="hidden" name="session_fee" id="session_fee_input" value="0.00">
 
+                            </div>
                             <div class="col-md-12">
                                 <label class="col-form-label">Notes:</label>
                                 <textarea class="form-control form-control-sm" id="notes" name="notes" rows="2"></textarea>
@@ -104,9 +135,10 @@
                                 <button type="submit" class="btn btn-primary btn-sm">Add Data</button>
                             </div>
                         </div>
-                </form>
+                    </form>
                 </div>
             </div>
+
             <!-- /add -->
         </div>
     </div>

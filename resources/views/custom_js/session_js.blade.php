@@ -1,177 +1,299 @@
 <script>
 
-$(document).ready(function() {
-    // Reset form when modal is closed
-    $('#add_session_modal').on('hidden.bs.modal', function() {
-        $(".add_session")[0].reset();
-        $('.session_id').val('');
-        $('#govt_select_div').hide(); // Ensure government select is hidden by default
-        $('#session_name_div').show(); // Ensure session name is shown by default
-    });
+$(document).ready(function () {
 
-    // Initialize DataTable
-    $('#all_session').DataTable({
-        "sAjaxSource": "{{ url('show_session') }}",
-        "bFilter": true,
-        'pagingType': 'numbers',
-        "ordering": true,
-        "order": [[6, "desc"]]
-    });
+    $(".add_session").submit(function (e) {
 
-    // Handle form submission
-    $('.add_session').off().on('submit', function(e) {
-        e.preventDefault();
+        e.preventDefault(); // Prevent form from refreshing
+        let sessionDate = $("#session_date").val();
+        let title = $("#title").val();
+        let firstName = $("#first_name").val();
+        let doctor = $("#doctor").val();
+        let sessionType = $("#session_select_box select").val(); // Ministry selection
 
-        var formData = new FormData(this);
-        formData.append('_token', '{{ csrf_token() }}');
+    // Validation check
+    if (!title) {
+        show_notification('error', '<?php echo trans('messages.title_required', [], session('locale')); ?>');
+        return;
+    }
+    if (!firstName) {
+        show_notification('error', '<?php echo trans('messages.first_name_required', [], session('locale')); ?>');
+        return;
+    }
+    if (!doctor) {
+        show_notification('error', '<?php echo trans('messages.doctor_required', [], session('locale')); ?>');
+        return;
+    }
+    if (!sessionDate) {
+        show_notification('error', '<?php echo trans('messages.session_date_required', [], session('locale')); ?>');
+        return;
+    }
+    if (!sessionType) {
+        show_notification('error', '<?php echo trans('messages.session_type_required', [], session('locale')); ?>');
+        return;
+    }
 
-        // Get selected session type
-        var sessionType = $('input[name="session_type"]:checked').val();
-        if (!sessionType) {
-            show_notification('error', 'Please select a session type.');
-            return false;
-        }
-        formData.append('session_type', sessionType);
-
-        // Handle session name or government selection based on session type
-        var sessionName = $('.session_name').val();
-        var government = $('select[name="government"]').val();
-
-        if (sessionType === "ministry" && !government) {
-            show_notification('error', 'Please select a government.');
-            return false;
-        } else if (sessionType === "normal" && !sessionName) {
-            show_notification('error', 'Please enter a session name.');
-            return false;
-        }
-
-        var id = $('.session_id').val();
-        showPreloader();
-        before_submit();
+        let formData = $(this).serialize(); // Serialize form data
 
         $.ajax({
-            type: "POST",
-            url: id ? "{{ url('update_session') }}" : "{{ url('add_session') }}",
+            url: "{{ route('add_session') }}", // Laravel route for storing data
+            method: "POST",
             data: formData,
-            contentType: false,
-            processData: false,
-            success: function(data) {
-                hidePreloader();
-                after_submit();
-                show_notification('success', id ?
-                    '<?php echo trans('messages.data_update_success_lang',[],session('locale')); ?>' :
-                    '<?php echo trans('messages.data_add_success_lang',[],session('locale')); ?>'
-                );
-                $('#add_session_modal').modal('hide');
-                $('#all_session').DataTable().ajax.reload();
-                if (!id) $(".add_session")[0].reset();
+            success: function (response) {
+                if (response.success) {
+                    show_notification('success', '<?php echo trans('messages.data_add_success_lang', [], session('locale')); ?>');
+                    $(".add_session")[0].reset(); // Reset form fields
+                    $("#session_fee").html("OMR 0.00"); // Reset session fee display
+                    window.location.href = "/session_detail/" + response.session_id;
+                } else {
+                    show_notification('error', '<?php echo trans('messages.data_add_failed_lang', [], session('locale')); ?>');
+                }
             },
-            error: function(data) {
-                hidePreloader();
-                after_submit();
-                show_notification('error', id ?
-                    '<?php echo trans('messages.data_update_failed_lang',[],session('locale')); ?>' :
-                    '<?php echo trans('messages.data_add_failed_lang',[],session('locale')); ?>'
-                );
-                $('#all_session').DataTable().ajax.reload();
-                console.log(data);
+            error: function (xhr) {
+                alert("Error saving session! Check required fields.");
+                console.log(xhr.responseText);
             }
         });
     });
+    // Function to fetch session price
+    function fetchSessionPrice() {
+        let sessionType = $("input[name='session_type']:checked").val();
+        let noOfSessions = $("#no_of_sessions").val();
+        let ministryId = $("#ministry_select_box select").val(); // Ministry selection
+        let offerId = $("#offer_select_box select").val(); // Offer selection
 
-    // Edit session function
 
 
-    // Delete session function
-    function del(id) {
-        Swal.fire({
-            title: '<?php echo trans('messages.sure_lang',[],session('locale')); ?>',
-            text: '<?php echo trans('messages.delete_lang',[],session('locale')); ?>',
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#3085d6",
-            cancelButtonColor: "#d33",
-            confirmButtonText: '<?php echo trans('messages.delete_it_lang',[],session('locale')); ?>'
-        }).then((result) => {
-            if (result.value) {
-                $('#global-loader').show();
-                before_submit();
-                var csrfToken = $('meta[name="csrf-token"]').attr('content');
+        // Ensure sessionType is selected
+        if (!sessionType) return;
 
-                $.ajax({
-                    url: "{{ url('delete_session') }}",
-                    type: 'POST',
-                    data: { id: id, _token: csrfToken },
-                    success: function() {
-                        $('#global-loader').hide();
-                        after_submit();
-                        $('#all_session').DataTable().ajax.reload();
-                        show_notification('success', '<?php echo trans('messages.delete_success_lang',[],session('locale')); ?>');
-                    },
-                    error: function() {
-                        $('#global-loader').hide();
-                        after_submit();
-                        show_notification('error', '<?php echo trans('messages.delete_failed_lang',[],session('locale')); ?>');
+        $.ajax({
+            url: "{{ route('get.session.price') }}", // Your Laravel route
+            method: "POST",
+            data: {
+                _token: "{{ csrf_token() }}",
+                session_type: sessionType,
+                no_of_sessions: noOfSessions,
+                ministry_id: ministryId,
+                offer_id: offerId
+            },
+            success: function (response) {
+                if (response.success) {
+                    $("#session_fee").html("OMR " + response.session_price.toFixed(2));
+
+                    // If response has predefined offer sessions, update input field
+                    if (response.offer_sessions) {
+                        $("#no_of_sessions").val(response.offer_sessions);
                     }
-                });
+                } else {
+                    $("#session_fee").html("OMR 0.00"); // Reset if no data found
+                }
+            },
+            error: function () {
+                alert("Error fetching session price");
             }
         });
     }
 
-    // Toggle session fields based on session type selection
-    $(".session_type").change(function() {
-        if ($("#ministry").is(":checked")) {
-            $("#govt_select_div").show();
+    // Event Listeners
+    $("input[name='session_type']").change(fetchSessionPrice); // Trigger when selecting session type
+    $("#no_of_sessions").on("input", fetchSessionPrice); // Works for both typing & programmatic changes
+    $("#ministry_select_box select").change(fetchSessionPrice); // Works for "pact" type
+    $("#offer_select_box select").change(fetchSessionPrice); // Works for "offer" type
+});
+
+
+
+
+$(document).ready(function () {
+    $('input[name="sessionType"]').change(function () {
+        if ($('#offer').is(':checked')) {
+            $('#offerFields').show();
+            $('#pactFields').hide();
+            $('#extraFields').show();
+        } else if ($('#pact').is(':checked')) {
+            $('#offerFields').hide();
+            $('#pactFields').show();
+            $('#extraFields').show();
         } else {
-            $("#govt_select_div").hide();
-            $("#session_name_div").show();
+            $('#offerFields').hide();
+            $('#pactFields').hide();
+            $('#extraFields').hide();
         }
     });
 });
 
 
-function edit(id) {
-        $('#global-loader').show();
-        before_submit();
-        var csrfToken = $('meta[name="csrf-token"]').attr('content');
+document.addEventListener('DOMContentLoaded', function () {
+        const sessionTypeRadios = document.querySelectorAll('input[name="session_type"]');
+        const offerSelectBox = document.getElementById('offer_select_box');
+        const ministrySelectBox = document.getElementById('ministry_select_box');
 
-        $.ajax({
-            dataType: 'JSON',
-            url: "{{ url('edit_session') }}",
-            method: "POST",
-            data: { id: id, _token: csrfToken },
-            success: function(fetch) {
-                $('#global-loader').hide();
-                after_submit();
-                if (fetch) {
-                    $(".session_name").val(fetch.session_name);
-                    $(".session_price").val(fetch.session_price);
-                    $(".notes").val(fetch.notes);
-                    $(".session_id").val(fetch.session_id);
-
-                    // Set radio button and toggle fields
-                    if (fetch.session_type === "ministry") {
-                        $("#ministry").prop("checked", true);
-                        $("#govt_select_div").show();
-                    } else {
-                        $("#normal").prop("checked", true);
-                        $("#govt_select_div").hide();
-                        $("#session_name_div").show();
-                    }
-                    $(".government").val(fetch.govt_id);
-                    $('.government').selectpicker('refresh');
-
-
-                    $(".modal-title").html('<?php echo trans('messages.update_lang',[],session('locale')); ?>');
+        sessionTypeRadios.forEach(radio => {
+            radio.addEventListener('change', function () {
+                if (this.value === 'offer') {
+                    offerSelectBox.style.display = 'block';
+                    ministrySelectBox.style.display = 'none';
+                } else if (this.value === 'ministry') {
+                    ministrySelectBox.style.display = 'block';
+                    offerSelectBox.style.display = 'none';
+                } else {
+                    offerSelectBox.style.display = 'none';
+                    ministrySelectBox.style.display = 'none';
                 }
-            },
+            });
+        });
+    });
+
+
+    function session_detail(session_id) {
+        $.ajax({
+            url: '/session_detail2/' + session_id, // API route
+            type: 'GET',
+            success: function(response) {
+                    // $("#patient_name").text(response.patient_name);
+                    // $("#doctor_name").text(response.doctor_name);
+
+                    let sessionCount = response.sessions;
+                    let gap = response.gap;
+                    let startDate = new Date(response.appointment_date);
+                    let sessionRows = '<tr>';
+
+                    for (let i = 0; i < sessionCount; i++) {
+                        let sessionDate = new Date(startDate);
+                        sessionDate.setDate(startDate.getDate() + (gap * i));
+                        let formattedDate = sessionDate.toISOString().split('T')[0];
+
+                        // Start a new row if needed
+                        if (i > 0 && i % 4 === 0) {
+                            sessionRows += '</tr><tr>';
+                        }
+
+                        sessionRows += `
+                                        <td class="col-md-3 text-center">
+                                            <label class="session-label">Session ${i + 1}</label>
+                                            <input type="date" class="form-control form-control-sm session-date mt-1" value="${formattedDate}" />
+                                            <div class="input-group clockpicker mt-1">
+                                                <input type="text" class="form-control form-control-sm success_time" id="time_to_${i}" name="time_to" value="10:30">
+                                                <span class="input-group-text"><i class="fas fa-clock"></i></span>
+                                            </div>
+                                        </td>`;
+                    }
+
+                    // Close the last row
+                    sessionRows += '</tr>';
+
+                    $("#session_table tbody").empty().append(sessionRows);
+
+                    // Reinitialize clockpicker for dynamically added elements
+                    $('.clockpicker').clockpicker({
+                        autoclose: true,
+                        donetext: 'Done'
+                    });
+
+                    $("#sessionModal").modal('show');
+                }
+
+
+                ,
+
             error: function() {
-                $('#global-loader').hide();
-                after_submit();
-                show_notification('error', '<?php echo trans('messages.edit_failed_lang',[],session('locale')); ?>');
+                show_notification('error',
+                    '{{ trans('messages.error_fetching_data', [], session('locale')) }}');
             }
         });
     }
+
+    $(document).ready(function() {
+        $("#addSessionBtn").click(function() {
+            let lastRow = $("#session_table tbody tr:last");
+            let currentSessionCount = $("#session_table tbody td").length;
+            let newSessionNumber = currentSessionCount + 1; // Next session number
+
+            let formattedDate = new Date().toISOString().split('T')[0];
+
+            let sessionTd = `
+            <td class="col-md-3 text-center">
+                <label class="session-label">Session ${newSessionNumber}</label>
+                <input type="date" class="form-control form-control-sm session-date mt-1" value="${formattedDate}" />
+                <div class="input-group clockpicker mt-1">
+                    <input type="text" class="form-control form-control-sm success_time" id="time_to_${newSessionNumber}" name="time_to" value="10:30">
+                    <span class="input-group-text"><i class="fas fa-clock"></i></span>
+                </div>
+            </td>`;
+
+            // If no row exists or last row already has 6 <td>, create a new row
+            if (lastRow.length === 0 || lastRow.children("td").length >= 4) {
+                $("#session_table tbody").append(`<tr>${sessionTd}</tr>`);
+            } else {
+                lastRow.append(sessionTd);
+            }
+        });
+
+        $("#removeSessionBtn").click(function() {
+            let lastRow = $("#session_table tbody tr:last");
+
+            if (lastRow.length > 0) {
+                let lastTd = lastRow.children("td:last");
+
+                if (lastRow.children("td").length > 1) {
+                    // Remove last session cell from the row
+                    lastTd.remove();
+                } else {
+                    // If only one session left in the row, remove the whole row
+                    lastRow.remove();
+                }
+            }
+        });
+    });
+
+
+
+
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const sessionToggle = document.getElementById("session_toggle");
+        const sessionSelectBox = document.getElementById("session_select_box");
+
+        sessionToggle.addEventListener("click", function() {
+            if (sessionSelectBox.style.display === "none") {
+                sessionSelectBox.style.display = "block";
+                sessionToggle.textContent = "Close";
+                sessionToggle.classList.remove("bg-primary");
+                sessionToggle.classList.add("bg-danger");
+            } else {
+                sessionSelectBox.style.display = "none";
+                sessionToggle.textContent = "Session";
+                sessionToggle.classList.remove("bg-danger");
+                sessionToggle.classList.add("bg-primary");
+            }
+        });
+    });
+
+    document.addEventListener("DOMContentLoaded", function () {
+    let sessionFeeDiv = document.getElementById("session_fee");
+    let sessionFeeInput = document.getElementById("session_fee_input");
+
+    if (sessionFeeDiv && sessionFeeInput) {
+        function updateSessionFee() {
+            let feeText = sessionFeeDiv.innerText.trim().replace("OMR", "").trim(); // Remove "OMR" and spaces
+            sessionFeeInput.value = feeText; // Update hidden input
+            console.log("Session Fee Updated:", sessionFeeInput.value); // Debugging
+        }
+
+        // Run initially to set value
+        updateSessionFee();
+
+        // Detect changes if session fee updates dynamically
+        let observer = new MutationObserver(updateSessionFee);
+        observer.observe(sessionFeeDiv, { childList: true, subtree: true });
+
+        // Also, manually trigger when clicking or focusing on the fee div (optional)
+        sessionFeeDiv.addEventListener("DOMSubtreeModified", updateSessionFee);
+    } else {
+        console.error("Session Fee element not found!");
+    }
+});
 
 
     </script>
