@@ -71,8 +71,7 @@ Route::get('/get-session-data/{appointment_id}', [AppointmentController::class, 
 
 //SettingController
 
-Route::get('setting', [SettingController::class, 'setting'])->name('setting');
-Route::post('add_setting', [SettingController::class, 'add_setting'])->name('add_setting');
+
 
 
 
@@ -309,3 +308,11 @@ Route::get('show_govt', [GovtController::class, 'show_govt'])->name('show_govt')
 Route::post('edit_govt', [GovtController::class, 'edit_govt'])->name('edit_govt');
 Route::post('update_govt', [GovtController::class, 'update_govt'])->name('update_govt');
 Route::post('delete_govt', [GovtController::class, 'delete_govt'])->name('delete_govt');
+
+
+//settingcontroller
+Route::get('setting', [SettingController::class, 'setting'])->name('setting');
+Route::post('add_setting', [SettingController::class, 'add_setting'])->name('add_setting');
+Route::get('view_fee_card', [SettingController::class, 'view_fee_card'])->name('view_fee_card');
+Route::post('appointment_fee', [SettingController::class, 'appointment_fee'])->name('appointment_fee');
+Route::get('setting_data', [SettingController::class, 'setting_data'])->name('setting_data');

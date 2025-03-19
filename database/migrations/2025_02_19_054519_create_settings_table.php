@@ -13,6 +13,18 @@ return new class extends Migration
     {
         Schema::create('settings', function (Blueprint $table) {
             $table->id();
+            $table->string('appointment_fee')->nullable();
+            $table->string('company_name')->nullable(); // Company Name
+            $table->string('company_email')->nullable(); // Company Email
+            $table->string('company_phone')->nullable(); // Company Phone
+            $table->string('company_cr')->nullable(); // Company CR
+            $table->string('company_address')->nullable(); // Company Address
+            $table->longText('notes')->nullable(); // Notes
+            $table->string('logo')->nullable();
+            $table->string('added_by')->nullable();
+            $table->string('updated_by')->nullable();
+            $table->string('user_id');
+            $table->string('branch_id', 255)->nullable();
             $table->timestamps();
         });
     }

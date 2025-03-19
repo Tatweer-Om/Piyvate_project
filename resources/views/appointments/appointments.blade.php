@@ -12,9 +12,13 @@
             <!-- /add -->
             <div class="card">
                 <div class="card-body">
-                    <div class="card-header">
-                        <h5 class="card-title">Appointment</h5>
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="card-title">APPOINTMENT</h5>
 
+                        <div class="form-group mb-0">
+                            <input type="text" class="form-control form-control-sm" name="patient_no"
+                                   placeholder="Clinic Code." style="max-width: 170px;">
+                        </div>
                     </div>
 
                    <form class="add_appointment">
@@ -92,7 +96,7 @@
                             <div class="col-md-2">
                                 <label class="col-form-label">Appointment Fee:</label>
                                 <div class="alert alert-info p-2" id="appointment_fee" style="font-weight: bold;">
-                                    OMR 0.00
+                                    OMR {{ $setting->appointment_fee ?? '' }}
                                 </div>
                             </div>
 
@@ -100,9 +104,10 @@
                                 <label class="col-form-label">Notes:</label>
                                 <textarea class="form-control form-control-sm" id="notes" name="notes" rows="2"></textarea>
                             </div>
-                            <div class="modal-footer">
-                                <button type="submit" class="btn btn-primary btn-sm">Add Data</button>
-                            </div>
+                            <button type="button" class="btn btn-primary btn-sm" id="open_payment_modal">
+                                Add Payment
+                            </button>
+
                         </div>
                 </form>
                 </div>
@@ -111,6 +116,82 @@
         </div>
     </div>
     </div>
+
+    <div class="modal fade" id="payment_modal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <!-- Styled Header with Total Amount -->
+                <div class="modal-header bg-primary text-white d-flex justify-content-between">
+                    <h5 class="modal-title fw-bold" id="paymentModalLabel">Payment</h5>
+                    <button type="button" class="btn-close text-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+                    <form class="add_payment">
+                        @csrf
+
+                        <!-- Total Amount -->
+                        <div class="mb-3">
+                            <h4 class="text-center fw-bold text-danger">Total Amount: OMR <span id="total_amount">{{ $setting->appointment_fee ?? '0.00' }}</span></h4>
+                        </div>
+
+                        <hr>
+
+                        <!-- Payment Method Title -->
+                        <div class="col-lg-12">
+                            <label class="col-form-label fw-bold fs-5">Select Payment Method</label>
+                            <p class="text-muted">You can choose multiple payment methods and specify the amount for each.</p>
+                        </div>
+
+                        <!-- Payment Methods with Amount Input -->
+                        <div class="col-lg-12">
+                            <div class="row">
+                                @foreach ($accounts as $account)
+                                    <div class="col-md-6">
+                                        <div class="form-check">
+                                            <input class="form-check-input payment-method-checkbox" type="checkbox" name="payment_methods[]" id="account_{{ $account->id }}" value="{{ $account->id }}" onchange="toggleAmountInput({{ $account->id }})">
+                                            <label class="form-check-label fw-bold" for="account_{{ $account->id }}">
+                                                {{ $account->account_name }}
+                                            </label>
+                                        </div>
+                                        <!-- Amount Input (Initially Hidden) -->
+                                        <input type="number" class="form-control form-control-sm payment-amount-input mt-1" id="amount_{{ $account->id }}" name="payment_amounts[{{ $account->id }}]" placeholder="Enter amount" min="0" step="0.01" style="display: none;">
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <!-- Submit Buttons -->
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-success" id="confirm_payment">
+                                <i class="fas fa-check"></i> Confirm Payment
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript to Show Amount Input when Checkbox is Selected -->
+    <script>
+        function toggleAmountInput(accountId) {
+            var checkbox = document.getElementById("account_" + accountId);
+            var amountInput = document.getElementById("amount_" + accountId);
+
+            if (checkbox.checked) {
+                amountInput.style.display = "block";
+                amountInput.required = true;
+            } else {
+                amountInput.style.display = "none";
+                amountInput.required = false;
+                amountInput.value = "";
+            }
+        }
+    </script>
 
 
 @include('layouts.footer')

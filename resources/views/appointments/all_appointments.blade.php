@@ -11,19 +11,17 @@
 <div class="content-body">
     <!-- row -->
     <div class="container-fluid">
-        <div class="page-titles">
-            <ol class="breadcrumb">
-                <li class=""><a href="javascript:void(0)">Dashboard/</a></li>
-                <li class="active"><a href="javascript:void(0)">appointmentss</a></li>
+        <div class="page-titles d-flex justify-content-between align-items-center">
+            <ol class="breadcrumb mb-0">
+                <li class=""><a href="javascript:void(0)">Dashboard /</a></li>
+                <li class="active"><a href="javascript:void(0)">Appointments</a></li>
             </ol>
-        </div>
-        <div class="form-head d-flex  mb-md-4 align-items-start flex-wrap">
-            <div class="me-auto  mb-md-0">
-                <a href="javascript:void();" class="btn btn-primary btn-rounded add-staff" data-bs-toggle="modal" data-bs-target="#add_appointments_modal">+ Add appointments</a>
+            <div>
+                <a href="appointments" class="btn btn-primary btn-rounded">+ Add Appointment</a>
             </div>
-
-
         </div>
+
+
 
         <div class="row">
             <div class="col-12">
@@ -36,8 +34,9 @@
                                         <th>Sr.No</th>
                                         <th> Patinet Name</th>
                                         <th>Doctor Name</th>
-                                        <th>Appointment Date</th>
+                                        <th>Recomendations</th>
                                         <th>Appoitnemnt Fee</th>
+                                        <th>Appointment Date</th>
                                         <th>Added By </th>
                                         <th>Added On </th>
                                         <th class="text-end">Action</th>
@@ -53,9 +52,7 @@
         </div>
     </div>
 
-
 </div>
-
 
 <div class="modal fade" id="sessionModal" tabindex="-1" aria-labelledby="sessionModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl">
@@ -65,53 +62,15 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body overflow-auto" style="max-height: 70vh;">
-                <!-- Patient & Doctor Info with Radio Buttons -->
                 <div class="row">
                     <div class="col-12 col-md-6">
                         <h5>Patient: <span id="patient_name" class="fw-normal"></span></h5>
                         <h5>Doctor: <span id="doctor_name" class="fw-normal"></span></h5>
                         <h5>Appointment Date: <span id="appointment_date" class="fw-normal"></span></h5>
                     </div>
-                    <div class="col-12 col-md-6 d-flex flex-column align-items-end">
-                        <div class="d-flex flex-wrap justify-content-end">
-                            <div class="form-check me-2">
-                                <input class="form-check-input" type="radio" name="sessionType" id="normal" value="Normal">
-                                <label class="form-check-label" for="normal">Normal</label>
-                            </div>
-                            <div class="form-check me-2">
-                                <input class="form-check-input" type="radio" name="sessionType" id="pact" value="Pact">
-                                <label class="form-check-label" for="pact">Pact</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="sessionType" id="offer" value="Offer">
-                                <label class="form-check-label" for="offer">Offer</label>
-                            </div>
-                        </div>
-                        <!-- Additional Inputs for Offer and Pact -->
-                        <div class="row mt-2 w-100" id="extraFields" style="display: none;">
-                            <div id="offerFields" class="col-12 col-md-6" style="display: none;">
-                                <label for="offerSelect">Select Offer:</label>
-                                <select id="offerSelect" class="form-control">
-                                    <option value="offer1">Offer 1</option>
-                                    <option value="offer2">Offer 2</option>
-                                </select>
-                                <label for="offerPrice" class="mt-2">Offer Price:</label>
-                            </div>
-
-                            <div id="pactFields" class="col-12 col-md-6" style="display: none;">
-                                <label for="ministrySelect">Select Ministry:</label>
-                                <select id="ministrySelect" class="form-control">
-                                    <option value="ministry1">Ministry 1</option>
-                                    <option value="ministry2">Ministry 2</option>
-                                </select>
-                                <label for="sessionPrice" class="mt-2">Session Price:</label>
-                                <label for="sessionType">Session Type:</label>
-                            </div>
-                        </div>
-                    </div>
                 </div>
 
-                <!-- Table with small inputs and better styling -->
+                <!-- Table -->
                 <div class="table-responsive">
                     <table id="session_table" class="table table-bordered mt-3">
                         <thead class="table-light">
@@ -130,12 +89,85 @@
                 <button type="button" class="btn btn-info" id="addSessionBtn">➕ Session</button>
                 <button type="button" class="btn btn-warning" id="removeSessionBtn">➖ Session</button>
                 <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary">Save Sessions</button>
+                <button type="button" class="btn btn-primary" id="saveSessionBtn">Save Sessions</button>
             </div>
         </div>
     </div>
 </div>
 
+<!-- Second Modal (Opens when clicking "Save Sessions") -->
+<div class="modal fade" id="secondModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="secondModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <!-- Styled Header with Total Amount -->
+            <div class="modal-header bg-primary text-white d-flex justify-content-between">
+                <h5 class="modal-title fw-bold" id="paymentModalLabel">Payment</h5>
+                <button type="button" class="btn-close text-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                <form class="add_payment">
+                    @csrf
+
+                    <!-- Total Amount -->
+                    <div class="mb-3">
+                        <h4 class="text-center fw-bold text-danger">Total Amount: OMR <span id="total_amount">{{ $setting->appointment_fee ?? '0.00' }}</span></h4>
+                    </div>
+
+                    <hr>
+
+                    <!-- Payment Method Title -->
+                    <div class="col-lg-12">
+                        <label class="col-form-label fw-bold fs-5">Select Payment Method</label>
+                        <p class="text-muted">You can choose multiple payment methods and specify the amount for each.</p>
+                    </div>
+
+                    <!-- Payment Methods with Amount Input -->
+                    <div class="col-lg-12">
+                        <div class="row">
+                            @foreach ($accounts as $account)
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input payment-method-checkbox" type="checkbox" name="payment_methods[]" id="account_{{ $account->id }}" value="{{ $account->id }}" onchange="toggleAmountInput({{ $account->id }})">
+                                        <label class="form-check-label fw-bold" for="account_{{ $account->id }}">
+                                            {{ $account->account_name }}
+                                        </label>
+                                    </div>
+                                    <!-- Amount Input (Initially Hidden) -->
+                                    <input type="number" class="form-control form-control-sm payment-amount-input mt-1" id="amount_{{ $account->id }}" name="payment_amounts[{{ $account->id }}]" placeholder="Enter amount" min="0" step="0.01" style="display: none;">
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <!-- Submit Buttons -->
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-success" id="confirm_payment">
+                            <i class="fas fa-check"></i> Confirm Payment
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript to Open Second Modal -->
+<script>
+    document.getElementById('saveSessionBtn').addEventListener('click', function () {
+        var secondModal = new bootstrap.Modal(document.getElementById('secondModal'));
+        secondModal.show();
+    });
+</script>
+
+
+
+
+
+<!-- Second Modal (Confirmation Modal) -->
 
 
 

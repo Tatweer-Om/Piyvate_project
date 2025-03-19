@@ -266,4 +266,79 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
     });
+
+
+
+    $(document).ready(function () {
+    let mainForm = $('.add_appointment'); // Main appointment form
+    let paymentForm = $('.add_payment'); // Payment form
+
+    // Open payment modal when clicking "Add Payment" button
+    $('#open_payment_modal').click(function () {
+        $('#payment_modal').modal('show');
+    });
+
+    // Confirm payment and append payment data to main form
+    $('#confirm_payment').click(function (e) {
+        e.preventDefault(); // Prevent default submission
+
+        let selectedPayments = [];
+        let totalAmount = 0;
+        let isValid = false;
+
+        // Loop through selected payment methods and collect their amounts
+        $('.payment-method-checkbox:checked').each(function () {
+            let accountId = $(this).val();
+            let amount = parseFloat($('#amount_' + accountId).val()) || 0;
+
+            if (amount > 0) {
+                selectedPayments.push({ accountId, amount });
+                totalAmount += amount;
+                isValid = true;
+            }
+        });
+
+        if (!isValid) {
+            show_notification('error', '{{ trans('messages.please_pay_the_fee_lang', [], session('locale')) }}');
+            return;
+        }
+
+        let appointmentFee = parseFloat($('#total_amount').text().trim().replace('OMR', '')) || 0;
+
+        // Ensure total payment matches the appointment fee
+        if (totalAmount !== appointmentFee) {
+            show_notification(
+                'error',
+                `{{ trans('messages.payment_mismatch_lang', [], session('locale')) }} (OMR ${totalAmount.toFixed(2)})`
+            );
+            return;
+        }
+
+        // Append payment data as hidden fields in the main form
+        selectedPayments.forEach(payment => {
+            $('<input>').attr({
+                type: 'hidden',
+                name: 'payment_methods[]',
+                value: payment.accountId
+            }).appendTo(mainForm);
+
+            $('<input>').attr({
+                type: 'hidden',
+                name: 'payment_amounts[' + payment.accountId + ']',
+                value: payment.amount
+            }).appendTo(mainForm);
+        });
+
+        // show_notification('success', '{{ trans('messages.payment_successful_lang', [], session('locale')) }}');
+
+        $('#payment_modal').modal('hide'); // Hide payment modal
+
+        // Submit the main form after payment confirmation
+        mainForm.submit();
+    });
+});
+
+
+
 </script>
+

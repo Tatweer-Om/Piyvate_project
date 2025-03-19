@@ -13,14 +13,8 @@ return new class extends Migration
     {
         Schema::create('appointments', function (Blueprint $table) {
             $table->id();
-            $table->string('title')->nullable();
-            $table->string('first_name')->nullable();
-            $table->string('second_name')->nullable();
-            $table->string('full_name')->nullable();
-            $table->string('mobile')->nullable();
-            $table->string('id_passport')->nullable();
-            $table->date('dob')->nullable();
-            $table->string('country_id')->nullable();
+            $table->string('patient_id')->nullable();
+            $table->string('clinic_no')->nullable();
             $table->string('doctor_id')->nullable();
             $table->date('appointment_date')->nullable();
             $table->string('appointment_fee')->nullable();
