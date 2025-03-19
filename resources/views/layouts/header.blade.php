@@ -1034,6 +1034,18 @@
                     </li>
 
                     <li><a href="javascript:void(0);" class="ai-icon has-arrow" aria-expanded="false">
+                        <i class="flaticon-381-id-card-4"></i>
+                        <span class="nav-text">Appointments</span>
+                    </a>
+                    <ul aria-expanded="false">
+                        <li><a href="{{ url('appointments') }}">Add Appointment</a></li>
+                        <li><a href="{{ url('all_appointments') }}"> All appointments</a></li>
+                        <li><a href="{{ url('sessions_list') }}">Add Sessions</a></li>
+
+                    </ul>
+                </li>
+
+                    <li><a href="javascript:void(0);" class="ai-icon has-arrow" aria-expanded="false">
                             <i class="flaticon-381-id-card-4"></i>
                             <span class="nav-text">Stock</span>
                         </a>
@@ -1046,6 +1058,17 @@
                             <li><a href="{{ url('addproduct') }}">Add Purchase</a></li>
                         </ul>
                     </li>
+                    <li><a href="javascript:void(0);" class="ai-icon has-arrow" aria-expanded="false">
+                        <i class="flaticon-381-id-card-4"></i>
+                        <span class="nav-text">Settings</span>
+                    </a>
+                    <ul aria-expanded="false">
+                        <li><a href="{{ url('setting') }}">Company Profile</a></li>
+                        <li><a href="{{ url('view_fee_card') }}">Appointment Fee</a></li>
+
+                    </ul>
+                    </li>
+
 
                     <li><a href="javascript:void(0);" class="ai-icon has-arrow" aria-expanded="false">
                             <i class="flaticon-381-id-card-4"></i>

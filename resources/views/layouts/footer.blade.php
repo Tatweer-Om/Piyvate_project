@@ -209,6 +209,10 @@
         @include('custom_js.offer_js')
         @elseif ($route_name == 'session')
         @include('custom_js.session_js')
+        @elseif ($route_name == 'setting')
+        @include('custom_js.setting_js')
+        @elseif ($route_name == 'view_fee_card')
+        @include('custom_js.setting_js')
     @endif
 
 </body>
