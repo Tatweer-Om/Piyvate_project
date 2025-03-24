@@ -141,8 +141,7 @@
                                     <li class="active dz-chat-user">
                                         <div class="d-flex bd-highlight">
                                             <div class="img_cont">
-                                                <img src="images/avatar/1.jpg" class="rounded-circle user_img"
-                                                    alt="">
+                                                <img src="{{ url('images/avatar/1.jpg') }}" class="rounded-circle user_img" alt="nothing">
                                                 <span class="online_icon"></span>
                                             </div>
                                             <div class="user_info">
@@ -154,8 +153,8 @@
                                     <li class="dz-chat-user">
                                         <div class="d-flex bd-highlight">
                                             <div class="img_cont">
-                                                <img src="images/avatar/2.jpg" class="rounded-circle user_img"
-                                                    alt="">
+                                                <img src="{{ url('images/avatar/2.jpg')}}" class="rounded-circle user_img"
+                                                    alt="image">
                                                 <span class="online_icon offline"></span>
                                             </div>
                                             <div class="user_info">
@@ -167,8 +166,8 @@
                                     <li class="dz-chat-user">
                                         <div class="d-flex bd-highlight">
                                             <div class="img_cont">
-                                                <img src="images/avatar/3.jpg" class="rounded-circle user_img"
-                                                    alt="">
+                                                <img src="{{ url('images/avatar/3.jpg')}}" class="rounded-circle user_img"
+                                                    alt="image">
                                                 <span class="online_icon"></span>
                                             </div>
                                             <div class="user_info">
@@ -180,8 +179,8 @@
                                     <li class="dz-chat-user">
                                         <div class="d-flex bd-highlight">
                                             <div class="img_cont">
-                                                <img src="images/avatar/4.jpg" class="rounded-circle user_img"
-                                                    alt="">
+                                                <img src="{{ url('images/avatar/4.jpg')}}" class="rounded-circle user_img"
+                                                    alt="image">
                                                 <span class="online_icon offline"></span>
                                             </div>
                                             <div class="user_info">
@@ -194,8 +193,8 @@
                                     <li class="dz-chat-user">
                                         <div class="d-flex bd-highlight">
                                             <div class="img_cont">
-                                                <img src="images/avatar/5.jpg" class="rounded-circle user_img"
-                                                    alt="">
+                                                <img src="{{ url('images/avatar/5.jpg')}}" class="rounded-circle user_img"
+                                                    alt="image">
                                                 <span class="online_icon offline"></span>
                                             </div>
                                             <div class="user_info">
@@ -207,8 +206,8 @@
                                     <li class="dz-chat-user">
                                         <div class="d-flex bd-highlight">
                                             <div class="img_cont">
-                                                <img src="images/avatar/1.jpg" class="rounded-circle user_img"
-                                                    alt="">
+                                                <img src="{{ url('images/avatar/1.jpg') }}" class="rounded-circle user_img">
+
                                                 <span class="online_icon"></span>
                                             </div>
                                             <div class="user_info">
@@ -220,8 +219,8 @@
                                     <li class="dz-chat-user">
                                         <div class="d-flex bd-highlight">
                                             <div class="img_cont">
-                                                <img src="images/avatar/2.jpg" class="rounded-circle user_img"
-                                                    alt="">
+                                                <img src="{{ url('images/avatar/2.jpg')}}" class="rounded-circle user_img"
+                                                    alt="image">
                                                 <span class="online_icon offline"></span>
                                             </div>
                                             <div class="user_info">
@@ -234,8 +233,8 @@
                                     <li class="dz-chat-user">
                                         <div class="d-flex bd-highlight">
                                             <div class="img_cont">
-                                                <img src="images/avatar/3.jpg" class="rounded-circle user_img"
-                                                    alt="">
+                                                <img src="{{ url('images/avatar/3.jpg')}}" class="rounded-circle user_img"
+                                                    alt="image">
                                                 <span class="online_icon"></span>
                                             </div>
                                             <div class="user_info">
@@ -247,8 +246,8 @@
                                     <li class="dz-chat-user">
                                         <div class="d-flex bd-highlight">
                                             <div class="img_cont">
-                                                <img src="images/avatar/4.jpg" class="rounded-circle user_img"
-                                                    alt="">
+                                                <img src="{{ url('images/avatar/4.jpg')}}" class="rounded-circle user_img"
+                                                    alt="image">
                                                 <span class="online_icon offline"></span>
                                             </div>
                                             <div class="user_info">
@@ -261,8 +260,8 @@
                                     <li class="dz-chat-user">
                                         <div class="d-flex bd-highlight">
                                             <div class="img_cont">
-                                                <img src="images/avatar/5.jpg" class="rounded-circle user_img"
-                                                    alt="">
+                                                <img src="{{ url('images/avatar/5.jpg')}}" class="rounded-circle user_img"
+                                                    alt="image">
                                                 <span class="online_icon offline"></span>
                                             </div>
                                             <div class="user_info">
@@ -274,8 +273,8 @@
                                     <li class="dz-chat-user">
                                         <div class="d-flex bd-highlight">
                                             <div class="img_cont">
-                                                <img src="images/avatar/1.jpg" class="rounded-circle user_img"
-                                                    alt="">
+                                                <img src="{{ url('images/avatar/1.jpg')}}" class="rounded-circle user_img"
+                                                    alt="image">
                                                 <span class="online_icon"></span>
                                             </div>
                                             <div class="user_info">
@@ -287,8 +286,8 @@
                                     <li class="dz-chat-user">
                                         <div class="d-flex bd-highlight">
                                             <div class="img_cont">
-                                                <img src="images/avatar/2.jpg" class="rounded-circle user_img"
-                                                    alt="">
+                                                <img src="{{ url('images/avatar/2.jpg')}}" class="rounded-circle user_img"
+                                                    alt="image">
                                                 <span class="online_icon offline"></span>
                                             </div>
                                             <div class="user_info">
@@ -300,8 +299,8 @@
                                     <li class="dz-chat-user">
                                         <div class="d-flex bd-highlight">
                                             <div class="img_cont">
-                                                <img src="images/avatar/3.jpg" class="rounded-circle user_img"
-                                                    alt="">
+                                                <img src="{{ url('images/avatar/3.jpg')}}" class="rounded-circle user_img"
+                                                    alt="image">
                                                 <span class="online_icon"></span>
                                             </div>
                                             <div class="user_info">
@@ -314,8 +313,8 @@
                                     <li class="dz-chat-user">
                                         <div class="d-flex bd-highlight">
                                             <div class="img_cont">
-                                                <img src="images/avatar/4.jpg" class="rounded-circle user_img"
-                                                    alt="">
+                                                <img src="{{ url('images/avatar/4.jpg')}}" class="rounded-circle user_img"
+                                                    alt="image">
                                                 <span class="online_icon offline"></span>
                                             </div>
                                             <div class="user_info">
@@ -327,8 +326,8 @@
                                     <li class="dz-chat-user">
                                         <div class="d-flex bd-highlight">
                                             <div class="img_cont">
-                                                <img src="images/avatar/5.jpg" class="rounded-circle user_img"
-                                                    alt="">
+                                                <img src="{{ url('images/avatar/5.jpg')}}" class="rounded-circle user_img"
+                                                    alt="image">
                                                 <span class="online_icon offline"></span>
                                             </div>
                                             <div class="user_info">
@@ -388,8 +387,8 @@
                             <div class="card-body msg_card_body dz-scroll" id="DZ_W_Contacts_Body3">
                                 <div class="d-flex justify-content-start mb-4">
                                     <div class="img_cont_msg">
-                                        <img src="images/avatar/1.jpg" class="rounded-circle user_img_msg"
-                                            alt="">
+                                        <img src="{{ url('images/avatar/1.jpg')}}" class="rounded-circle user_img_msg"
+                                            alt="image">
                                     </div>
                                     <div class="msg_cotainer">
                                         Hi, how are you samim?
@@ -402,14 +401,14 @@
                                         <span class="msg_time_send">8:55 AM, Today</span>
                                     </div>
                                     <div class="img_cont_msg">
-                                        <img src="images/avatar/2.jpg" class="rounded-circle user_img_msg"
-                                            alt="">
+                                        <img src="{{ url('images/avatar/2.jpg')}}" class="rounded-circle user_img_msg"
+                                            alt="image">
                                     </div>
                                 </div>
                                 <div class="d-flex justify-content-start mb-4">
                                     <div class="img_cont_msg">
-                                        <img src="images/avatar/1.jpg" class="rounded-circle user_img_msg"
-                                            alt="">
+                                        <img src="{{ url('images/avatar/1.jpg')}}" class="rounded-circle user_img_msg"
+                                            alt="image">
                                     </div>
                                     <div class="msg_cotainer">
                                         I am good too, thank you for your chat template
@@ -422,14 +421,14 @@
                                         <span class="msg_time_send">9:05 AM, Today</span>
                                     </div>
                                     <div class="img_cont_msg">
-                                        <img src="images/avatar/2.jpg" class="rounded-circle user_img_msg"
-                                            alt="">
+                                        <img src="{{ url('images/avatar/2.jpg')}}" class="rounded-circle user_img_msg"
+                                            alt="image">
                                     </div>
                                 </div>
                                 <div class="d-flex justify-content-start mb-4">
                                     <div class="img_cont_msg">
-                                        <img src="images/avatar/1.jpg" class="rounded-circle user_img_msg"
-                                            alt="">
+                                        <img src="{{ url('images/avatar/1.jpg')}}" class="rounded-circle user_img_msg"
+                                            alt="image">
                                     </div>
                                     <div class="msg_cotainer">
                                         I am looking for your next templates
@@ -442,14 +441,14 @@
                                         <span class="msg_time_send">9:10 AM, Today</span>
                                     </div>
                                     <div class="img_cont_msg">
-                                        <img src="images/avatar/2.jpg" class="rounded-circle user_img_msg"
-                                            alt="">
+                                        <img src="{{ url('images/avatar/2.jpg')}}" class="rounded-circle user_img_msg"
+                                            alt="image">
                                     </div>
                                 </div>
                                 <div class="d-flex justify-content-start mb-4">
                                     <div class="img_cont_msg">
-                                        <img src="images/avatar/1.jpg" class="rounded-circle user_img_msg"
-                                            alt="">
+                                        <img src="{{ url('images/avatar/1.jpg')}}" class="rounded-circle user_img_msg"
+                                            alt="image">
                                     </div>
                                     <div class="msg_cotainer">
                                         Bye, see you
@@ -458,8 +457,8 @@
                                 </div>
                                 <div class="d-flex justify-content-start mb-4">
                                     <div class="img_cont_msg">
-                                        <img src="images/avatar/1.jpg" class="rounded-circle user_img_msg"
-                                            alt="">
+                                        <img src="{{ url('images/avatar/1.jpg')}}" class="rounded-circle user_img_msg"
+                                            alt="image">
                                     </div>
                                     <div class="msg_cotainer">
                                         Hi, how are you samim?
@@ -472,14 +471,14 @@
                                         <span class="msg_time_send">8:55 AM, Today</span>
                                     </div>
                                     <div class="img_cont_msg">
-                                        <img src="images/avatar/2.jpg" class="rounded-circle user_img_msg"
-                                            alt="">
+                                        <img src="{{ url('images/avatar/2.jpg')}}" class="rounded-circle user_img_msg"
+                                            alt="image">
                                     </div>
                                 </div>
                                 <div class="d-flex justify-content-start mb-4">
                                     <div class="img_cont_msg">
-                                        <img src="images/avatar/1.jpg" class="rounded-circle user_img_msg"
-                                            alt="">
+                                        <img src="{{ url('images/avatar/1.jpg')}}" class="rounded-circle user_img_msg"
+                                            alt="image">
                                     </div>
                                     <div class="msg_cotainer">
                                         I am good too, thank you for your chat template
@@ -492,14 +491,14 @@
                                         <span class="msg_time_send">9:05 AM, Today</span>
                                     </div>
                                     <div class="img_cont_msg">
-                                        <img src="images/avatar/2.jpg" class="rounded-circle user_img_msg"
-                                            alt="">
+                                        <img src="{{ url('images/avatar/2.jpg')}}" class="rounded-circle user_img_msg"
+                                            alt="image">
                                     </div>
                                 </div>
                                 <div class="d-flex justify-content-start mb-4">
                                     <div class="img_cont_msg">
-                                        <img src="images/avatar/1.jpg" class="rounded-circle user_img_msg"
-                                            alt="">
+                                        <img src="{{ url('images/avatar/1.jpg')}}" class="rounded-circle user_img_msg"
+                                            alt="image">
                                     </div>
                                     <div class="msg_cotainer">
                                         I am looking for your next templates
@@ -512,14 +511,14 @@
                                         <span class="msg_time_send">9:10 AM, Today</span>
                                     </div>
                                     <div class="img_cont_msg">
-                                        <img src="images/avatar/2.jpg" class="rounded-circle user_img_msg"
-                                            alt="">
+                                        <img src="{{ url('images/avatar/2.jpg')}}" class="rounded-circle user_img_msg"
+                                            alt="image">
                                     </div>
                                 </div>
                                 <div class="d-flex justify-content-start mb-4">
                                     <div class="img_cont_msg">
-                                        <img src="images/avatar/1.jpg" class="rounded-circle user_img_msg"
-                                            alt="">
+                                        <img src="{{ url('images/avatar/1.jpg')}}" class="rounded-circle user_img_msg"
+                                            alt="image">
                                     </div>
                                     <div class="msg_cotainer">
                                         Bye, see you
@@ -752,7 +751,7 @@
                                             <li>
                                                 <div class="timeline-panel">
                                                     <div class="media me-2">
-                                                        <img alt="image" width="50" src="images/avatar/1.jpg">
+                                                        <img alt="image" width="50" src="{{ url('images/avatar/1.jpg')}}">
                                                     </div>
                                                     <div class="media-body">
                                                         <h6 class="mb-1">Dr sultads Send you Photo</h6>
@@ -785,7 +784,7 @@
                                             <li>
                                                 <div class="timeline-panel">
                                                     <div class="media me-2">
-                                                        <img alt="image" width="50" src="images/avatar/1.jpg">
+                                                        <img alt="image" width="50" src="{{ url('images/avatar/1.jpg')}}">
                                                     </div>
                                                     <div class="media-body">
                                                         <h6 class="mb-1">Dr sultads Send you Photo</h6>
@@ -919,7 +918,7 @@
                             </li>
                             <li class="nav-item dropdown header-profile">
                                 <a class="nav-link" href="javascript:;" role="button" data-bs-toggle="dropdown">
-                                    <img src="images/profile/12.png" width="20" alt="">
+                                    <img src="{{  url('images/profile/12.png')}}" width="20" alt="image">
                                     <div class="header-info">
                                         <span>Hello,<strong> Haseeb</strong></span>
                                     </div>
@@ -1041,6 +1040,8 @@
                         <li><a href="{{ url('appointments') }}">Add Appointment</a></li>
                         <li><a href="{{ url('all_appointments') }}"> All appointments</a></li>
                         <li><a href="{{ url('sessions_list') }}">Add Sessions</a></li>
+                        <li><a href="{{ url('session') }}">Session Setting</a></li>
+
 
                     </ul>
                 </li>

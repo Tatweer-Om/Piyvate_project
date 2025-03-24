@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PosController;
+use App\Http\Controllers\GovtController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
@@ -9,21 +10,22 @@ use App\Http\Controllers\OfferController;
 use App\Http\Controllers\StaffController;
 use App\Http\Controllers\BranchController;
 use App\Http\Controllers\DoctorController;
+use App\Http\Controllers\SationController;
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\PatientController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ReprintController;
+use App\Http\Controllers\SessionCONTROLLER;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\MinistryController;
 use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\ExpensecatController;
 use App\Http\Controllers\SpecialityController;
 use App\Http\Controllers\AppointmentController;
-use App\Http\Controllers\GovtController;
-use App\Http\Controllers\SessionCONTROLLER;
 
 Route::get('/', function () {
     return view('welcome');
@@ -40,7 +42,11 @@ Route::get('/switch-language/{locale}', [HomeController::class, 'switchLanguage'
 
 Route::get('patient_list', [PatientController::class, 'patient_list'])->name('patient_list');
 Route::get('patient_profile', [PatientController::class, 'patient_profile'])->name('patient_profile');
-
+Route::get('show_patient', [PatientController::class, 'show_patient'])->name('show_patient');
+Route::post('add_patient', [PatientController::class, 'add_patient'])->name('add_patient');
+Route::post('update_patient', [PatientController::class, 'update_patient'])->name('update_patient');
+Route::post('edit_patient', [PatientController::class, 'edit_patient'])->name('edit_patient');
+Route::post('delete_patient', [PatientController::class, 'delete_patient'])->name('delete_patient');
 
 //doctorController
 
@@ -57,14 +63,21 @@ Route::get('staff_profile', [StaffController::class, 'staff_profile'])->name('st
 Route::get('appointments', [AppointmentController::class, 'appointments'])->name('appointments');
 Route::get('show_appointment', [AppointmentController::class, 'show_appointment'])->name('show_appointment');
 Route::post('add_appointment', [AppointmentController::class, 'add_appointment'])->name('add_appointment');
+Route::post('update_appointment', [AppointmentController::class, 'update_appointment'])->name('update_appointment');
+Route::post('cancel_appointment', [AppointmentController::class, 'cancel_appointment'])->name('cancel_appointment');
+
+Route::get('edit_appointment/{id}', [AppointmentController::class, 'edit_appointment'])->name('edit_appointment');
 Route::get('all_appointments', [AppointmentController::class, 'all_appointments'])->name('all_appointments');
 Route::get('sessions_list', [AppointmentController::class, 'sessions_list'])->name('sessions_list');
 Route::post('/get-session-price', [AppointmentController::class, 'getSessionPrice'])->name('get.session.price');
-
-
-
-
+Route::get('/getMinistryDetails/{id}', [AppointmentController::class, 'getMinistryDetails'])->name('getMinistryDetails');
+Route::get('/getsessionDetails/{id}', [AppointmentController::class, 'getsessionDetails'])->name('getsessionDetails');
+Route::get('/getOfferDetails/{id}', [AppointmentController::class, 'getOfferDetails'])->name('getOfferDetails');
 Route::get('/get-session-data/{appointment_id}', [AppointmentController::class, 'getSessionData']);
+Route::post('/save_sessions', [AppointmentController::class, 'save_sessions'])->name('save_sessions');
+Route::post('/save_session_payment', [AppointmentController::class, 'save_session_payment'])->name('save_session_payment');
+Route::get('/search-patient', [AppointmentController::class, 'searchPatient']);
+
 
 
 
@@ -109,15 +122,20 @@ Route::post('delete_offer', [OfferController::class, 'delete_offer'])->name('del
 
 //offercontroller
 
-Route::get('session', [SessionCONTROLLER::class, 'index'])->name('session');
 Route::post('add_session', [SessionCONTROLLER::class, 'add_session'])->name('add_session');
 Route::get('session_detail/{id}', [SessionCONTROLLER::class, 'session_detail'])->name('session_detail');
 Route::get('/session_detail2/{id}', [SessionCONTROLLER::class, 'session_detail2'])->name('session_detail2');
+Route::get('/search_patient', [SessionCONTROLLER::class, 'search_patient'])->name('search_patient');
 
-Route::get('show_session', [SessionCONTROLLER::class, 'show_session'])->name('show_session');
-Route::post('edit_session', [SessionCONTROLLER::class, 'edit_session'])->name('edit_session');
-Route::post('update_session', [SessionCONTROLLER::class, 'update_session'])->name('update_session');
-Route::post('delete_session', [SessionCONTROLLER::class, 'delete_session'])->name('delete_session');
+
+
+Route::get('sation', [SationController::class, 'index'])->name('sation');
+Route::match(['get', 'post'], 'add_sation', [SationController::class, 'add_sation'])->name('add_sation');
+Route::get('show_sation', [SationController::class, 'show_sation'])->name('show_sation');
+Route::post('edit_sation', [SationController::class, 'edit_sation'])->name('edit_sation');
+Route::post('update_sation', [SationController::class, 'update_sation'])->name('update_sation');
+Route::post('delete_sation', [SationController::class, 'delete_sation'])->name('delete_sation');
+
 // exepnsecat
 Route::get('expense_category', [ExpensecatController::class, 'index'])->name('expense_category');
 Route::post('add_expense_category', [ExpensecatController::class, 'add_expense_category'])->name('add_expense_category');
@@ -316,3 +334,12 @@ Route::post('add_setting', [SettingController::class, 'add_setting'])->name('add
 Route::get('view_fee_card', [SettingController::class, 'view_fee_card'])->name('view_fee_card');
 Route::post('appointment_fee', [SettingController::class, 'appointment_fee'])->name('appointment_fee');
 Route::get('setting_data', [SettingController::class, 'setting_data'])->name('setting_data');
+
+
+
+Route::get('ministry_category', [MinistryController::class, 'index'])->name('ministry_category');
+Route::post('add_ministry_category', [MinistryController::class, 'add_ministry_category'])->name('add_ministry_category');
+Route::get('show_ministry_category', [MinistryController::class, 'show_ministry_category'])->name('show_ministry_category');
+Route::post('edit_ministry_category', [MinistryController::class, 'edit_ministry_category'])->name('edit_ministry_category');
+Route::post('update_ministry_category', [MinistryController::class, 'update_ministry_category'])->name('update_ministry_category');
+Route::post('delete_ministry_category', [MinistryController::class, 'delete_ministry_category'])->name('delete_ministry_category');
