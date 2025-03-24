@@ -270,30 +270,46 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    document.addEventListener("DOMContentLoaded", function () {
-    let sessionFeeDiv = document.getElementById("session_fee");
-    let sessionFeeInput = document.getElementById("session_fee_input");
+    $(document).ready(function () {
+    $("#clinic_no").autocomplete({
+        source: function (request, response) {
+            $.ajax({
+                url: "/search_patient", // Define the backend route
+                type: "GET",
+                dataType: "json",
+                data: {
+                    query: request.term // Send the search term to the backend
+                },
+                success: function (data) {
+                    response($.map(data, function (item) {
+                        return {
+                            label: item.first_name + " " + item.second_name + " - " + item.clinic_no + " - " + item.mobile, // Display format
+                            value: item.clinic_no, // The value inserted into the input field
+                            patient: item // Store full patient data
+                        };
+                    }));
+                }
+            });
+        },
+        minLength: 2, // Start searching after 2 characters
+        select: function (event, ui) {
+            if (ui.item.patient) {
+                let patient = ui.item.patient;
 
-    if (sessionFeeDiv && sessionFeeInput) {
-        function updateSessionFee() {
-            let feeText = sessionFeeDiv.innerText.trim().replace("OMR", "").trim(); // Remove "OMR" and spaces
-            sessionFeeInput.value = feeText; // Update hidden input
-            console.log("Session Fee Updated:", sessionFeeInput.value); // Debugging
+                $("#title").val(patient.title);
+                $('#title').selectpicker('refresh');
+                $("#first_name").val(patient.first_name);
+                $("#second_name").val(patient.second_name);
+                $("#mobile").val(patient.mobile);
+                $("#id_passport").val(patient.id_passport);
+                $("#dob").val(patient.dob);
+                $("#country").val(patient.country_id);
+                $('#country').selectpicker('refresh');
+                $('#doctor').selectpicker('refresh');
+                $("#doctor").val(patient.doctor_id);
+                            }
         }
-
-        // Run initially to set value
-        updateSessionFee();
-
-        // Detect changes if session fee updates dynamically
-        let observer = new MutationObserver(updateSessionFee);
-        observer.observe(sessionFeeDiv, { childList: true, subtree: true });
-
-        // Also, manually trigger when clicking or focusing on the fee div (optional)
-        sessionFeeDiv.addEventListener("DOMSubtreeModified", updateSessionFee);
-    } else {
-        console.error("Session Fee element not found!");
-    }
+    });
 });
-
 
     </script>

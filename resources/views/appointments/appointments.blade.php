@@ -16,8 +16,8 @@
                         <h5 class="card-title">APPOINTMENT</h5>
 
                         <div class="form-group mb-0">
-                            <input type="text" class="form-control form-control-sm" name="patient_no"
-                                   placeholder="Clinic Code." style="max-width: 170px;">
+                            <input type="text" class="form-control form-control-sm" id="clinic_no" class="clinic_no" name="clinic_no"
+                                   placeholder="Patinet Detail" style="max-width: 170px;">
                         </div>
                     </div>
 
@@ -149,13 +149,13 @@
                                 @foreach ($accounts as $account)
                                     <div class="col-md-6">
                                         <div class="form-check">
-                                            <input class="form-check-input payment-method-checkbox" type="checkbox" name="payment_methods[]" id="account_{{ $account->id }}" value="{{ $account->id }}" onchange="toggleAmountInput({{ $account->id }})">
+                                            <input class="form-check-input payment-method-checkbox" type="checkbox" name="payment_methods[]" id="account_{{ $account->id }}" value="{{ $account->id }}"  onchange="toggleAmountInput({{ $account->id }})">
                                             <label class="form-check-label fw-bold" for="account_{{ $account->id }}">
                                                 {{ $account->account_name }}
                                             </label>
                                         </div>
                                         <!-- Amount Input (Initially Hidden) -->
-                                        <input type="number" class="form-control form-control-sm payment-amount-input mt-1" id="amount_{{ $account->id }}" name="payment_amounts[{{ $account->id }}]" placeholder="Enter amount" min="0" step="0.01" style="display: none;">
+                                        <input type="number" class="form-control form-control-sm payment-amount-input mt-1" id="amount_{{ $account->id }}" name="payment_amounts[{{ $account->id }}]" value="{{ $setting->appointment_fee ?? '0.00' }}" placeholder="Enter amount" min="0" step="0.01" style="display: none;">
                                     </div>
                                 @endforeach
                             </div>

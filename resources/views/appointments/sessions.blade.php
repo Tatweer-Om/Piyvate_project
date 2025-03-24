@@ -21,6 +21,10 @@
                             <input type="radio" name="session_type" value="ministry"> Pact
                         </div>
                     </div>
+                    <div class="form-group mb-0">
+                        <input type="text" class="form-control form-control-sm" id="clinic_no" class="clinic_no" name="clinic_no"
+                               placeholder="Patinet Detail" style="max-width: 170px;">
+                    </div>
                 </div>
 
                 <div class="card-body">

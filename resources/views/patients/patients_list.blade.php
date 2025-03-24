@@ -18,8 +18,8 @@
         </div>
 
         <div class="form-head d-flex mb-3 mb-md-4 align-items-start">
-            <div class="me-auto d-none d-lg-block">
-                <a href="patient-details.html" class="btn btn-primary btn-rounded">+ Add New</a>
+            <div class="me-auto mb-3 mb-md-0">
+                <a href="javascript:void(0);" class="btn btn-primary btn-rounded add-staff" data-bs-toggle="modal" data-bs-target="#add_patient">+ Patient</a>
             </div>
 
             <div class="input-group search-area ms-auto d-inline-flex me-3">
@@ -34,435 +34,24 @@
                 <div class="card">
                     <div class="card-body p-0">
                         <div class="table-responsive">
-                            <table id="example5" class="table table-striped patient-list mb-4 dataTablesCard fs-14">
+                            <table id="all_patient" class="table table-striped patient-list mb-4 dataTablesCard fs-14">
                                 <thead>
                                     <tr>
-                                        <th>
-                                            <div class="checkbox text-end align-self-center">
-                                                <div class="form-check custom-checkbox ">
-                                                    <input type="checkbox" class="form-check-input" id="checkAll" required="">
-                                                    <label class="form-check-label" for="checkAll"></label>
-                                                </div>
-                                            </div>
-                                        </th>
+
+                                        <th>Sr No.</th>
                                         <th>Patient ID</th>
-                                        <th>Date Check In</th>
                                         <th>Patient Name</th>
-                                        <th>Doctor Assgined</th>
-                                        <th>Disease</th>
-                                        <th>Status</th>
-                                        <th>Room No</th>
-                                        <th></th>
+                                        <th>Patient Phone</th>
+                                        <th>Country</th>
+                                        <th>Branch</th>
+                                        <th>Added On</th>
+                                        <th>Added By</th>
+                                        <th>Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr>
-                                        <td>
-                                            <div class="checkbox text-end align-self-center">
-                                                <div class="form-check custom-checkbox ">
-                                                    <input type="checkbox" class="form-check-input" id="customCheckBox1" required="">
-                                                    <label class="form-check-label" for="customCheckBox1"></label>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>#P-00012</td>
-                                        <td>26/02/2020, 12:42 AM</td>
-                                        <td>Alexia Kev</td>
-                                        <td>Dr. Samantha</td>
-                                        <td>Allergies & Asthma</td>
-                                        <td>
-                                            <span class="text-nowrap">
-                                                <svg class="me-2" width="9" height="9" viewBox="0 0 9 9" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                    <circle cx="4.5" cy="4.5" r="4.5" fill="#FFB800"/>
-                                                </svg>
-                                                <span class="text-warning">Pending</span>
-                                            </span>
-                                        </td>
-                                        <td>AB-002</td>
-                                        <td class="text-end">
-                                            <a href="javascript:void(0);" class="me-3">
-                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                    <path d="M17 3C17.2626 2.73735 17.5744 2.52901 17.9176 2.38687C18.2608 2.24473 18.6286 2.17157 19 2.17157C19.3714 2.17157 19.7392 2.24473 20.0824 2.38687C20.4256 2.52901 20.7374 2.73735 21 3C21.2626 3.26264 21.471 3.57444 21.6131 3.9176C21.7553 4.26077 21.8284 4.62856 21.8284 5C21.8284 5.37143 21.7553 5.73923 21.6131 6.08239C21.471 6.42555 21.2626 6.73735 21 7L7.5 20.5L2 22L3.5 16.5L17 3Z" stroke="#3E4954" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                                </svg>
-                                            </a>
-                                            <a href="javascript:void(0);">
-                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                    <path d="M3 6H5H21" stroke="#F46B68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                                    <path d="M8 6V4C8 3.46957 8.21071 2.96086 8.58579 2.58579C8.96086 2.21071 9.46957 2 10 2H14C14.5304 2 15.0391 2.21071 15.4142 2.58579C15.7893 2.96086 16 3.46957 16 4V6M19 6V20C19 20.5304 18.7893 21.0391 18.4142 21.4142C18.0391 21.7893 17.5304 22 17 22H7C6.46957 22 5.96086 21.7893 5.58579 21.4142C5.21071 21.0391 5 20.5304 5 20V6H19Z" stroke="#F46B68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                                </svg>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <div class="checkbox text-end align-self-center">
-                                                <div class="form-check custom-checkbox ">
-                                                    <input type="checkbox" class="form-check-input" id="customCheckBox2" required="">
-                                                    <label class="form-check-label" for="customCheckBox2"></label>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>#P-00013</td>
-                                        <td>26/02/2020, 12:42 AM</td>
-                                        <td>Andrew Stevano</td>
-                                        <td>Dr. Marcus Jr</td>
-                                        <td>Dental Care</td>
-                                        <td>
-                                            <span class="text-nowrap">
-                                                <svg class="me-2" width="9" height="9" viewBox="0 0 9 9" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                    <circle cx="4.5" cy="4.5" r="4.5" fill="#FFB800"/>
-                                                </svg>
-                                                <span class="text-warning">Pending</span>
-                                            </span>
-                                        </td>
-                                        <td>AB-003</td>
-                                        <td class="text-end">
-                                            <a href="javascript:void(0);" class="me-3">
-                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                    <path d="M17 3C17.2626 2.73735 17.5744 2.52901 17.9176 2.38687C18.2608 2.24473 18.6286 2.17157 19 2.17157C19.3714 2.17157 19.7392 2.24473 20.0824 2.38687C20.4256 2.52901 20.7374 2.73735 21 3C21.2626 3.26264 21.471 3.57444 21.6131 3.9176C21.7553 4.26077 21.8284 4.62856 21.8284 5C21.8284 5.37143 21.7553 5.73923 21.6131 6.08239C21.471 6.42555 21.2626 6.73735 21 7L7.5 20.5L2 22L3.5 16.5L17 3Z" stroke="#3E4954" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                                </svg>
-                                            </a>
-                                            <a href="javascript:void(0);">
-                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                    <path d="M3 6H5H21" stroke="#F46B68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                                    <path d="M8 6V4C8 3.46957 8.21071 2.96086 8.58579 2.58579C8.96086 2.21071 9.46957 2 10 2H14C14.5304 2 15.0391 2.21071 15.4142 2.58579C15.7893 2.96086 16 3.46957 16 4V6M19 6V20C19 20.5304 18.7893 21.0391 18.4142 21.4142C18.0391 21.7893 17.5304 22 17 22H7C6.46957 22 5.96086 21.7893 5.58579 21.4142C5.21071 21.0391 5 20.5304 5 20V6H19Z" stroke="#F46B68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                                </svg>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <div class="checkbox text-end align-self-center">
-                                                <div class="form-check custom-checkbox ">
-                                                    <input type="checkbox" class="form-check-input" id="customCheckBox3" required="">
-                                                    <label class="form-check-label" for="customCheckBox3"></label>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>#P-00014</td>
-                                        <td>26/02/2020, 12:42 AM</td>
-                                        <td>Brian Lucky</td>
-                                        <td>Dr. David Lee</td>
-                                        <td>Sleep Problem</td>
-                                        <td>
-                                            <span class="text-nowrap">
-                                                <svg class="me-2" width="9" height="9" viewBox="0 0 9 9" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                    <circle cx="4.5" cy="4.5" r="4.5" fill="#2BC155"/>
-                                                </svg>
-                                                <span class="text-primary">Recovered</span>
-                                            </span>
-                                        </td>
-                                        <td>AB-002</td>
-                                        <td class="text-end">
-                                            <a href="javascript:void(0);" class="me-3">
-                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                    <path d="M17 3C17.2626 2.73735 17.5744 2.52901 17.9176 2.38687C18.2608 2.24473 18.6286 2.17157 19 2.17157C19.3714 2.17157 19.7392 2.24473 20.0824 2.38687C20.4256 2.52901 20.7374 2.73735 21 3C21.2626 3.26264 21.471 3.57444 21.6131 3.9176C21.7553 4.26077 21.8284 4.62856 21.8284 5C21.8284 5.37143 21.7553 5.73923 21.6131 6.08239C21.471 6.42555 21.2626 6.73735 21 7L7.5 20.5L2 22L3.5 16.5L17 3Z" stroke="#3E4954" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                                </svg>
-                                            </a>
-                                            <a href="javascript:void(0);">
-                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                    <path d="M3 6H5H21" stroke="#F46B68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                                    <path d="M8 6V4C8 3.46957 8.21071 2.96086 8.58579 2.58579C8.96086 2.21071 9.46957 2 10 2H14C14.5304 2 15.0391 2.21071 15.4142 2.58579C15.7893 2.96086 16 3.46957 16 4V6M19 6V20C19 20.5304 18.7893 21.0391 18.4142 21.4142C18.0391 21.7893 17.5304 22 17 22H7C6.46957 22 5.96086 21.7893 5.58579 21.4142C5.21071 21.0391 5 20.5304 5 20V6H19Z" stroke="#F46B68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                                </svg>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <div class="checkbox text-end align-self-center">
-                                                <div class="form-check custom-checkbox ">
-                                                    <input type="checkbox" class="form-check-input" id="customCheckBox4" required="">
-                                                    <label class="form-check-label" for="customCheckBox4"></label>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>#P-00015</td>
-                                        <td>26/02/2020, 12:42 AM</td>
-                                        <td>Bella Simatupang</td>
-                                        <td>Dr. Olivia Jean</td>
-                                        <td>Hearing Loss</td>
-                                        <td>
-                                            <span class="text-nowrap">
-                                                <svg class="me-2" width="9" height="9" viewBox="0 0 9 9" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                    <circle cx="4.5" cy="4.5" r="4.5" fill="#369DC9"/>
-                                                </svg>
-                                                <span class="text-info">On Recovery</span>
-                                            </span>
-                                        </td>
-                                        <td>AB-005</td>
-                                        <td class="text-end">
-                                            <a href="javascript:void(0);" class="me-3">
-                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                    <path d="M17 3C17.2626 2.73735 17.5744 2.52901 17.9176 2.38687C18.2608 2.24473 18.6286 2.17157 19 2.17157C19.3714 2.17157 19.7392 2.24473 20.0824 2.38687C20.4256 2.52901 20.7374 2.73735 21 3C21.2626 3.26264 21.471 3.57444 21.6131 3.9176C21.7553 4.26077 21.8284 4.62856 21.8284 5C21.8284 5.37143 21.7553 5.73923 21.6131 6.08239C21.471 6.42555 21.2626 6.73735 21 7L7.5 20.5L2 22L3.5 16.5L17 3Z" stroke="#3E4954" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                                </svg>
-                                            </a>
-                                            <a href="javascript:void(0);">
-                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                    <path d="M3 6H5H21" stroke="#F46B68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                                    <path d="M8 6V4C8 3.46957 8.21071 2.96086 8.58579 2.58579C8.96086 2.21071 9.46957 2 10 2H14C14.5304 2 15.0391 2.21071 15.4142 2.58579C15.7893 2.96086 16 3.46957 16 4V6M19 6V20C19 20.5304 18.7893 21.0391 18.4142 21.4142C18.0391 21.7893 17.5304 22 17 22H7C6.46957 22 5.96086 21.7893 5.58579 21.4142C5.21071 21.0391 5 20.5304 5 20V6H19Z" stroke="#F46B68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                                </svg>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <div class="checkbox text-end align-self-center">
-                                                <div class="form-check custom-checkbox ">
-                                                    <input type="checkbox" class="form-check-input" id="customCheckBox5" required="">
-                                                    <label class="form-check-label" for="customCheckBox5"></label>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>#P-00016</td>
-                                        <td>26/02/2020, 12:42 AM</td>
-                                        <td>Cive Slauw</td>
-                                        <td>Dr. Samantha</td>
-                                        <td>Diabetes</td>
-                                        <td>
-                                            <span class="text-nowrap">
-                                                <svg class="me-2" width="9" height="9" viewBox="0 0 9 9" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                    <circle cx="4.5" cy="4.5" r="4.5" fill="#2BC155"/>
-                                                </svg>
-                                                <span class="text-primary">Recovered</span>
-                                            </span>
-                                        </td>
-                                        <td>AB-006</td>
-                                        <td class="text-end">
-                                            <a href="javascript:void(0);" class="me-3">
-                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                    <path d="M17 3C17.2626 2.73735 17.5744 2.52901 17.9176 2.38687C18.2608 2.24473 18.6286 2.17157 19 2.17157C19.3714 2.17157 19.7392 2.24473 20.0824 2.38687C20.4256 2.52901 20.7374 2.73735 21 3C21.2626 3.26264 21.471 3.57444 21.6131 3.9176C21.7553 4.26077 21.8284 4.62856 21.8284 5C21.8284 5.37143 21.7553 5.73923 21.6131 6.08239C21.471 6.42555 21.2626 6.73735 21 7L7.5 20.5L2 22L3.5 16.5L17 3Z" stroke="#3E4954" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                                </svg>
-                                            </a>
-                                            <a href="javascript:void(0);">
-                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                    <path d="M3 6H5H21" stroke="#F46B68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                                    <path d="M8 6V4C8 3.46957 8.21071 2.96086 8.58579 2.58579C8.96086 2.21071 9.46957 2 10 2H14C14.5304 2 15.0391 2.21071 15.4142 2.58579C15.7893 2.96086 16 3.46957 16 4V6M19 6V20C19 20.5304 18.7893 21.0391 18.4142 21.4142C18.0391 21.7893 17.5304 22 17 22H7C6.46957 22 5.96086 21.7893 5.58579 21.4142C5.21071 21.0391 5 20.5304 5 20V6H19Z" stroke="#F46B68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                                </svg>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <div class="checkbox text-end align-self-center">
-                                                <div class="form-check custom-checkbox ">
-                                                    <input type="checkbox" class="form-check-input" id="customCheckBox6" required="">
-                                                    <label class="form-check-label" for="customCheckBox6"></label>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>#P-00017</td>
-                                        <td>26/02/2020, 12:42 AM</td>
-                                        <td>David Bekam</td>
-                                        <td>Dr. Kevin Zidan</td>
-                                        <td>Alcoholism</td>
-                                        <td>
-                                            <span class="text-nowrap">
-                                                <svg class="me-2" width="9" height="9" viewBox="0 0 9 9" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                    <circle cx="4.5" cy="4.5" r="4.5" fill="#FFB800"/>
-                                                </svg>
-                                                <span class="text-warning">Pending</span>
-                                            </span>
-                                        </td>
-                                        <td>AB-007</td>
-                                        <td class="text-end">
-                                            <a href="javascript:void(0);" class="me-3">
-                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                    <path d="M17 3C17.2626 2.73735 17.5744 2.52901 17.9176 2.38687C18.2608 2.24473 18.6286 2.17157 19 2.17157C19.3714 2.17157 19.7392 2.24473 20.0824 2.38687C20.4256 2.52901 20.7374 2.73735 21 3C21.2626 3.26264 21.471 3.57444 21.6131 3.9176C21.7553 4.26077 21.8284 4.62856 21.8284 5C21.8284 5.37143 21.7553 5.73923 21.6131 6.08239C21.471 6.42555 21.2626 6.73735 21 7L7.5 20.5L2 22L3.5 16.5L17 3Z" stroke="#3E4954" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                                </svg>
-                                            </a>
-                                            <a href="javascript:void(0);">
-                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                    <path d="M3 6H5H21" stroke="#F46B68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                                    <path d="M8 6V4C8 3.46957 8.21071 2.96086 8.58579 2.58579C8.96086 2.21071 9.46957 2 10 2H14C14.5304 2 15.0391 2.21071 15.4142 2.58579C15.7893 2.96086 16 3.46957 16 4V6M19 6V20C19 20.5304 18.7893 21.0391 18.4142 21.4142C18.0391 21.7893 17.5304 22 17 22H7C6.46957 22 5.96086 21.7893 5.58579 21.4142C5.21071 21.0391 5 20.5304 5 20V6H19Z" stroke="#F46B68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                                </svg>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <div class="checkbox text-end align-self-center">
-                                                <div class="form-check custom-checkbox ">
-                                                    <input type="checkbox" class="form-check-input" id="customCheckBox7" required="">
-                                                    <label class="form-check-label" for="customCheckBox7"></label>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>#P-00018</td>
-                                        <td>26/02/2020, 12:42 AM</td>
-                                        <td>Enjeline Sari</td>
-                                        <td>Dr. Gustauv Loi</td>
-                                        <td>Cold & Flu</td>
-                                        <td>
-                                            <span class="text-nowrap">
-                                                <svg class="me-2" width="9" height="9" viewBox="0 0 9 9" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                    <circle cx="4.5" cy="4.5" r="4.5" fill="#369DC9"/>
-                                                </svg>
-                                                <span class="text-info">On Recovery</span>
-                                            </span>
-                                        </td>
-                                        <td>AB-008</td>
-                                        <td class="text-end">
-                                            <a href="javascript:void(0);" class="me-3">
-                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                    <path d="M17 3C17.2626 2.73735 17.5744 2.52901 17.9176 2.38687C18.2608 2.24473 18.6286 2.17157 19 2.17157C19.3714 2.17157 19.7392 2.24473 20.0824 2.38687C20.4256 2.52901 20.7374 2.73735 21 3C21.2626 3.26264 21.471 3.57444 21.6131 3.9176C21.7553 4.26077 21.8284 4.62856 21.8284 5C21.8284 5.37143 21.7553 5.73923 21.6131 6.08239C21.471 6.42555 21.2626 6.73735 21 7L7.5 20.5L2 22L3.5 16.5L17 3Z" stroke="#3E4954" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                                </svg>
-                                            </a>
-                                            <a href="javascript:void(0);">
-                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                    <path d="M3 6H5H21" stroke="#F46B68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                                    <path d="M8 6V4C8 3.46957 8.21071 2.96086 8.58579 2.58579C8.96086 2.21071 9.46957 2 10 2H14C14.5304 2 15.0391 2.21071 15.4142 2.58579C15.7893 2.96086 16 3.46957 16 4V6M19 6V20C19 20.5304 18.7893 21.0391 18.4142 21.4142C18.0391 21.7893 17.5304 22 17 22H7C6.46957 22 5.96086 21.7893 5.58579 21.4142C5.21071 21.0391 5 20.5304 5 20V6H19Z" stroke="#F46B68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                                </svg>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <div class="checkbox text-end align-self-center">
-                                                <div class="form-check custom-checkbox ">
-                                                    <input type="checkbox" class="form-check-input" id="customCheckBox8" required="">
-                                                    <label class="form-check-label" for="customCheckBox8"></label>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>#P-00019</td>
-                                        <td>26/02/2020, 12:42 AM</td>
-                                        <td>Eddy Cusuma</td>
-                                        <td>Dr. Samantha</td>
-                                        <td>Dental Care</td>
-                                        <td>
-                                            <span class="text-nowrap">
-                                                <svg class="me-2" width="9" height="9" viewBox="0 0 9 9" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                    <circle cx="4.5" cy="4.5" r="4.5" fill="#F46B68"/>
-                                                </svg>
-                                                <span class="text-danger">Rejected</span>
-                                            </span>
-                                        </td>
-                                        <td>AB-009</td>
-                                        <td class="text-end">
-                                            <a href="javascript:void(0);" class="me-3">
-                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                    <path d="M17 3C17.2626 2.73735 17.5744 2.52901 17.9176 2.38687C18.2608 2.24473 18.6286 2.17157 19 2.17157C19.3714 2.17157 19.7392 2.24473 20.0824 2.38687C20.4256 2.52901 20.7374 2.73735 21 3C21.2626 3.26264 21.471 3.57444 21.6131 3.9176C21.7553 4.26077 21.8284 4.62856 21.8284 5C21.8284 5.37143 21.7553 5.73923 21.6131 6.08239C21.471 6.42555 21.2626 6.73735 21 7L7.5 20.5L2 22L3.5 16.5L17 3Z" stroke="#3E4954" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                                </svg>
-                                            </a>
-                                            <a href="javascript:void(0);">
-                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                    <path d="M3 6H5H21" stroke="#F46B68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                                    <path d="M8 6V4C8 3.46957 8.21071 2.96086 8.58579 2.58579C8.96086 2.21071 9.46957 2 10 2H14C14.5304 2 15.0391 2.21071 15.4142 2.58579C15.7893 2.96086 16 3.46957 16 4V6M19 6V20C19 20.5304 18.7893 21.0391 18.4142 21.4142C18.0391 21.7893 17.5304 22 17 22H7C6.46957 22 5.96086 21.7893 5.58579 21.4142C5.21071 21.0391 5 20.5304 5 20V6H19Z" stroke="#F46B68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                                </svg>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <div class="checkbox text-end align-self-center">
-                                                <div class="form-check custom-checkbox ">
-                                                    <input type="checkbox" class="form-check-input" id="customCheckBox9" required="">
-                                                    <label class="form-check-label" for="customCheckBox9"></label>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>#P-00020</td>
-                                        <td>26/02/2020, 12:42 AM</td>
-                                        <td>Frank Azire</td>
-                                        <td>Dr. David Lee</td>
-                                        <td>Allergies & Asthma</td>
-                                        <td>
-                                            <span class="text-nowrap">
-                                                <svg class="me-2" width="9" height="9" viewBox="0 0 9 9" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                    <circle cx="4.5" cy="4.5" r="4.5" fill="#2BC155"/>
-                                                </svg>
-                                                <span class="text-primary">Recovered</span>
-                                            </span>
-                                        </td>
-                                        <td>AB-020</td>
-                                        <td class="text-end">
-                                            <a href="javascript:void(0);" class="me-3">
-                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                    <path d="M17 3C17.2626 2.73735 17.5744 2.52901 17.9176 2.38687C18.2608 2.24473 18.6286 2.17157 19 2.17157C19.3714 2.17157 19.7392 2.24473 20.0824 2.38687C20.4256 2.52901 20.7374 2.73735 21 3C21.2626 3.26264 21.471 3.57444 21.6131 3.9176C21.7553 4.26077 21.8284 4.62856 21.8284 5C21.8284 5.37143 21.7553 5.73923 21.6131 6.08239C21.471 6.42555 21.2626 6.73735 21 7L7.5 20.5L2 22L3.5 16.5L17 3Z" stroke="#3E4954" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                                </svg>
-                                            </a>
-                                            <a href="javascript:void(0);">
-                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                    <path d="M3 6H5H21" stroke="#F46B68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                                    <path d="M8 6V4C8 3.46957 8.21071 2.96086 8.58579 2.58579C8.96086 2.21071 9.46957 2 10 2H14C14.5304 2 15.0391 2.21071 15.4142 2.58579C15.7893 2.96086 16 3.46957 16 4V6M19 6V20C19 20.5304 18.7893 21.0391 18.4142 21.4142C18.0391 21.7893 17.5304 22 17 22H7C6.46957 22 5.96086 21.7893 5.58579 21.4142C5.21071 21.0391 5 20.5304 5 20V6H19Z" stroke="#F46B68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                                </svg>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <div class="checkbox text-end align-self-center">
-                                                <div class="form-check custom-checkbox ">
-                                                    <input type="checkbox" class="form-check-input" id="customCheckBox10" required="">
-                                                    <label class="form-check-label" for="customCheckBox10"></label>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>#P-00012</td>
-                                        <td>26/02/2020, 12:42 AM</td>
-                                        <td>Alexia Kev</td>
-                                        <td>Dr. Samantha</td>
-                                        <td>Allergies & Asthma</td>
-                                        <td>
-                                            <span class="text-nowrap">
-                                                <svg class="me-2" width="9" height="9" viewBox="0 0 9 9" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                    <circle cx="4.5" cy="4.5" r="4.5" fill="#FFB800"/>
-                                                </svg>
-                                                <span class="text-warning">Pending</span>
-                                            </span>
-                                        </td>
-                                        <td>AB-002</td>
-                                        <td class="text-end">
-                                            <a href="javascript:void(0);" class="me-3">
-                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                    <path d="M17 3C17.2626 2.73735 17.5744 2.52901 17.9176 2.38687C18.2608 2.24473 18.6286 2.17157 19 2.17157C19.3714 2.17157 19.7392 2.24473 20.0824 2.38687C20.4256 2.52901 20.7374 2.73735 21 3C21.2626 3.26264 21.471 3.57444 21.6131 3.9176C21.7553 4.26077 21.8284 4.62856 21.8284 5C21.8284 5.37143 21.7553 5.73923 21.6131 6.08239C21.471 6.42555 21.2626 6.73735 21 7L7.5 20.5L2 22L3.5 16.5L17 3Z" stroke="#3E4954" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                                </svg>
-                                            </a>
-                                            <a href="javascript:void(0);">
-                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                    <path d="M3 6H5H21" stroke="#F46B68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                                    <path d="M8 6V4C8 3.46957 8.21071 2.96086 8.58579 2.58579C8.96086 2.21071 9.46957 2 10 2H14C14.5304 2 15.0391 2.21071 15.4142 2.58579C15.7893 2.96086 16 3.46957 16 4V6M19 6V20C19 20.5304 18.7893 21.0391 18.4142 21.4142C18.0391 21.7893 17.5304 22 17 22H7C6.46957 22 5.96086 21.7893 5.58579 21.4142C5.21071 21.0391 5 20.5304 5 20V6H19Z" stroke="#F46B68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                                </svg>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <div class="checkbox text-end align-self-center">
-                                                <div class="form-check custom-checkbox ">
-                                                    <input type="checkbox" class="form-check-input" id="customCheckBox11" required="">
-                                                    <label class="form-check-label" for="customCheckBox11"></label>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>#P-00012</td>
-                                        <td>26/02/2020, 12:42 AM</td>
-                                        <td>Alexia Kev</td>
-                                        <td>Dr. Samantha</td>
-                                        <td>Allergies & Asthma</td>
-                                        <td>
-                                            <span class="text-nowrap">
-                                                <svg class="me-2" width="9" height="9" viewBox="0 0 9 9" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                    <circle cx="4.5" cy="4.5" r="4.5" fill="#FFB800"/>
-                                                </svg>
-                                                <span class="text-warning">Pending</span>
-                                            </span>
-                                        </td>
-                                        <td>AB-002</td>
-                                        <td class="text-end">
-                                            <a href="javascript:void(0);" class="me-3">
-                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                    <path d="M17 3C17.2626 2.73735 17.5744 2.52901 17.9176 2.38687C18.2608 2.24473 18.6286 2.17157 19 2.17157C19.3714 2.17157 19.7392 2.24473 20.0824 2.38687C20.4256 2.52901 20.7374 2.73735 21 3C21.2626 3.26264 21.471 3.57444 21.6131 3.9176C21.7553 4.26077 21.8284 4.62856 21.8284 5C21.8284 5.37143 21.7553 5.73923 21.6131 6.08239C21.471 6.42555 21.2626 6.73735 21 7L7.5 20.5L2 22L3.5 16.5L17 3Z" stroke="#3E4954" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                                </svg>
-                                            </a>
-                                            <a href="javascript:void(0);">
-                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                    <path d="M3 6H5H21" stroke="#F46B68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                                    <path d="M8 6V4C8 3.46957 8.21071 2.96086 8.58579 2.58579C8.96086 2.21071 9.46957 2 10 2H14C14.5304 2 15.0391 2.21071 15.4142 2.58579C15.7893 2.96086 16 3.46957 16 4V6M19 6V20C19 20.5304 18.7893 21.0391 18.4142 21.4142C18.0391 21.7893 17.5304 22 17 22H7C6.46957 22 5.96086 21.7893 5.58579 21.4142C5.21071 21.0391 5 20.5304 5 20V6H19Z" stroke="#F46B68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                                </svg>
-                                            </a>
-                                        </td>
-                                    </tr>
+
+
                                 </tbody>
                             </table>
                         </div>
@@ -472,6 +61,78 @@
         </div>
     </div>
 </div>
+
+<!-- Patient Modal -->
+<div class="modal fade" id="add_patient" tabindex="-1" aria-labelledby="patientModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="patientModalLabel">Add New Patient</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form class="add_patient">
+                    @csrf
+                    <input type="hidden" name="patient_id" id="patient_id" class="patient_id">
+
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label class="col-form-label">Title:</label>
+                            <select class="form-control form-control-sm" id="title" name="title">
+                                <option value="">Choose..</option>
+                                <option value="1">Miss</option>
+                                <option value="2">Mr.</option>
+                                <option value="3">Mrs.</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="col-form-label">First Name:</label>
+                            <input type="text" class="form-control form-control-sm" id="first_name" name="first_name" >
+                        </div>
+                        <div class="col-md-3">
+                            <label class="col-form-label">Second Name:</label>
+                            <input type="text" class="form-control form-control-sm" id="second_name" name="second_name">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="col-form-label">Mobile No:</label>
+                            <input type="tel" class="form-control form-control-sm" id="mobile" name="mobile" >
+                        </div>
+                        <div class="col-md-3">
+                            <label class="col-form-label">ID / Passport No:</label>
+                            <input type="text" class="form-control form-control-sm" id="id_passport" name="id_passport" >
+                        </div>
+                        <div class="col-md-3">
+                            <label class="col-form-label">Date Of Birth:</label>
+                            <input type="date" class="form-control form-control-sm" id="dob" name="dob" >
+                        </div>
+                        <div class="col-md-3">
+                            <label class="col-form-label">Country:</label>
+                            <select class="form-control form-control-sm country" id="country" name="country" >
+                                <option value="">Select Country</option>
+                                @foreach ($countries as $country)
+                                    <option value="{{ $country->id }}">{{ $country->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Details Section -->
+                    <div class="mt-3">
+                        <label class="col-form-label">Additional Details:</label>
+                        <textarea class="form-control" name="details" id="details" rows="3" placeholder="Enter any additional details about the patient..."></textarea>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger light" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Add Patient</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 
 @include('layouts.footer')
 @endsection
