@@ -99,7 +99,7 @@
                     <hr>
 
                     <input type="hidden" name="session_id2" id="session_id" class="session_id2" value="{{ $session->id ?? '' }}">
-                    <input type="hidden" name="payment_status" class="payment_status" id="payment_status" value="{{ $session->payment_status ?? '' }}">
+                    <input type="hidden" name="payment_status" class="payment_status3" id="payment_status" value="{{ $session->payment_status ?? '' }}">
 
                     <!-- Payment Status Message (Only for Pending Payments) -->
                     <div id="pendingPaymentAlert" class="alert alert-warning text-center d-none">

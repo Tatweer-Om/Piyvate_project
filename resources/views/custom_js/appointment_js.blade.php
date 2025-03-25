@@ -259,7 +259,6 @@
                 sessionDate.setDate(startDate.getDate() + (gap * i));
                 let formattedDate = sessionDate.toISOString().split('T')[0];
 
-                // Start a new row if needed
                 if (i > 0 && i % 6 === 0) {
                     sessionRows += '</tr><tr>';
                 }
@@ -279,7 +278,7 @@
 
             $("#session_table tbody").empty().append(sessionRows);
 
-            // Reinitialize clockpicker for dynamically added elements
+
             $('.clockpicker').clockpicker({
                 autoclose: true,
                 donetext: 'Done'
@@ -331,7 +330,6 @@ function updateSessionDates(startDate, gap) {
                 </div>
             </td>`;
 
-            // If no row exists or last row already has 6 <td>, create a new row
             if (lastRow.length === 0 || lastRow.children("td").length >= 6) {
                 $("#session_table tbody").append(`<tr>${sessionTd}</tr>`);
             } else {
@@ -514,7 +512,7 @@ $(document).ready(function () {
             sessions: []
         };
 
-        $("#session_table tbody tr").each(function () {
+        $("#session_table tbody td").each(function () {
             let session_date = $(this).find(".session-date").val();
             let session_time = $(this).find(".success_time").val();
 
@@ -526,7 +524,6 @@ $(document).ready(function () {
             }
         });
 
-        // Store total price in hidden input before sending AJAX request
         $("#hiddenTotalPrice").val(totalPrice.toFixed(2));
         $("#total_amount").text(totalPrice.toFixed(2));  // Update before AJAX
 
@@ -617,6 +614,7 @@ $(document).ready(function () {
         if (paymentStatus === 3) {
             $("#pendingPaymentAlert").removeClass("d-none").addClass("d-block");
             $("#accountss").hide();
+            $(".deta").hide();
         } else {
             $("#pendingPaymentAlert").removeClass("d-block").addClass("d-none");
         }

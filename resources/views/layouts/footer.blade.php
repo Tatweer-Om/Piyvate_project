@@ -212,6 +212,8 @@
         @include('custom_js.patient_js')
         @elseif ($route_name == 'offer')
         @include('custom_js.offer_js')
+        @elseif ($route_name == 'all_sessions')
+        @include('custom_js.session_js')
         @elseif ($route_name == 'sation')
         @include('custom_js.sation_js')
         @elseif ($route_name == 'ministry_category')

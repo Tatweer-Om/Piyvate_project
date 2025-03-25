@@ -21,6 +21,7 @@ use Illuminate\Http\Request;
 use App\Models\SessionsPayment;
 use App\Models\AppointmentDetail;
 use App\Models\AppointmentPayment;
+use App\Models\AppointmentSession;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use App\Models\AppointPaymentExpense;
@@ -644,6 +645,18 @@ public function getMinistryDetails($id)
             $appointment->added_by = $user->id;
             $appointment->branch_id = $user->branch_id;
             $appointment->save();
+            if (!empty($request->sessions)) {
+                foreach ($request->sessions as $session) {
+                    $sessiondetail = new AppointmentSession();
+                    $sessiondetail->appointment_id = $appointment->id;
+                    $sessiondetail->patient_id =   $appointment->patient_id;
+                    $sessiondetail->session_date = $session['session_date']; // Assuming `session_date` is provided
+                    $sessiondetail->session_time = $session['session_time']; // Assuming `session_time` is provided
+                    $sessiondetail->session_price = $single_session_price;
+                    $sessiondetail->status = '1'; // Default status as per migration (1 = Pending)
+                    $sessiondetail->save();
+                }
+            }
 
             return response()->json([
                 'success' => trans('messages.appointment_add_success_lang'),

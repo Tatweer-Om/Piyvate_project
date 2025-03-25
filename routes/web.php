@@ -123,6 +123,10 @@ Route::post('delete_offer', [OfferController::class, 'delete_offer'])->name('del
 //offercontroller
 
 Route::post('add_session', [SessionCONTROLLER::class, 'add_session'])->name('add_session');
+Route::get('show_sessions', [SessionCONTROLLER::class, 'show_sessions'])->name('show_sessions');
+Route::get('all_sessions', [SessionCONTROLLER::class, 'all_sessions'])->name('all_sessions');
+
+
 Route::post('add_session_detail', [SessionCONTROLLER::class, 'add_session_detail'])->name('add_session_detail');
 Route::post('save_session_payment2', [SessionCONTROLLER::class, 'save_session_payment2'])->name('save_session_payment2');
 
