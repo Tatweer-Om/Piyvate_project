@@ -19,10 +19,16 @@ return new class extends Migration
             $table->string('second_name')->nullable();
             $table->string('full_name');
             $table->string('mobile')->nullable();
-            $table->string('id_passport')->unique(); // Unique identifier for each patient
+            $table->string('id_passport')->unique()->nullable();
             $table->date('dob')->nullable();
+            $table->string('country_id')->nullable(); // Adding country_id
+
             $table->string('branch_id')->nullable();
             $table->string('added_by')->nullable();
+            $table->string('updated_by')->nullable();
+            $table->string('points')->nullable();
+
+
             $table->string('user_id')->nullable();
 
 

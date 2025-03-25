@@ -13,28 +13,27 @@ return new class extends Migration
     {
         Schema::create('session_lists', function (Blueprint $table) {
             $table->id();
-            $table->string('title')->nullable();
-            $table->string('first_name')->nullable();
-            $table->string('second_name')->nullable();
-            $table->string('full_name')->nullable();
-            $table->string('mobile')->nullable();
-            $table->string('id_passport')->nullable();
-            $table->date('dob')->nullable();
-            $table->string('country')->nullable();// Storing country name as a string
-            $table->string('doctor')->nullable(); // Storing doctor name as a string
-            $table->string('session_type')->nullable();// e.g., 'pact', 'ministry', 'offer'
-            $table->string('session_fee')->nullable();// e.g., 'pact', 'ministry', 'offer'
+            $table->string('doctor_id')->nullable();
+            $table->string('patient_id')->nullable();
+            $table->string('session_no')->nullable();
+            $table->string('clinic_no')->nullable();
+            $table->string('session_type')->nullable();
+            $table->string('session_fee')->nullable();
             $table->integer('no_of_sessions')->default(1);
             $table->integer('session_gap')->nullable();
             $table->date('session_date');
-            $table->string('offer_id')->nullable(); // Storing offer ID as a string
-            $table->string('ministry_id')->nullable(); // Storing ministry ID as a string
-            $table->string('session_cat')->nullable(); // Storing ministry ID as a string
+            $table->string('offer_id')->nullable();
+            $table->string('ministry_id')->nullable();
+            $table->string('session_cat')->nullable();
             $table->text('notes')->nullable();
+            $table->integer('session_status')->nullable()->comment('1 = sessions recomended, 2 = Session, 0 = Default, 3=Total Sessions, 4=Cancelled 5=Pre-registered');
+            $table->integer('payment_status')->nullable()->comment('0 = Default, 1 = Normal Session, 2 = Offer Session, 3 = Contract Session');
             $table->string('user_id', 255)->nullable();
             $table->string('branch_id', 255)->nullable();
             $table->string('added_by')->nullable();
             $table->string('updated_by')->nullable();
+
+
             $table->timestamps();
         });
     }

@@ -50,7 +50,7 @@ $(document).ready(function () {
                 }
             },
             error: function (xhr) {
-                alert("Error saving session! Check required fields.");
+                show_notification('error', '<?php echo trans('messages.check_the_fields_lang', [], session('locale')); ?>');
                 console.log(xhr.responseText);
             }
         });
@@ -249,6 +249,60 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 
+    $(document).ready(function () {
+    $.ajaxSetup({
+        headers: {
+            "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content")
+        }
+    });
+
+    $("#addSessionForm").submit(function (e) {
+        e.preventDefault(); // Prevent form submission
+
+        let formData = $(this).serializeArray(); // Serialize non-table form data
+
+        // Collect session details dynamically
+        let sessionData = [];
+        $("#session_table tbody tr td").each(function (index) {
+            let sessionDate = $(this).find(".session-date").val();
+            let sessionTime = $(this).find(".success_time").val();
+
+            if (sessionDate && sessionTime) {
+                sessionData.push({
+                    date: sessionDate,
+                    time: sessionTime
+                });
+            }
+        });
+
+        // Append sessionData as JSON
+        formData.push({ name: "sessions", value: JSON.stringify(sessionData) });
+
+        $.ajax({
+            url: "{{ route('add_session_detail') }}", // Laravel route for storing sessions
+            method: "POST",
+            data: formData,
+            success: function (response) {
+                if (response.success) {
+                    show_notification('success', '{{ trans("messages.data_add_success_lang", [], session("locale")) }}');
+                    $("#addSessionForm")[0].reset(); // Reset form
+                    $("#session_table tbody").empty(); // Clear sessions
+                    $(".session_id").val(response.session_id);
+
+                    $("#secondModal2").modal("show");
+                } else {
+                    show_notification('error', '{{ trans("messages.data_add_failed_lang", [], session("locale")) }}');
+                }
+            },
+            error: function (xhr) {
+                show_notification('error', '{{ trans("messages.check_required_failed_lang", [], session("locale")) }}');
+                console.log(xhr.responseText);
+            }
+        });
+    });
+});
+
+
 
 
     document.addEventListener("DOMContentLoaded", function() {
@@ -308,6 +362,103 @@ document.addEventListener('DOMContentLoaded', function () {
                 $('#doctor').selectpicker('refresh');
                 $("#doctor").val(patient.doctor_id);
                             }
+        }
+    });
+});
+
+
+document.addEventListener("DOMContentLoaded", function () {
+            let sessionFeeDiv = document.getElementById("session_fee");
+            let sessionFeeInput = document.getElementById("session_fee_input");
+
+            // Function to update the hidden input field
+            function updateSessionFeeInput() {
+                sessionFeeInput.value = sessionFeeDiv.textContent.trim().replace("OMR ", "");
+            }
+
+            // Run the function initially
+            updateSessionFeeInput();
+
+            // Observe changes to the session fee div
+            let observer = new MutationObserver(updateSessionFeeInput);
+            observer.observe(sessionFeeDiv, { childList: true, subtree: true });
+        });
+
+
+
+
+$(document).ready(function () {
+    $(".add_payment3").submit(function (event) {
+        event.preventDefault();
+
+        let paymentData = [];
+        let totalPaid = 0;
+        let paymentStatus = parseInt($("#payment_status").val()) || 0;
+        let totalAmount = parseFloat($("#total_amount").text()) || 0;
+
+
+        $(".payment-method-checkbox:checked").each(function () {
+            let accountId = $(this).val();
+            let amount = parseFloat($("#amount_" + accountId).val()) || 0;
+            let refNoInput = $("#ref_no_" + accountId); // Reference the input field
+            let refNo = refNoInput.length > 0 ? refNoInput.val().trim() : null;
+            if (amount > 0) {
+                paymentData.push({
+                    account_id: accountId,
+                    amount: amount,
+                    ref_no:refNo,
+                    payment_status:paymentStatus
+                });
+                totalPaid += amount;
+            }
+        });
+
+        if (paymentData.length === 0 && paymentStatus !== 3) {
+            show_notification('error',
+            '{{ trans('messages.Please_select_atleast_a_payment_method', [], session('locale')) }}');
+            return;
+        }
+
+        $.ajax({
+            url: "/save_session_payment2", // Change URL if needed
+            type: "POST",
+            data: {
+                _token: $("input[name=_token]").val(), // CSRF Token
+                payment_methods: paymentData,
+                payment_status: paymentStatus, // Send payment_status to backend
+                session_id: $(".session_id2").val(),
+                totalAmount: totalAmount
+            },
+            success: function (response) {
+                if (response.success) {
+                    show_notification('success',
+                    '{{ trans('messages.payment_added_success', [], session('locale')) }}');
+                      $("#secondModal2").modal("hide");
+                    // $('#all_appointments').DataTable().ajax.reload();
+
+                } else {
+                    alert("Payment failed! " + response.message);
+                }
+            },
+            error: function (xhr) {
+                alert("Error occurred: " + xhr.responseText);
+            }
+        });
+    });
+});
+
+
+
+
+$(document).ready(function () {
+    $('#secondModal2').on('show.bs.modal', function () {
+        let paymentStatus = parseInt($("#payment_status").val()) || 0;
+
+        if (paymentStatus === 3) {
+            $("#pendingPaymentAlert").removeClass("d-none").addClass("d-block");
+            $("#accountss").hide();
+        } else {
+            $("#pendingPaymentAlert").removeClass("d-block").addClass("d-none");
         }
     });
 });

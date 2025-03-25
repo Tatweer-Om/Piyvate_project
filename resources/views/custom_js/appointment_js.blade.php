@@ -166,29 +166,27 @@
 
 
     $(document).ready(function () {
-    let mainForm = $('.add_appointment'); // Main appointment form
-    let paymentForm = $('.add_payment'); // Payment form
+    let mainForm = $('.add_appointment');
+    let paymentForm = $('.add_payment');
 
-    // Open payment modal when clicking "Add Payment" button
     $('#open_payment_modal').click(function () {
         $('#payment_modal').modal('show');
     });
 
-    // Confirm payment and append payment data to main form
     $('#confirm_payment').click(function (e) {
-        e.preventDefault(); // Prevent default submission
+        e.preventDefault();
 
         let selectedPayments = [];
         let totalAmount = 0;
         let isValid = false;
 
-        // Loop through selected payment methods and collect their amounts
         $('.payment-method-checkbox:checked').each(function () {
             let accountId = $(this).val();
             let amount = parseFloat($('#amount_' + accountId).val()) || 0;
+            let refNo = $('#ref_no_' + accountId).length ? $('#ref_no_' + accountId).val().trim() : null;
 
             if (amount > 0) {
-                selectedPayments.push({ accountId, amount });
+                selectedPayments.push({ accountId, amount, refNo });
                 totalAmount += amount;
                 isValid = true;
             }
@@ -201,16 +199,11 @@
 
         let appointmentFee = parseFloat($('#total_amount').text().trim().replace('OMR', '')) || 0;
 
-        // Ensure total payment matches the appointment fee
         if (totalAmount !== appointmentFee) {
-            show_notification(
-                'error',
-                `{{ trans('messages.payment_mismatch_lang', [], session('locale')) }} (OMR ${totalAmount.toFixed(2)})`
-            );
+            show_notification('error', `{{ trans('messages.payment_mismatch_lang', [], session('locale')) }} (OMR ${totalAmount.toFixed(2)})`);
             return;
         }
 
-        // Append payment data as hidden fields in the main form
         selectedPayments.forEach(payment => {
             $('<input>').attr({
                 type: 'hidden',
@@ -223,16 +216,21 @@
                 name: 'payment_amounts[' + payment.accountId + ']',
                 value: payment.amount
             }).appendTo(mainForm);
+
+            if (payment.refNo) {
+                $('<input>').attr({
+                    type: 'hidden',
+                    name: 'payment_ref_nos[' + payment.accountId + ']',
+                    value: payment.refNo
+                }).appendTo(mainForm);
+            }
         });
 
-        // show_notification('success', '{{ trans('messages.payment_successful_lang', [], session('locale')) }}');
-
-        $('#payment_modal').modal('hide'); // Hide payment modal
-
-        // Submit the main form after payment confirmation
+        $('#payment_modal').modal('hide');
         mainForm.submit();
     });
 });
+
 
 
     function session(appointment_id) {
@@ -550,34 +548,32 @@ $(document).ready(function () {
 });
 
 
-
-
-
-
-
-
 $(document).ready(function () {
     $(".add_payment2").submit(function (event) {
-        event.preventDefault(); // Prevent default form submission
+        event.preventDefault();
 
         let paymentData = [];
         let totalPaid = 0;
-        let paymentStatus = parseInt($("#payment_status").val()) || 0; // Get payment_status
+        let paymentStatus = parseInt($("#payment_status").val()) || 0;
+        let totalAmount = parseFloat($("#total_amount").text()) || 0;
+
 
         $(".payment-method-checkbox:checked").each(function () {
             let accountId = $(this).val();
             let amount = parseFloat($("#amount_" + accountId).val()) || 0;
-
+            let refNoInput = $("#ref_no_" + accountId); // Reference the input field
+            let refNo = refNoInput.length > 0 ? refNoInput.val().trim() : null;
             if (amount > 0) {
                 paymentData.push({
                     account_id: accountId,
-                    amount: amount
+                    amount: amount,
+                    ref_no:refNo,
+                    payment_status:paymentStatus
                 });
                 totalPaid += amount;
             }
         });
 
-        // Skip validation if payment_status is 3
         if (paymentData.length === 0 && paymentStatus !== 3) {
             show_notification('error',
             '{{ trans('messages.Please_select_atleast_a_payment_method', [], session('locale')) }}');
@@ -591,11 +587,12 @@ $(document).ready(function () {
                 _token: $("input[name=_token]").val(), // CSRF Token
                 payment_methods: paymentData,
                 payment_status: paymentStatus, // Send payment_status to backend
-                appointment_id2: $(".appointment_id2").val()
+                appointment_id2: $(".appointment_id2").val(),
+                totalAmount: totalAmount
             },
             success: function (response) {
                 if (response.success) {
-                    show_notification('error',
+                    show_notification('success',
                     '{{ trans('messages.payment_added_success', [], session('locale')) }}');                    $("#secondModal").modal("hide");
                     $('#all_appointments').DataTable().ajax.reload();
 
@@ -619,6 +616,7 @@ $(document).ready(function () {
 
         if (paymentStatus === 3) {
             $("#pendingPaymentAlert").removeClass("d-none").addClass("d-block");
+            $("#accountss").hide();
         } else {
             $("#pendingPaymentAlert").removeClass("d-block").addClass("d-none");
         }

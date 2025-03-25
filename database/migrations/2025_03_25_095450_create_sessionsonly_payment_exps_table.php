@@ -11,12 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('appointment_payments', function (Blueprint $table) {
+        Schema::create('sessionsonly_payment_exps', function (Blueprint $table) {
             $table->id();
-            $table->string('appointment_id');
-            $table->string('account_id');
-            $table->string('ref_no')->nullable()->default('');
-            $table->decimal('amount', 10, 2);
+            $table->integer('session_id');
+            $table->decimal('total_amount', 10, 2);
+            $table->decimal('account_tax', 5, 2)->nullable(); // Commission percentage
+            $table->decimal('account_tax_fee', 10, 2)->nullable(); // Calculated commission fee
+            $table->integer('account_id');
             $table->integer('user_id');
             $table->integer('branch_id');
             $table->string('added_by');
@@ -29,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('appointment_payments');
+        Schema::dropIfExists('sessionsonly_payment_exps');
     }
 };
