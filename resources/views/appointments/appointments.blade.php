@@ -149,13 +149,19 @@
                                 @foreach ($accounts as $account)
                                     <div class="col-md-6">
                                         <div class="form-check">
-                                            <input class="form-check-input payment-method-checkbox" type="checkbox" name="payment_methods[]" id="account_{{ $account->id }}" value="{{ $account->id }}"  onchange="toggleAmountInput({{ $account->id }})">
+                                            <input class="form-check-input payment-method-checkbox" type="checkbox" name="payment_methods[]" id="account_{{ $account->id }}" value="{{ $account->id }}" onchange="toggleAmountInput({{ $account->id }}, {{ $account->account_status }})">
                                             <label class="form-check-label fw-bold" for="account_{{ $account->id }}">
                                                 {{ $account->account_name }}
                                             </label>
                                         </div>
+
                                         <!-- Amount Input (Initially Hidden) -->
                                         <input type="number" class="form-control form-control-sm payment-amount-input mt-1" id="amount_{{ $account->id }}" name="payment_amounts[{{ $account->id }}]" value="{{ $setting->appointment_fee ?? '0.00' }}" placeholder="Enter amount" min="0" step="0.01" style="display: none;">
+
+                                        <!-- Ref No Input (Initially Hidden, Only if account_status != 1) -->
+                                        @if($account->account_status != 1)
+                                            <input type="text" class="form-control form-control-sm ref-no-input mt-1" id="ref_no_{{ $account->id }}" name="ref_nos[{{ $account->id }}]" placeholder="Enter Reference Number" style="display: none;">
+                                        @endif
                                     </div>
                                 @endforeach
                             </div>
@@ -176,22 +182,35 @@
         </div>
     </div>
 
-    <!-- JavaScript to Show Amount Input when Checkbox is Selected -->
+    <!-- JavaScript to Show Amount & Ref No Input when Checkbox is Selected -->
     <script>
-        function toggleAmountInput(accountId) {
+        function toggleAmountInput(accountId, accountStatus) {
             var checkbox = document.getElementById("account_" + accountId);
             var amountInput = document.getElementById("amount_" + accountId);
+            var refNoInput = document.getElementById("ref_no_" + accountId);
 
             if (checkbox.checked) {
                 amountInput.style.display = "block";
                 amountInput.required = true;
+
+                if (accountStatus !== 1 && refNoInput) {
+                    refNoInput.style.display = "block";
+                    refNoInput.required = true;
+                }
             } else {
                 amountInput.style.display = "none";
                 amountInput.required = false;
                 amountInput.value = "";
+
+                if (accountStatus !== 1 && refNoInput) {
+                    refNoInput.style.display = "none";
+                    refNoInput.required = false;
+                    refNoInput.value = "";
+                }
             }
         }
     </script>
+
 
 
 @include('layouts.footer')

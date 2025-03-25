@@ -13,23 +13,26 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="card-title mb-0">Sessions</h5>
-                    <div class="d-flex align-items-center gap-2">
-                        <label class="col-form-label mb-0">Session Type:</label>
-                        <div class="d-flex gap-2">
-                            <input type="radio"  name="session_type" value="normal" checked> Normal
-                            <input type="radio"  name="session_type" value="offer"> Offer
-                            <input type="radio" name="session_type" value="ministry"> Pact
-                        </div>
-                    </div>
                     <div class="form-group mb-0">
-                        <input type="text" class="form-control form-control-sm" id="clinic_no" class="clinic_no" name="clinic_no"
-                               placeholder="Patinet Detail" style="max-width: 170px;">
+                        <input type="text" class="form-control form-control-sm" id="clinic_no" name="clinic_no"
+                               placeholder="Patient Detail" style="max-width: 170px;">
                     </div>
                 </div>
 
                 <div class="card-body">
                     <form class="add_session">
                         @csrf
+                        <!-- Session Type (Moved inside the form but visually same position) -->
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div class="d-flex align-items-center gap-2">
+                                <label class="col-form-label mb-0">Session Type:</label>
+                                <div class="d-flex gap-2">
+                                    <input type="radio" name="session_type" value="normal" checked> Normal
+                                    <input type="radio" name="session_type" value="offer"> Offer
+                                    <input type="radio" name="session_type" value="ministry"> Pact
+                                </div>
+                            </div>
+                        </div>
                         <div class="row g-2">
                             <div class="col-md-3">
                                 <label class="col-form-label">Title:</label>
@@ -147,6 +150,7 @@
         </div>
     </div>
     </div>
+
 
 
 @include('layouts.footer')

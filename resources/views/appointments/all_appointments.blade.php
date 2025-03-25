@@ -30,11 +30,12 @@
                             <table id="all_appointments" class="table table-striped  mb-4 dataTablesCard fs-14">
                                 <thead>
                                     <tr>
-                                        <th>Sr.No</th>
+                                        <th>Appt.No</th>
                                         <th> Patinet Name</th>
                                         <th>Doctor Name</th>
                                         <th>Appointment Status</th>
                                         <th>Appoitnemnt Fee</th>
+                                        <th>Session Fee</th>
                                         <th>Appointment Date</th>
                                         <th>Added By </th>
                                         <th>Added On </th>
@@ -185,7 +186,7 @@
 
                     <!-- Payment Status Message (Only for Pending Payments) -->
                     <div id="pendingPaymentAlert" class="alert alert-warning text-center d-none">
-                        <i class="fas fa-exclamation-triangle"></i> <strong>This payment can be kept as pending.</strong>
+                        <i class="fas fa-exclamation-triangle"></i> <strong>This payment will be kept as pending.</strong>
                     </div>
 
                     <!-- Payment Method Title -->
@@ -195,7 +196,7 @@
                     </div>
 
                     <!-- Payment Methods with Amount Input -->
-                    <div class="row">
+                    <div class="row" id="accountss">
                         @foreach ($accounts as $account)
                             <div class="col-12 col-md-6 mb-3"> <!-- Stacks on small screens, 2 columns on medium+ -->
                                 <div class="form-check">
@@ -205,7 +206,13 @@
                                     </label>
                                 </div>
                                 <!-- Amount Input (Initially Hidden) -->
+
                                 <input type="number" class="form-control form-control-sm payment-amount-input mt-1" id="amount_{{ $account->id }}" name="payment_amounts[{{ $account->id }}]" placeholder="Enter amount" min="0" step="0.01" style="display: none;">
+                                @if($account->account_status != 1)
+                                <input type="text" class="form-control form-control-sm payment-ref-input mt-1"
+                                id="ref_no_{{ $account->id }}" name="payment_ref_nos[{{ $account->id }}]"
+                                placeholder="Enter Ref No (if required)" style="display: none;">
+                                @endif
                             </div>
                         @endforeach
                     </div>
@@ -232,19 +239,23 @@
 
 
 <script>
-    function toggleAmountInput(accountId) {
-        var checkbox = document.getElementById("account_" + accountId);
-        var amountInput = document.getElementById("amount_" + accountId);
+ function toggleAmountInput(accountId) {
+    var checkbox = document.getElementById("account_" + accountId);
+    var amountInput = document.getElementById("amount_" + accountId);
+    var refNoInput = document.getElementById("ref_no_" + accountId);
 
-        if (checkbox.checked) {
-            amountInput.style.display = "block";
-            amountInput.required = true;
-        } else {
-            amountInput.style.display = "none";
-            amountInput.required = false;
-            amountInput.value = "";
-        }
+    if (checkbox.checked) {
+        amountInput.style.display = "block";
+        refNoInput.style.display = "block";
+        amountInput.required = true;
+    } else {
+        amountInput.style.display = "none";
+        refNoInput.style.display = "none";
+        amountInput.required = false;
+        amountInput.value = "";
+        refNoInput.value = "";
     }
+}
 
 
 </script>

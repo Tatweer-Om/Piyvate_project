@@ -113,17 +113,35 @@ public function show_appointment()
             $doctor_name = Doctor::where('id', $appointment->doctor_id)->value('doctor_name');
             $patient_name = Patient::where('id', $appointment->patient_id)->value('full_name');
             $country_name = Country::where('id', $appointment->country_id)->value('name');
-            $sno++;
+            $session = SessionsPayment::where('appointment_id', $appointment->id)->first();
+            $session_payment = '';
 
+            if ($session) {
+                if ($session->payment_status == 3) {
+                    $session_payment = '<span class="badge bg-secondary bg-sm text-center">' . $session->amount . ' OMR (Pending)</span>'; // Green
+                } elseif ($session->payment_status == 2) {
+                    $session_payment = '<span class="badge bg-warning bg-sm text-center text-dark">' . $session->amount . ' OMR (Offer)</span>'; // Yellow
+                } else {
+                    $session_payment = '<span class="badge bg-danger bg-sm text-center">' . $session->amount . ' OMR (Normal)</span>'; // Red
+                }
+            } else {
+                 $session_payment = '<span class="badge bg-info bg-sm text-center">Appointment Only</span>'; // Red
+
+            }
+
+
+            $sno++;
             $json[] = array(
-                '<span class="patient-info ps-0">' . $sno . '</span>',
+                '<span class="patient-info ps-0">' . $appointment->appointment_no . '</span>',
                 '<span class="text-nowrap ms-2">' . $patient_name . '</span>',
                 '<span class="text-primary">' . $doctor_name . '</span>',
                 $modal2,
                 '<span class="badge bg-success bg-sm text-center">' . $appointment->appointment_fee . ' OMR</span>',
+
+                '<span class="d-block ">' . $session_payment . '</span>',
                 '<span>' . $appointment_date_time . '</span>',
-                '<span >' . $appointment->added_by . '</span>',
-                '<span >' . $added_date . '</span>',
+                '<span>' . $appointment->added_by . '</span>',
+                '<span>' . $added_date . '</span>',
                 $modal
             );
         }
@@ -192,9 +210,30 @@ public function add_appointment(Request $request)
 
         }
 
+        $month = date('n');
+        $year = date('y');
+        $clinicPrefix = "{$month}{$year}A-";
+
+        $lastAppointment = Appointment::where('appointment_no', 'like', "{$clinicPrefix}%")
+            ->orderBy('clinic_no', 'desc')
+            ->first();
+
+        if ($lastAppointment) {
+            $lastSequence = (int) substr($lastAppointment->clinic_no, strrpos($lastAppointment->clinic_no, '-') + 1);
+            $newSequence = str_pad($lastSequence + 1, 3, '0', STR_PAD_LEFT);
+        } else {
+            $newSequence = '001';
+        }
+
+        $clinicNo = "{$clinicPrefix}{$newSequence}";
+
+
+        $clinicNo = "{$clinicPrefix}{$newSequence}";
+
         $appointment = new Appointment();
         $appointment->patient_id = $patient->id; // Link patient
         $appointment->clinic_no = $patient->clinic_no; // Link patient
+        $appointment->appointment_no =  $clinicNo;
         $appointment->doctor_id = $request->doctor;
         $appointment->appointment_date = $request->appointment_date;
         $appointment->appointment_fee = $setting->appointment_fee;
@@ -218,28 +257,28 @@ public function add_appointment(Request $request)
         if ($request->has('payment_methods') && $request->has('payment_amounts')) {
             foreach ($request->payment_methods as $paymentMethodId) {
                 $paidAmount = $request->payment_amounts[$paymentMethodId] ?? 0;
+                $refNo = $request->payment_ref_nos[$paymentMethodId] ?? null; // Get ref_no if exists
+
 
                 if ($paidAmount > 0) {
-                    // Save payment in `appointment_payment`
                     $payment = new AppointmentPayment();
                     $payment->appointment_id = $appointment->id;
                     $payment->account_id = $paymentMethodId;
+                    $payment->ref_no = $refNo;
+
                     $payment->amount = $paidAmount;
                     $payment->user_id = $user_id;
                     $payment->branch_id = $branch_id;
                     $payment->added_by = $user;
                     $payment->save();
 
-                    // Update account balance
                     $account = Account::find($paymentMethodId);
                     if ($account) {
                         $account->opening_balance += $paidAmount;
                         $account->save();
 
-                        // Handle Commission if Account has a fee
                         if ($account->account_status != 1 && !empty($account->commission) && $account->commission > 0) {
                             $commissionFee = ($paidAmount / 100) * $account->commission;
-
                             $paymentExpense = new AppointPaymentExpense();
                             $paymentExpense->total_amount = $paidAmount;
                             $paymentExpense->account_tax = $account->commission;
@@ -253,7 +292,6 @@ public function add_appointment(Request $request)
                         }
                     }
 
-                    // Update total paid & remaining balance
                     $totalPaid += $paidAmount;
                     $remainingBalance -= $paidAmount;
                 }
@@ -578,11 +616,11 @@ public function getMinistryDetails($id)
             if ($request->session_type == 'ministry') {
                 $appoint = Appointment::where('id', $request->appointment_id)->first();
 
-                if ($appoint) { // Ensure appointment exists
+                if ($appoint) {
                     $appoint->payment_status = 3;
-                    $appoint->save(); // Save changes to DB
+                    $appoint->save();
                 } else {
-                    dd('Appointment not found'); // Debugging if appointment is missing
+                    dd('Appointment not found');
                 }
             }
 
@@ -591,7 +629,6 @@ public function getMinistryDetails($id)
             ? $request->total_price / $request->total_sessions
             : 0;
 
-            // Create a new appointment detail
             $appointment = new AppointmentDetail();
             $appointment->appointment_id = $request->appointment_id;
             $appointment->session_type = $request->session_type;
@@ -631,22 +668,25 @@ public function getMinistryDetails($id)
             return response()->json(['success' => false, 'message' => 'User not found'], 404);
         }
 
-
-
         $totalPaid = 0;
 
-        // Case 1: If payment methods are provided
+        $appointment = Appointment::where('id', $request->appointment_id2)->first();
+        $appointment->session_status= 3;
+        $appointment->save();
+
+
         if (is_array($request->payment_methods) && !empty($request->payment_methods)) {
             foreach ($request->payment_methods as $paymentData) {
                 $paymentMethodId = $paymentData['account_id'];
                 $paidAmount = $paymentData['amount'];
+                $refNo = $paymentData['ref_no'];
 
                 if ($paidAmount > 0) {
-                    // Save payment in `sessions_payment`
                     $payment = new SessionsPayment();
                     $payment->appointment_id = $request->appointment_id2;
                     $payment->payment_status = $request->payment_status;
                     $payment->account_id = $paymentMethodId;
+                    $payment->ref_no = $refNo;
                     $payment->amount = $paidAmount;
                     $payment->user_id = $user_id;
                     $payment->branch_id = $user->branch_id;
@@ -656,13 +696,11 @@ public function getMinistryDetails($id)
                     $appointii= Appointment::where('id', $request->appointment_id2)->first();
                     $appointii->session_status= 3;
                     $appointii->save();
-                    // Update account balance
                     $account = Account::find($paymentMethodId);
                     if ($account) {
                         $account->opening_balance += $paidAmount;
                         $account->save();
 
-                        // Handle Commission if Account has a fee
                         if ($account->account_status != 1 && !empty($account->commission) && $account->commission > 0) {
                             $commissionFee = ($paidAmount / 100) * $account->commission;
 
@@ -683,12 +721,12 @@ public function getMinistryDetails($id)
                 }
             }
         } else {
-            // Case 2: No payment methods provided → Save a simple record
+
             $payment = new SessionsPayment();
             $payment->appointment_id = $request->appointment_id2;
             $payment->account_id = null; // No account since no payment method
             $payment->payment_status = $request->payment_status;
-            $payment->amount = 0; // No amount since no payment made
+            $payment->amount = $request->input('totalAmount'); // No amount since no payment made
             $payment->user_id = $user_id;
             $payment->branch_id = $user->branch_id;
             $payment->added_by = $user->id;
@@ -704,7 +742,7 @@ public function getMinistryDetails($id)
 
 
 
-//patient auto complete
+
 
 public function searchPatient(Request $request)
 {
