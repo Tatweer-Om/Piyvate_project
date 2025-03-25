@@ -9,6 +9,7 @@ use App\Models\Branch;
 use App\Models\Doctor;
 use App\Models\Sation;
 use App\Models\Account;
+use App\Models\Country;
 use App\Models\History;
 use App\Models\Patient;
 use App\Models\Session;
@@ -17,10 +18,13 @@ use App\Models\GovtDept;
 use App\Models\SessionList;
 use Illuminate\Http\Request;
 use App\Models\SessionDetail;
-use App\Models\SessionsonlyPayment;
-use App\Models\SessionsonlyPaymentExp;
+use App\Models\AllSessioDetail;
+use App\Models\AppointmentSession;
+use App\Models\SessionsallSession;
 use Illuminate\Support\Facades\DB;
+use App\Models\SessionsonlyPayment;
 use Illuminate\Support\Facades\Auth;
+use App\Models\SessionsonlyPaymentExp;
 
 class SessionCONTROLLER extends Controller
 {
@@ -78,11 +82,14 @@ class SessionCONTROLLER extends Controller
 
             $clinicNo = "{$clinicPrefix}{$newSequence}";
 
+            $sessions_count= $request->no_of_sessions;
+            $session_fee= $request->session_fee;
+
             $session = new SessionList();
             $session->doctor_id = $request->doctor;
             $session->session_type = $request->session_type;
-            $session->session_fee = $request->session_fee;
-            $session->no_of_sessions = $request->no_of_sessions;
+            $session->session_fee = $session_fee;
+            $session->no_of_sessions = $sessions_count;
             $session->session_gap = $request->session_gap;
             $session->session_date = $request->session_date;
             $session->offer_id = $request->offer_id;
@@ -95,10 +102,24 @@ class SessionCONTROLLER extends Controller
             $session->patient_id = $patient->id;
             $session->clinic_no = $patient->clinic_no;
             $session->session_no = $clinicNo;
-            $session->session_status = ($session->session_date > now()->toDateString()) ? 5 : 2;
-            $session->payment_status = 0;
+            if ($session->session_date > now()->toDateString()) {
+                $session->session_status = 5; // Set to "Pre-Registered"
+            } else {
+                $session->session_status = 2; // Set to "Appointment"
+            }
+            if ($session->session_type == 'normal') {
+                $session->payment_status = 1;
+            } elseif ($session->session_type == 'ministry') {
+                $session->payment_status = 3;
+            } elseif ($session->session_type == 'offer') {
+                $session->payment_status = 2;
+            } else {
+                $session->payment_status = 0;
+            }
 
             $session->save();
+
+
             if ($session->save()) {
                 return response()->json(['success' => true, 'session_id' => $session->id, 'message' => 'Session added successfully!']);
             } else {
@@ -184,6 +205,24 @@ class SessionCONTROLLER extends Controller
                 $appointment->branch_id = $user->branch_id;
                 $appointment->save();
 
+
+                $sessions = json_decode($request->sessions, true); // Convert JSON string to array
+
+                if (!empty($sessions)) {
+                    foreach ($sessions as $session) {
+                        $sessiondetail = new AllSessioDetail();
+                        $sessiondetail->session_id =  $appointment->session_id;
+                        $sessiondetail->patient_id =   $appointment->patient_id;
+
+                        $sessiondetail->session_date = $session['date'];
+                        $sessiondetail->session_time = $session['time'];
+                        $sessiondetail->session_price = $single_session_price;
+                        $sessiondetail->status = '1';
+                        $sessiondetail->save();
+                    }
+                }
+
+
                 return response()->json([
                     'success' => true,
                     'message' => trans('messages.appointment_add_success_lang'),
@@ -251,6 +290,7 @@ public function save_session_payment2(Request $request)
     }
 
     $totalPaid = 0;
+    // dd($request->session_id);
 
     $appointment = SessionList::find($request->session_id);
 
@@ -277,7 +317,6 @@ public function save_session_payment2(Request $request)
                 $payment->account_id = $paymentMethodId;
                 $payment->ref_no = $refNo;
                 $payment->amount = $paidAmount;
-                $payment->pending_amount= $request->totalAmount;
                 $payment->user_id = $user_id;
                 $payment->branch_id = $user->branch_id;
                 $payment->added_by = $user->id;
@@ -330,5 +369,84 @@ public function save_session_payment2(Request $request)
     ]);
 }
 
+public function all_sessions(){
+return view('appointments.all_sessions');
+}
+
+
+public function show_sessions()
+{
+    $sno = 0;
+    $appointments = SessionList::all();
+
+    if ($appointments->count() > 0) {
+        foreach ($appointments as $appointment) {
+            $total_sessions = (int) SessionDetail::where('session_id', $appointment->id)->value('total_sessions');
+
+            $modal = '
+            <a href="javascript:void(0);" class="me-3" >
+                <i class="fa fa-pencil fs-18 text-success"></i>
+            </a>
+            <a href="javascript:void(0);" onclick=del("'.$appointment->id.'")>
+                <i class="fa fa-trash fs-18 text-danger"></i>
+            </a>';
+
+
+
+            $appointment_date_time = $appointment->appointment_date . ' <br> (' . Carbon::parse($appointment->time_from)->format('h:i A') . ' - ' . Carbon::parse($appointment->time_to)->format('h:i A') . ')';
+            $added_date = Carbon::parse($appointment->created_at)->format('d-m-Y (h:i a)');
+            $doctor_name = Doctor::where('id', $appointment->doctor_id)->value('doctor_name');
+            $patient_name = Patient::where('id', $appointment->patient_id)->value('full_name');
+            $country_name = Country::where('id', $appointment->country_id)->value('name');
+            $session = SessionsonlyPayment::where('session_id', $appointment->id)->first();
+            $session_payment = '';
+
+            if ($session) {
+                if ($session->payment_status == 3) {
+                    $session_payment = '<span class="badge bg-secondary bg-sm text-center">' . $session->amount . ' OMR (Pending)</span>'; // Green
+                } elseif ($session->payment_status == 2) {
+                    $session_payment = '<span class="badge bg-warning bg-sm text-center text-dark">' . $session->amount . ' OMR (Offer)</span>'; // Yellow
+                } else {
+                    $session_payment = '<span class="badge bg-danger bg-sm text-center">' . $session->amount . ' OMR (Normal)</span>'; // Red
+                }
+            } else {
+                 $session_payment = '<span class="badge bg-info bg-sm text-center">Referenerce</span>'; // Red
+
+            }
+
+            $remaining_sessions= AppointmentSession::where('status', 1)->where('appointment_id', $appointment->id)->count();
+
+
+            $sno++;
+            $json[] = array(
+                '<span class="patient-info ps-0">' . $appointment->session_no . '</span>',
+                '<span class="text-nowrap ms-2">' . $patient_name . '</span>',
+                // '<span class="text-primary">' . $doctor_name . '</span>',
+                '<span class="badge bg-success bg-sm text-center">
+                    <i class="fas fa-list-alt me-1"></i>' . $appointment->no_of_sessions . '
+                </span>',
+                '<span class="badge bg-success bg-sm text-center"> <i class="fas fa-clock me-1"></i>' . $remaining_sessions . '</span>',
+
+                '<span class="d-block ">' . $session_payment . '</span>',
+                '<span>' . $appointment->added_by . '</span>',
+                '<span>' . $added_date . '</span>',
+                $modal
+
+            );
+        }
+
+        $response = array();
+        $response['success'] = true;
+        $response['aaData'] = $json;
+        echo json_encode($response);
+    } else {
+        $response = array();
+        $response['sEcho'] = 0;
+        $response['iTotalRecords'] = 0;
+        $response['iTotalDisplayRecords'] = 0;
+        $response['aaData'] = [];
+        echo json_encode($response);
+    }
+}
 
 }

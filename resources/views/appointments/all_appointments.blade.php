@@ -4,10 +4,7 @@
     @push('title')
         <title> {{ trans('messages.appointments_lang', [], session('locale')) }}</title>
     @endpush
-    <style>
-    /* Make button full-width on small screens */
 
-</style>
 <div class="content-body">
     <!-- row -->
     <div class="container-fluid">
@@ -64,7 +61,6 @@
             <div class="modal-body overflow-auto" style="max-height: 70vh;">
                 <form class="sessionForm">
                     <div class="row">
-                        <!-- Left Side: Patient & Doctor Details -->
                         <div class="col-12 col-md-6">
                             <h5>Patient: <span id="patient_name" class="fw-normal"></span></h5>
                             <input type="hidden" id="patient_id" name="patient_id">
@@ -256,7 +252,6 @@
         refNoInput.value = "";
     }
 }
-
 
 </script>
 

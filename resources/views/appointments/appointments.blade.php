@@ -138,7 +138,7 @@
                         <hr>
 
                         <!-- Payment Method Title -->
-                        <div class="col-lg-12">
+                        <div class="col-lg-12 deta">
                             <label class="col-form-label fw-bold fs-5">Select Payment Method</label>
                             <p class="text-muted">You can choose multiple payment methods and specify the amount for each.</p>
                         </div>

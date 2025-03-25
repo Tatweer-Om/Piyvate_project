@@ -2,6 +2,14 @@
 
 $(document).ready(function () {
 
+    $('#all_sessions').DataTable({
+            "sAjaxSource": "{{ url('show_sessions') }}",
+            "bFilter": true,
+            'pagingType': 'numbers',
+            "ordering": true,
+            "order": [[6, "desc"]]
+        });
+
     $(".add_session").submit(function (e) {
 
         e.preventDefault(); // Prevent form from refreshing
@@ -286,9 +294,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (response.success) {
                     show_notification('success', '{{ trans("messages.data_add_success_lang", [], session("locale")) }}');
                     $("#addSessionForm")[0].reset(); // Reset form
-                    $("#session_table tbody").empty(); // Clear sessions
                     $(".session_id").val(response.session_id);
-
                     $("#secondModal2").modal("show");
                 } else {
                     show_notification('error', '{{ trans("messages.data_add_failed_lang", [], session("locale")) }}');
@@ -434,7 +440,8 @@ $(document).ready(function () {
                     show_notification('success',
                     '{{ trans('messages.payment_added_success', [], session('locale')) }}');
                       $("#secondModal2").modal("hide");
-                    // $('#all_appointments').DataTable().ajax.reload();
+                      window.location.href = "/all_sessions";
+                    $('#all_sessions').DataTable().ajax.reload();
 
                 } else {
                     alert("Payment failed! " + response.message);
@@ -457,6 +464,8 @@ $(document).ready(function () {
         if (paymentStatus === 3) {
             $("#pendingPaymentAlert").removeClass("d-none").addClass("d-block");
             $("#accountss").hide();
+            $(".deta").hide();
+
         } else {
             $("#pendingPaymentAlert").removeClass("d-block").addClass("d-none");
         }
