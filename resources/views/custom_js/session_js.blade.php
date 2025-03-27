@@ -337,13 +337,16 @@ document.addEventListener('DOMContentLoaded', function () {
                 url: "/search_patient", // Define the backend route
                 type: "GET",
                 dataType: "json",
-                data: {
-                    query: request.term // Send the search term to the backend
-                },
+                data: { query: request.term }, // Send the search term to the backend
                 success: function (data) {
                     response($.map(data, function (item) {
                         return {
-                            label: item.first_name + " " + item.second_name + " - " + item.clinic_no + " - " + item.mobile, // Display format
+                            label: `
+                                <div class="_autocomplete-item">
+                                    <span class="_autocomplete-name">${item.first_name} ${item.second_name}</span>
+                                    <span class="_autocomplete-info">Clinic No: ${item.clinic_no} | ${item.mobile}</span>
+                                </div>
+                            `,
                             value: item.clinic_no, // The value inserted into the input field
                             patient: item // Store full patient data
                         };
@@ -352,10 +355,10 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         },
         minLength: 2, // Start searching after 2 characters
+        focus: function (event, ui) { return false; },
         select: function (event, ui) {
             if (ui.item.patient) {
                 let patient = ui.item.patient;
-
                 $("#title").val(patient.title);
                 $('#title').selectpicker('refresh');
                 $("#first_name").val(patient.first_name);
@@ -367,10 +370,15 @@ document.addEventListener('DOMContentLoaded', function () {
                 $('#country').selectpicker('refresh');
                 $('#doctor').selectpicker('refresh');
                 $("#doctor").val(patient.doctor_id);
-                            }
+            }
         }
-    });
+    }).autocomplete("instance")._renderItem = function (ul, item) {
+        return $("<li class='ui-menu-item'>")
+            .append(item.label)
+            .appendTo(ul);
+    };
 });
+
 
 
 document.addEventListener("DOMContentLoaded", function () {

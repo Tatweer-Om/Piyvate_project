@@ -629,28 +629,31 @@ $(document).ready(function () {
     $("#clinic_no").autocomplete({
         source: function (request, response) {
             $.ajax({
-                url: "/search-patient", // Define the backend route
+                url: "/search-patient",
                 type: "GET",
                 dataType: "json",
-                data: {
-                    query: request.term // Send the search term to the backend
-                },
+                data: { query: request.term },
                 success: function (data) {
                     response($.map(data, function (item) {
                         return {
-                            label: item.first_name + " " + item.second_name + " - " + item.clinic_no + " - " + item.mobile, // Display format
-                            value: item.clinic_no, // The value inserted into the input field
-                            patient: item // Store full patient data
+                            label: `
+                                <div class="_autocomplete-item">
+                                    <span class="_autocomplete-name">${item.first_name} ${item.second_name}</span>
+                                    <span class="_autocomplete-info"> ${item.clinic_no} | ${item.mobile}</span>
+                                </div>
+                            `,
+                            value: item.clinic_no,
+                            patient: item
                         };
                     }));
                 }
             });
         },
-        minLength: 2, // Start searching after 2 characters
+        minLength: 2,
+        focus: function (event, ui) { return false; }, // Prevent default input field fill on hover
         select: function (event, ui) {
             if (ui.item.patient) {
                 let patient = ui.item.patient;
-
                 $("#title").val(patient.title);
                 $('#title').selectpicker('refresh');
                 $("#first_name").val(patient.first_name);
@@ -662,10 +665,15 @@ $(document).ready(function () {
                 $('#country').selectpicker('refresh');
                 $('#doctor').selectpicker('refresh');
                 $("#doctor").val(patient.doctor_id);
-                            }
+            }
         }
-    });
+    }).autocomplete("instance")._renderItem = function (ul, item) {
+        return $("<li class='ui-menu-item'>")
+            .append(item.label)
+            .appendTo(ul);
+    };
 });
+
 
 </script>
 

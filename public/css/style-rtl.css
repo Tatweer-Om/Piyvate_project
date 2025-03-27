@@ -4,8 +4,8 @@
     Name                 : Eres
     Author               : DexignZone
     Author Portfolio     : https://themeforest.net/user/dexignzone/portfolio
-    
-	
+
+
     Table of Sass Contents
 
     1. Abstracts
@@ -15,7 +15,7 @@
         _mixin
         _variable
 
-    2. bootstrap 
+    2. bootstrap
         -Here goes all official bootstrap scss files
 
     3. Global/Base
@@ -26635,3 +26635,41 @@ html[dir="rtl"] [direction="rtl"][data-sidebar-style="compact"]:not([data-layout
   padding-right: 9.375rem; }
 
 /*# sourceMappingURL=style.css.map */
+
+.ui-autocomplete {
+    max-height: 250px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    font-size: 14px;
+    background: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.ui-menu-item {
+    padding: 8px 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #eee;
+}
+
+.ui-menu-item:hover {
+    background: rgb(144, 238, 144);
+    color: white;
+}
+
+._autocomplete-item {
+    display: flex;
+    flex-direction: column;
+}
+
+._autocomplete-name {
+    font-weight: bold;
+    color: #007bff;
+}
+
+._autocomplete-info {
+    font-size: 12px;
+    color: #6c757d;
+}
