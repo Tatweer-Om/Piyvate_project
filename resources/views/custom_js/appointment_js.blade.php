@@ -639,10 +639,10 @@ $(document).ready(function () {
                             label: `
                                 <div class="_autocomplete-item">
                                     <span class="_autocomplete-name">${item.first_name} ${item.second_name}</span>
-                                    <span class="_autocomplete-info"> ${item.clinic_no} | ${item.mobile}</span>
+                                    <span class="_autocomplete-info"> ${item.HN} | ${item.mobile}</span>
                                 </div>
                             `,
-                            value: item.clinic_no,
+                            value: item.clinic_no, // Ensure only the clinic number is set in the input field
                             patient: item
                         };
                     }));
@@ -650,10 +650,14 @@ $(document).ready(function () {
             });
         },
         minLength: 2,
-        focus: function (event, ui) { return false; }, // Prevent default input field fill on hover
+        focus: function (event, ui) {
+            event.preventDefault(); // Prevent default behavior
+        },
         select: function (event, ui) {
+            event.preventDefault(); // Prevent inserting the `label` (HTML) in the input field
             if (ui.item.patient) {
                 let patient = ui.item.patient;
+                $("#clinic_no").val(patient.clinic_no); // Set only clinic_no in the input field
                 $("#title").val(patient.title);
                 $('#title').selectpicker('refresh');
                 $("#first_name").val(patient.first_name);
@@ -665,14 +669,75 @@ $(document).ready(function () {
                 $('#country').selectpicker('refresh');
                 $('#doctor').selectpicker('refresh');
                 $("#doctor").val(patient.doctor_id);
+                $("#gender").val(patient.gender);
+                $("#age_input").val(patient.age);
+                $("#age_value").text(patient.age);
+                $("#age_badge").show();
+                $("#gender_value").text(patient.gender);
+                $(".gender").val(patient.gender);
+                $("#gender_badge").show();
             }
         }
     }).autocomplete("instance")._renderItem = function (ul, item) {
         return $("<li class='ui-menu-item'>")
-            .append(item.label)
+            .append($(item.label)) // Use jQuery to parse HTML properly
             .appendTo(ul);
     };
 });
+
+
+
+$(document).ready(function () {
+    // Calculate and display age in years and months when DOB is selected
+    $("#dob").on("change", function () {
+        let dob = new Date($(this).val());
+        let today = new Date();
+        let ageYears = today.getFullYear() - dob.getFullYear();
+        let ageMonths = today.getMonth() - dob.getMonth();
+
+        // Adjust if the birthday hasn't occurred yet this year
+        if (today.getDate() < dob.getDate()) {
+            ageMonths--;
+        }
+
+        if (ageMonths < 0) {
+            ageYears--;
+            ageMonths += 12;
+        }
+
+        if (!isNaN(ageYears) && ageYears >= 0) {
+            let ageText = `${ageYears} years`;
+            if (ageMonths > 0) {
+                ageText += ` ${ageMonths} months`;
+            }
+
+            $("#age_value").text(ageText);
+            $("#age_input").val(`${ageYears} years ${ageMonths} months`);
+            $("#age_badge").show();
+        } else {
+            $("#age_badge").hide();
+        }
+    });
+
+    // Update gender based on selected title
+    $("#title").on("change", function () {
+        let title = $(this).val();
+        let gender = "";
+
+        if (title === "1") gender = "Female";  // Miss
+        if (title === "2") gender = "Male";    // Mr.
+        if (title === "3") gender = "Female";  // Mrs.
+
+        if (gender) {
+            $("#gender_value").text(gender);
+            $("#gender_input").val(gender);
+            $("#gender_badge").show();
+        } else {
+            $("#gender_badge").hide();
+        }
+    });
+});
+
 
 
 </script>

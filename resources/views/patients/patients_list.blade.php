@@ -38,11 +38,12 @@
                                 <thead>
                                     <tr>
 
-                                        <th>Sr No.</th>
-                                        <th>Patient ID</th>
+                                        <th>HN</th>
                                         <th>Patient Name</th>
                                         <th>Patient Phone</th>
                                         <th>Country</th>
+                                        <th>Age</th>
+
                                         <th>Branch</th>
                                         <th>Added On</th>
                                         <th>Added By</th>
@@ -114,7 +115,23 @@
                                 @endforeach
                             </select>
                         </div>
+                        <div class="col-md-3 mt-3">
+                            <div class="col-md-3 d-flex align-items-center">
+                                <span id="age_badge" class="badge bg-success" style="display: none; font-size: 12px;">
+                                    <i class="fas fa-birthday-cake"></i> Age: <span id="age_value">--</span>
+                                </span>
+                                <input type="hidden" id="age_input" name="age">
+                            </div>
+                            <br>
+                            <div class="col-md-3 d-flex align-items-center">
+                                <span id="gender_badge" class="badge bg-info" style="display: none; font-size: 12px;">
+                                    <i class="fas fa-venus-mars"></i> Gender: <span id="gender_value">--</span>
+                                </span>
+                                <input type="hidden" class="gender" id="gender_input" name="gender">
+                            </div>
+                        </div>
                     </div>
+
 
                     <!-- Details Section -->
                     <div class="mt-3">

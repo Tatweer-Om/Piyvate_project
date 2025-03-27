@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('doctor_id')->nullable();
             $table->string('patient_id')->nullable();
             $table->string('session_no')->nullable();
-            $table->string('clinic_no')->nullable();
+            $table->string('HN')->nullable();
             $table->string('session_type')->nullable();
             $table->string('session_fee')->nullable();
             $table->integer('no_of_sessions')->default(1);

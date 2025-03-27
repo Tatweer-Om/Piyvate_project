@@ -108,8 +108,39 @@
 
                             <div class="col-md-2">
                                 <label class="col-form-label">Appointment Fee:</label>
-                                <div class="alert alert-info p-2" id="appointment_fee" style="font-weight: bold;">
-                                    OMR {{ $setting->appointment_fee ?? '' }}
+                                <div class="input-group">
+                                    <span class="input-group-text">OMR</span>
+                                    <input type="text" class="form-control form-control-sm" id="appointment_fee" name="appointment_fee"
+                                           value="{{ $setting->appointment_fee ?? '' }}" style="font-weight: bold;">
+                                </div>
+                            </div>
+
+                            <div class="col-md-3 mt-3">
+                                <!-- Age Badge & Hidden Input -->
+                                <div class="col-md-3 d-flex align-items-center">
+                                    @php
+                                        $age = $patient->age ?? ''; // Fetch stored age directly from DB
+                                    @endphp
+
+                                    <span id="age_badge" class="badge bg-success" style="font-size: 14px; {{ $age ? '' : 'display: none;' }}">
+                                        Age: <span id="age_value">{{ $age ?: '--' }}</span>
+                                    </span>
+                                    <input type="hidden" id="age_input" name="age" value="{{ $age }}">
+                                </div>
+                                <br>
+
+                                <!-- Gender Badge & Hidden Input -->
+                                <div class="col-md-3 d-flex align-items-center">
+                                    @php
+                                        $gender = $patient->gender ?? ''; // Fetch stored gender from DB
+
+                                    @endphp
+
+                                    <span id="gender_badge" class="badge bg-info" style="font-size: 14px; {{ $gender ? '' : 'display: none;' }}">
+                                        <i class="{{ $genderMap[$gender]['icon'] ?? 'fas fa-venus-mars' }}"></i>
+                                        Gender: <span id="gender_value">{{ $gender ?? '' }}</span>
+                                    </span>
+                                    <input type="hidden" class="gender" id="gender_input" name="gender" value="{{ $gender }}">
                                 </div>
                             </div>
 

@@ -994,10 +994,21 @@
                         <ul aria-expanded="false">
                             <li><a href="{{ url('patient_list') }}">Patients</a></li>
                             <li><a href="{{ url('patient_profile') }}">Patient Profie</a></li>
-                            <li><a href="{{ url('govt') }}">Govt agencies</a></li>
+
 
                         </ul>
                     </li>
+                    <li><a href="javascript:void(0);" class="ai-icon has-arrow" aria-expanded="false">
+                        <i class="flaticon-381-id-card-4"></i>
+                        <span class="nav-text">Session Settings</span>
+                    </a>
+                    <ul aria-expanded="false">
+                        <li><a href="{{ url('sation') }}">Add Setting</a></li>
+                        <li><a href="{{ url('govt') }}">Govt agencies</a></li>
+                        <li><a href="{{ url('ministry_category') }}">Ministry Categrogies</a></li>
+
+                    </ul>
+                </li>
                     <li><a href="javascript:void(0);" class="ai-icon has-arrow" aria-expanded="false">
                             <i class="flaticon-381-id-card-4"></i>
                             <span class="nav-text">Doctors</span>
@@ -1039,6 +1050,7 @@
                     <ul aria-expanded="false">
                         <li><a href="{{ url('appointments') }}">Add Appointment</a></li>
                         <li><a href="{{ url('all_appointments') }}"> All appointments</a></li>
+                        <li><a href="{{ url('all_sessions') }}">Direct Session Bookings</a></li>
                         <li><a href="{{ url('sessions_list') }}">Add Sessions</a></li>
                         <li><a href="{{ url('session') }}">Session Setting</a></li>
 

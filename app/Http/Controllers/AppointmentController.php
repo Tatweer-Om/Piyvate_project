@@ -166,6 +166,7 @@ public function show_appointment()
 public function add_appointment(Request $request)
 {
 
+
     // dd($request->all());
     $user_id = Auth::id();
     $data = User::where('id', $user_id)->first();
@@ -190,9 +191,21 @@ public function add_appointment(Request $request)
         $patient = Patient::where('mobile', $request->mobile)->first();
 
         if (!$patient) {
-            $lastClinicNumber = Patient::max('clinic_no'); // Get last saved number
-            $nextNumber = $lastClinicNumber ? intval(explode('-', $lastClinicNumber)[1]) + 1 : 1;
-            $clinicNumber = sprintf('00-%d', $nextNumber);
+            $prefix = 'HN-125'; // Correct prefix format
+
+            $lastClinicNumber = Patient::where('HN', 'like', $prefix . '%')
+                ->orderBy('HN', 'desc')
+                ->value('HN');
+
+            if ($lastClinicNumber) {
+                $lastNumber = intval(substr($lastClinicNumber, strlen($prefix)));
+                $nextNumber = $lastNumber + 1;
+            } else {
+                $nextNumber = 1;
+            }
+
+            $clinicNumber = sprintf('%s%05d', $prefix, $nextNumber);
+
 
             $patient = new Patient();
             $patient->title = $request->title;
@@ -203,10 +216,12 @@ public function add_appointment(Request $request)
             $patient->country_id = $request->country;
             $patient->id_passport = $request->id_passport;
             $patient->dob = $request->dob;
+            $patient->age = $request->age;
+            $patient->gender = $request->gender;
             $patient->branch_id = $branch_id;
             $patient->added_by = $user;
             $patient->user_id = $user_id;
-            $patient->clinic_no = $clinicNumber;
+            $patient->HN = $clinicNumber;
             $patient->save();
 
         }
@@ -356,7 +371,7 @@ public function update_appointment(Request $request)
 
     // Save previous data before update (for history tracking)
     $previousPatientData = $patient->only([
-        'title', 'first_name', 'second_name', 'full_name', 'mobile', 'country_id', 'id_passport', 'dob', 'branch_id', 'updated_by'
+        'title', 'first_name', 'second_name', 'full_name', 'mobile', 'HN', 'country_id', 'id_passport', 'dob', 'branch_id', 'updated_by'
     ]);
 
     $previousAppointmentData = $appointment->only([
@@ -764,7 +779,7 @@ public function searchPatient(Request $request)
     $patients = DB::table('patients')
         ->where('first_name', 'LIKE', "%{$query}%")  // Use correct column name
         ->orWhere('second_name', 'LIKE', "%{$query}%")  // If you have a second name
-        ->orWhere('clinic_no', 'LIKE', "%{$query}%")
+        ->orWhere('HN', 'LIKE', "%{$query}%")
         ->orWhere('mobile', 'LIKE', "%{$query}%")
         ->limit(10)
         ->get();

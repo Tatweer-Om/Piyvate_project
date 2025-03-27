@@ -87,6 +87,13 @@ function edit(id) {
                 $("#first_name").val(patient.first_name);
                 $("#second_name").val(patient.second_name);
                 $("#mobile").val(patient.mobile);
+                $("#gender").val(patient.gender);
+                $("#age_input").val(patient.age);
+                $("#age_value").text(patient.age);
+                $("#age_badge").show();
+                $("#gender_value").text(patient.gender);
+                $(".gender").val(patient.gender);
+                $("#gender_badge").show();
                 $("#id_passport").val(patient.id_passport);
                 $("#dob").val(patient.dob);
                 $("#country").val(patient.country);
@@ -145,5 +152,55 @@ function del(id) {
     });
 }
 
+$(document).ready(function () {
+    // Calculate and display age in years and months when DOB is selected
+    $("#dob").on("change", function () {
+        let dob = new Date($(this).val());
+        let today = new Date();
+        let ageYears = today.getFullYear() - dob.getFullYear();
+        let ageMonths = today.getMonth() - dob.getMonth();
+
+        // Adjust if the birthday hasn't occurred yet this year
+        if (today.getDate() < dob.getDate()) {
+            ageMonths--;
+        }
+
+        if (ageMonths < 0) {
+            ageYears--;
+            ageMonths += 12;
+        }
+
+        if (!isNaN(ageYears) && ageYears >= 0) {
+            let ageText = `${ageYears} years`;
+            if (ageMonths > 0) {
+                ageText += ` ${ageMonths} months`;
+            }
+
+            $("#age_value").text(ageText);
+            $("#age_input").val(`${ageYears} years ${ageMonths} months`);
+            $("#age_badge").show();
+        } else {
+            $("#age_badge").hide();
+        }
+    });
+
+    // Update gender based on selected title
+    $("#title").on("change", function () {
+        let title = $(this).val();
+        let gender = "";
+
+        if (title === "1") gender = "Female";  // Miss
+        if (title === "2") gender = "Male";    // Mr.
+        if (title === "3") gender = "Female";  // Mrs.
+
+        if (gender) {
+            $("#gender_value").text(gender);
+            $("#gender_input").val(gender);
+            $("#gender_badge").show();
+        } else {
+            $("#gender_badge").hide();
+        }
+    });
+});
 
 </script>

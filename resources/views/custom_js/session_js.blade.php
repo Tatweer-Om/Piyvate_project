@@ -334,31 +334,35 @@ document.addEventListener('DOMContentLoaded', function () {
     $("#clinic_no").autocomplete({
         source: function (request, response) {
             $.ajax({
-                url: "/search_patient", // Define the backend route
+                url: "/search-patient",
                 type: "GET",
                 dataType: "json",
-                data: { query: request.term }, // Send the search term to the backend
+                data: { query: request.term },
                 success: function (data) {
                     response($.map(data, function (item) {
                         return {
                             label: `
                                 <div class="_autocomplete-item">
                                     <span class="_autocomplete-name">${item.first_name} ${item.second_name}</span>
-                                    <span class="_autocomplete-info">Clinic No: ${item.clinic_no} | ${item.mobile}</span>
+                                    <span class="_autocomplete-info"> ${item.HN} | ${item.mobile}</span>
                                 </div>
                             `,
-                            value: item.clinic_no, // The value inserted into the input field
-                            patient: item // Store full patient data
+                            value: item.clinic_no, // Ensure only the clinic number is set in the input field
+                            patient: item
                         };
                     }));
                 }
             });
         },
-        minLength: 2, // Start searching after 2 characters
-        focus: function (event, ui) { return false; },
+        minLength: 2,
+        focus: function (event, ui) {
+            event.preventDefault(); // Prevent default behavior
+        },
         select: function (event, ui) {
+            event.preventDefault(); // Prevent inserting the `label` (HTML) in the input field
             if (ui.item.patient) {
                 let patient = ui.item.patient;
+                $("#clinic_no").val(patient.clinic_no); // Set only clinic_no in the input field
                 $("#title").val(patient.title);
                 $('#title').selectpicker('refresh');
                 $("#first_name").val(patient.first_name);
@@ -370,15 +374,21 @@ document.addEventListener('DOMContentLoaded', function () {
                 $('#country').selectpicker('refresh');
                 $('#doctor').selectpicker('refresh');
                 $("#doctor").val(patient.doctor_id);
+                $("#gender").val(patient.gender);
+                $("#age_input").val(patient.age);
+                $("#age_value").text(patient.age);
+                $("#age_badge").show();
+                $("#gender_value").text(patient.gender);
+                $(".gender").val(patient.gender);
+                $("#gender_badge").show();
             }
         }
     }).autocomplete("instance")._renderItem = function (ul, item) {
         return $("<li class='ui-menu-item'>")
-            .append(item.label)
+            .append($(item.label)) // Use jQuery to parse HTML properly
             .appendTo(ul);
     };
 });
-
 
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -479,5 +489,54 @@ $(document).ready(function () {
         }
     });
 });
+
+
+$(document).ready(function () {
+    // Calculate Age and Show Badge with Years and Months
+    $("#dob").on("change", function () {
+        let dob = new Date($(this).val());
+        if (!isNaN(dob)) {
+            let today = new Date();
+            let ageYears = today.getFullYear() - dob.getFullYear();
+            let ageMonths = today.getMonth() - dob.getMonth();
+            let dayDiff = today.getDate() - dob.getDate();
+
+            // Adjust age if birthday hasn't occurred yet this year
+            if (dayDiff < 0) {
+                ageMonths--;
+            }
+            if (ageMonths < 0) {
+                ageYears--;
+                ageMonths += 12; // Convert negative months into positive by adjusting year
+            }
+
+            $("#age_badge").text("Age: " + ageYears + " years, " + ageMonths + " months").show();
+        } else {
+            $("#age_badge").hide();
+        }
+    });
+
+    // Detect Gender from Title and Show Badge
+    $("#title").on("change", function () {
+        let title = $(this).val();
+        let genderText = "Unknown";
+        let genderIcon = "fas fa-question-circle";
+
+        if (title == "1") {
+            genderText = "Female";
+            genderIcon = "fas fa-female";
+        } else if (title == "2") {
+            genderText = "Male";
+            genderIcon = "fas fa-male";
+        } else if (title == "3") {
+            genderText = "Female";
+            genderIcon = "fas fa-female";
+        }
+
+        $("#gender_badge").html('<i class="' + genderIcon + '"></i> Gender: ' + genderText).show();
+    });
+});
+
+
 
     </script>
