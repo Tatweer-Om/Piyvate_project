@@ -47,11 +47,11 @@ class PatientController extends Controller
 
                 $sno++;
                 $json[] = array(
-                    '<span class="patient-info ps-0">' . $sno . '</span>',
-                    '<span class="patient-info ps-0">' . $patient->clinic_no . '</span>',
+                    '<span class="patient-info ps-0">' . $patient->HN . '</span>',
                     '<span class="text-primary">' .$patient_name. '</span>',
-                    '<span >' . $patient->mobile . '</span>',
+                    '<span class="badge bg-primary"><i class="fas fa-phone-alt"></i> ' . $patient->mobile . '</span>',
                     '<span >' . $country . '</span>',
+                    '<span class="badge bg-secondary" style="font-size: 10px;"><i class="fas fa-birthday-cake"></i> ' . $patient->age . ' yrs</span>',
 
                     '<span>' . $branch . '</span>',
                     '<span>' . $add_data . '</span>',
@@ -92,10 +92,23 @@ class PatientController extends Controller
         $patient = Patient::where('mobile', $request->mobile)->first();
 
         if (!$patient) {
-            // Generate clinic number
-            $lastClinicNumber = Patient::max('clinic_no');
-            $nextNumber = $lastClinicNumber ? intval(explode('-', $lastClinicNumber)[1]) + 1 : 1;
-            $clinicNumber = sprintf('00-%d', $nextNumber);
+            $prefix = 'HN-125'; // Correct prefix format
+
+            $lastClinicNumber = Patient::where('HN', 'like', $prefix . '%')
+                ->orderBy('HN', 'desc')
+                ->value('HN');
+
+            if ($lastClinicNumber) {
+                $lastNumber = intval(substr($lastClinicNumber, strlen($prefix)));
+                $nextNumber = $lastNumber + 1;
+            } else {
+                $nextNumber = 1;
+            }
+
+            $clinicNumber = sprintf('%s%05d', $prefix, $nextNumber);
+
+
+
 
             // Create new patient
             $patient = new Patient();
@@ -107,10 +120,12 @@ class PatientController extends Controller
             $patient->country_id = $request->country;
             $patient->id_passport = $request->id_passport;
             $patient->dob = $request->dob;
+            $patient->gender = $request->gender;
+            $patient->age = $request->age;
             $patient->branch_id = $branch_id;
             $patient->added_by = $user;
             $patient->user_id = $user_id;
-            $patient->clinic_no = $clinicNumber;
+            $patient->HN = $clinicNumber;
             $patient->save();
 
             return response()->json(['success' => 'Patient added successfully', 'patient_id' => $patient->id]);
@@ -138,6 +153,8 @@ class PatientController extends Controller
             'mobile' => $patient->mobile,
             'id_passport' => $patient->id_passport,
             'dob' => $patient->dob,
+            'age' => $patient->age,
+            'gender' => $patient->gender,
             'country' => $patient->country_id,
             'details' => $patient->details,
         ]);
@@ -149,8 +166,6 @@ class PatientController extends Controller
         $data = User::where('id', $user_id)->first();
         $user = $data->user_name;
         $branch_id = $data->branch_id;
-
-        // Determine title
 
 
         $patient = Patient::find($request->input('patient_id'));
@@ -174,9 +189,7 @@ class PatientController extends Controller
         // Generate full name
         $full_name = trim($title . ' ' . $request->first_name . ' ' . $request->second_name);
 
-        $lastClinicNumber = Patient::max('clinic_no');
-        $nextNumber = $lastClinicNumber ? intval(explode('-', $lastClinicNumber)[1]) + 1 : 1;
-        $clinicNumber = sprintf('00-%d', $nextNumber);
+
 
         // Create new patient
         $patient->title = $request->title;
@@ -187,15 +200,18 @@ class PatientController extends Controller
         $patient->country_id = $request->country;
         $patient->id_passport = $request->id_passport;
         $patient->dob = $request->dob;
+        $patient->gender = $request->gender;
+        $patient->age = $request->age;
+
         $patient->branch_id = $branch_id;
         $patient->added_by = $user;
         $patient->user_id = $user_id;
-        $patient->clinic_no = $clinicNumber;
+        $patient->HN = $patient->HN;
         $patient->save();
 
         // Save update history
         $updatedData = $patient->only([
-            'title', 'first_name', 'second_name', 'mobile', 'id_passport', 'dob', 'country', 'details', 'added_by'
+            'title', 'first_name', 'second_name', 'mobile', 'gender', 'age', 'HN', 'id_passport', 'dob', 'country', 'details', 'added_by'
         ]);
 
         $history = new History();
@@ -225,7 +241,7 @@ class PatientController extends Controller
 
         // Store previous data before deletion
         $previousData = $patient->only([
-            'title', 'first_name', 'second_name', 'mobile', 'id_passport', 'dob', 'country', 'details', 'added_by', 'created_at'
+            'title', 'first_name', 'second_name', 'gender', 'age', 'HN', 'mobile', 'id_passport', 'dob', 'country', 'details', 'added_by', 'created_at'
         ]);
 
         // Get current user info

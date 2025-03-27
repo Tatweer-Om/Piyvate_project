@@ -134,6 +134,25 @@
                                 <input type="hidden" name="session_fee" id="session_fee_input" value="0.00">
 
                             </div>
+                            <div class="col-md-2 mt-3">
+                                <!-- Age Badge & Hidden Input -->
+                                <div class="col-md-3 d-flex align-items-center">
+                                    <span id="age_badge" class="badge bg-success" style="display: none; font-size: 14px;">
+                                         Age: <span id="age_value">--</span>
+                                    </span>
+                                    <input type="hidden" id="age_input" name="age">
+                                </div>
+                                <br>
+
+                                <!-- Gender Badge & Hidden Input -->
+                                <div class="col-md-3 d-flex align-items-center">
+                                    <span id="gender_badge" class="badge bg-info" style="display: none; font-size: 14px;">
+                                        <i class="fas fa-venus-mars"></i> Gender: <span id="gender_value">--</span>
+                                    </span>
+                                    <input type="hidden" class="gender" id="gender_input" name="gender">
+                                </div>
+                            </div>
+
                             <div class="col-md-12">
                                 <label class="col-form-label">Notes:</label>
                                 <textarea class="form-control form-control-sm" id="notes" name="notes" rows="2"></textarea>

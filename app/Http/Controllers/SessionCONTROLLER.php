@@ -48,10 +48,20 @@ class SessionCONTROLLER extends Controller
             $patient = Patient::where('mobile', $request->mobile)->first();
 
             if (!$patient) {
-                $lastClinicNumber = Patient::max('clinic_no'); // Get last saved number
-                $nextNumber = $lastClinicNumber ? intval(explode('-', $lastClinicNumber)[1]) + 1 : 1;
-                $clinicNumber = sprintf('00-%d', $nextNumber);
+                $prefix = 'HN-125'; // Correct prefix format
 
+            $lastClinicNumber = Patient::where('HN', 'like', $prefix . '%')
+                ->orderBy('HN', 'desc')
+                ->value('HN');
+
+            if ($lastClinicNumber) {
+                $lastNumber = intval(substr($lastClinicNumber, strlen($prefix)));
+                $nextNumber = $lastNumber + 1;
+            } else {
+                $nextNumber = 1;
+            }
+
+            $clinicNumber = sprintf('%s%05d', $prefix, $nextNumber);
                 $patient = new Patient();
                 $patient->full_name = $full_name;
                 $patient->title = $request->title;
@@ -60,11 +70,13 @@ class SessionCONTROLLER extends Controller
                 $patient->mobile = $request->mobile;
                 $patient->id_passport = $request->id_passport;
                 $patient->dob = $request->dob;
+                $patient->age = $request->age;
+                $patient->gender = $request->gender;
                 $patient->country = $request->country;
                 $patient->branch_id = $branch_id;
                 $patient->added_by = $user;
                 $patient->user_id = $user_id;
-                $patient->clinic_no = $clinicNumber;
+                $patient->HN = $clinicNumber;
                 $patient->save();
             }
 
@@ -100,7 +112,7 @@ class SessionCONTROLLER extends Controller
             $session->branch_id = $branch_id;
             $session->notes = $request->notes;
             $session->patient_id = $patient->id;
-            $session->clinic_no = $patient->clinic_no;
+            $session->HN = $patient->HN;
             $session->session_no = $clinicNo;
             if ($session->session_date > now()->toDateString()) {
                 $session->session_status = 5; // Set to "Pre-Registered"
@@ -271,7 +283,7 @@ class SessionCONTROLLER extends Controller
     $patients = DB::table('patients')
         ->where('first_name', 'LIKE', "%{$query}%")  // Use correct column name
         ->orWhere('second_name', 'LIKE', "%{$query}%")  // If you have a second name
-        ->orWhere('clinic_no', 'LIKE', "%{$query}%")
+        ->orWhere('HN', 'LIKE', "%{$query}%")
         ->orWhere('mobile', 'LIKE', "%{$query}%")
         ->limit(10)
         ->get();
@@ -430,7 +442,7 @@ public function show_sessions()
                 '<span class="d-block ">' . $session_payment . '</span>',
                 '<span>' . $appointment->added_by . '</span>',
                 '<span>' . $added_date . '</span>',
-                $modal
+
 
             );
         }

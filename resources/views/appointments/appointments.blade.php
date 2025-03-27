@@ -95,10 +95,34 @@
 
                             <div class="col-md-2">
                                 <label class="col-form-label">Appointment Fee:</label>
-                                <div class="alert alert-info p-2" id="appointment_fee" style="font-weight: bold;">
-                                    OMR {{ $setting->appointment_fee ?? '' }}
+                                <div class="input-group">
+                                    <span class="input-group-text">OMR</span>
+                                    <input type="text" class="form-control form-control-sm" id="appointment_fee" name="appointment_fee"
+                                           value="{{ $setting->appointment_fee ?? '' }}" style="font-weight: bold;">
                                 </div>
                             </div>
+
+
+                            <div class="col-md-3 mt-3">
+                                <!-- Age Badge & Hidden Input -->
+                                <div class="col-md-3 d-flex align-items-center">
+                                    <span id="age_badge" class="badge bg-success" style="display: none; font-size: 14px;">
+                                         Age: <span id="age_value">--</span>
+                                    </span>
+                                    <input type="hidden" id="age_input" name="age">
+                                </div>
+                                <br>
+
+                                <!-- Gender Badge & Hidden Input -->
+                                <div class="col-md-3 d-flex align-items-center">
+                                    <span id="gender_badge" class="badge bg-info" style="display: none; font-size: 14px;">
+                                        <i class="fas fa-venus-mars"></i> Gender: <span id="gender_value">--</span>
+                                    </span>
+                                    <input type="hidden" class="gender" id="gender_input" name="gender">
+                                </div>
+                            </div>
+
+
 
                             <div class="col-md-12">
                                 <label class="col-form-label">Notes:</label>
@@ -107,7 +131,6 @@
                             <button type="button" class="btn btn-primary btn-sm" id="open_payment_modal">
                                 Add Payment
                             </button>
-
                         </div>
                 </form>
                 </div>

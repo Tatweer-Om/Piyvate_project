@@ -37,7 +37,6 @@
                                         <th>Sessions Fee</th>
                                         <th>Added By </th>
                                         <th>Added On </th>
-                                        <th class="text-end">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
