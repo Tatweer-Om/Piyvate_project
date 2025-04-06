@@ -15,8 +15,10 @@ return new class extends Migration
             $table->id();
             $table->integer('session_id'); // Removed foreign key constraint
             $table->string('patient_id'); // Removed foreign key constraint
-            $table->date('session_date');
-            $table->time('session_time');
+            $table->string('doctor_id')->nullable(); // Removed foreign key constraint
+
+            $table->date('session_date')->nullable();
+            $table->time('session_time')->nullable();
             $table->decimal('session_price', 10, 2);
             $table->string('status')
                   ->default('1')

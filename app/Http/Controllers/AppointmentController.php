@@ -231,11 +231,11 @@ public function add_appointment(Request $request)
         $clinicPrefix = "{$month}{$year}A-";
 
         $lastAppointment = Appointment::where('appointment_no', 'like', "{$clinicPrefix}%")
-            ->orderBy('clinic_no', 'desc')
+            ->orderBy('appointment_no', 'desc')
             ->first();
 
         if ($lastAppointment) {
-            $lastSequence = (int) substr($lastAppointment->clinic_no, strrpos($lastAppointment->clinic_no, '-') + 1);
+            $lastSequence = (int) substr($lastAppointment->appointment_no, strrpos($lastAppointment->appointment_no, '-') + 1);
             $newSequence = str_pad($lastSequence + 1, 3, '0', STR_PAD_LEFT);
         } else {
             $newSequence = '001';
@@ -246,9 +246,23 @@ public function add_appointment(Request $request)
 
         $clinicNo = "{$clinicPrefix}{$newSequence}";
 
+        $check = Appointment::where('clinic_no', $patient->HN)
+        ->whereDate('appointment_date', $request->appointment_date) // Ensure the appointment is for the specified date
+        ->exists(); // Check if any matching records exist
+
+    if ($check) {
+        return response()->json([
+            'error' => trans('messages.appointment_already_booked_for_today_lang'),
+            'status' => 7
+        ]);
+    }
+
+
+
+
         $appointment = new Appointment();
         $appointment->patient_id = $patient->id; // Link patient
-        $appointment->clinic_no = $patient->clinic_no; // Link patient
+        $appointment->clinic_no = $patient->HN; // Link patient
         $appointment->appointment_no =  $clinicNo;
         $appointment->doctor_id = $request->doctor;
         $appointment->appointment_date = $request->appointment_date;
@@ -665,6 +679,7 @@ public function getMinistryDetails($id)
                     $sessiondetail = new AppointmentSession();
                     $sessiondetail->appointment_id = $appointment->id;
                     $sessiondetail->patient_id =   $appointment->patient_id;
+                    $sessiondetail->doctor_id =   $appointment->doctor_id;
                     $sessiondetail->session_date = $session['session_date']; // Assuming `session_date` is provided
                     $sessiondetail->session_time = $session['session_time']; // Assuming `session_time` is provided
                     $sessiondetail->session_price = $single_session_price;

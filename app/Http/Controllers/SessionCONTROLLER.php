@@ -225,7 +225,7 @@ class SessionCONTROLLER extends Controller
                         $sessiondetail = new AllSessioDetail();
                         $sessiondetail->session_id =  $appointment->session_id;
                         $sessiondetail->patient_id =   $appointment->patient_id;
-
+                        $sessiondetail->doctor_id =   $appointment->doctor_id;
                         $sessiondetail->session_date = $session['date'];
                         $sessiondetail->session_time = $session['time'];
                         $sessiondetail->session_price = $single_session_price;

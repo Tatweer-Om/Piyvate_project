@@ -51,7 +51,7 @@ class PatientController extends Controller
                     '<span class="text-primary">' .$patient_name. '</span>',
                     '<span class="badge bg-primary"><i class="fas fa-phone-alt"></i> ' . $patient->mobile . '</span>',
                     '<span >' . $country . '</span>',
-                    '<span class="badge bg-secondary" style="font-size: 10px;"><i class="fas fa-birthday-cake"></i> ' . $patient->age . ' yrs</span>',
+                    '<span class="badge bg-secondary" style="font-size: 10px;"><i class="fas fa-birthday-cake"></i> ' . $patient->age . '</span>',
 
                     '<span>' . $branch . '</span>',
                     '<span>' . $add_data . '</span>',

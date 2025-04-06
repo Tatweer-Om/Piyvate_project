@@ -45,6 +45,12 @@
                 success: function(response) {
                     hidePreloader();
                     after_submit();
+                    if (response.status == 7) {
+                            show_notification('error',
+                                '{{ trans('messages.patient_appointment_already_booked_lang', [], session('locale')) }}'
+                            );
+                            return;
+                        }
                     show_notification('success',
                         '{{ trans('messages.appointment_add_success_lang', [], session('locale')) }}'
                         );
