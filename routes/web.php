@@ -48,10 +48,7 @@ Route::post('update_patient', [PatientController::class, 'update_patient'])->nam
 Route::post('edit_patient', [PatientController::class, 'edit_patient'])->name('edit_patient');
 Route::post('delete_patient', [PatientController::class, 'delete_patient'])->name('delete_patient');
 
-//doctorController
 
-Route::get('doctor_list', [DoctorController::class, 'doctor_list'])->name('doctor_list');
-Route::get('doctor_profile', [DoctorController::class, 'doctor_profile'])->name('doctor_profile');
 
 //staffController
 
@@ -326,6 +323,10 @@ Route::get('show_doctors', [DoctorController::class, 'show_doctors'])->name('sho
 Route::post('edit_doctor', [DoctorController::class, 'edit_doctor'])->name('edit_doctor');
 Route::post('update_doctor', [DoctorController::class, 'update_doctor'])->name('update_doctor');
 Route::post('delete_doctor', [DoctorController::class, 'delete_doctor'])->name('delete_doctor');
+Route::get('doctor_list', [DoctorController::class, 'doctor_list'])->name('doctor_list');
+Route::get('show_doctor_patients', [DoctorController::class, 'show_doctor_patients'])->name('show_doctor_patients');
+Route::get('doctor_profile/{id}', [DoctorController::class, 'doctor_profile'])->name('doctor_profile');
+Route::get('/doctor/{doctorId}/appointments', [DoctorController::class, 'getDoctorAppointments']);
 
 //GovtController
 Route::get('govt', [GovtController::class, 'index'])->name('govt');

@@ -8,12 +8,12 @@
     <div class="content-body">
         <!-- row -->
         <div class="container-fluid">
-            <div class="page-titles">
+            {{-- <div class="page-titles">
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a href="javascript:void(0)">Dashboard</a></li>
                     <li class="breadcrumb-item active"><a href="javascript:void(0)">Patient Details</a></li>
                 </ol>
-            </div>
+            </div> --}}
             <div class="d-md-flex d-block mb-3 align-items-center">
                 <div class="widget-timeline-icon py-3 py-md-2 px-1 overflow-auto">
                     <ul class="timeline">
