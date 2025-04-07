@@ -6,11 +6,12 @@ use Carbon\Carbon;
 use App\Models\Role;
 use App\Models\Staff;
 use App\Models\Branch;
+use App\Models\User;
 use App\Models\History;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 
 class StaffController extends Controller
 {
@@ -59,7 +60,7 @@ class StaffController extends Controller
 
 
                 $branch= Branch::where('id', $value->branch_id)->value('branch_name');
-                $role= Role::where('id', $value->role_id)->value('role_name');
+                $role= Role::where('id', $value->role)->value('role_name');
 
 
                 $sno++;
@@ -68,7 +69,6 @@ class StaffController extends Controller
                     '<span class="text-nowrap ms-2">' . $src .'  '. $employee_name . '</span>',
                     '<span class="text-primary">' . $value->employee_phone . '</span>',
                     '<span >' . $role . '</span>',
-
                     '<span >' .  $branch . '</span>',
                     '<span >' . $value->added_by . '</span>',
                     '<span >' . $add_data . '</span>',
@@ -94,10 +94,9 @@ class StaffController extends Controller
 
     public function add_employee(Request $request){
 
-        $employee_id = Auth::id();
-        $data= Staff::where('id', $employee_id)->first();
-        $employeename= $data->employee_name;
-
+        $user_id = Auth::id(); 
+        $data= User::where('id', $user_id)->first();
+        $user= $data->user_name; 
 
         $employee_image = "";
 
@@ -117,14 +116,14 @@ class StaffController extends Controller
         $employee->employee_name = $request['employee_name'];
         $employee->employee_email = $request['email'];
         $employee->employee_phone = $request['phone'];
-        $employee->permissions = implode(',',$request['permissions']);
+        // $employee->permissions = implode(',',$request['permissions']);
         $employee->password = Hash::make($request['password']);
         $employee->employee_image = $employee_image;
         $employee->branch_id = $request['branch_id'];
-        $employee->role_id = $request['role_id'];
+        $employee->role = $request['role_id'];
         $employee->notes = $request['notes'];
-        $employee->added_by = $employeename;
-        $employee->employee_id = $employee_id;
+        $employee->added_by = $user;
+        $employee->user_id = $user_id;
         $employee->save();
         return response()->json(['employee_id' => $employee->id]);
 

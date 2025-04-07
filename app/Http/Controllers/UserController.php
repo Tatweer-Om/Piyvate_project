@@ -383,14 +383,23 @@ class UserController extends Controller
 
 
 
-    public function logout(Request $request)
-{
-    if (Auth::check()) {
-        Auth::logout();
+    // public function logout(Request $request)
+    // {
+    //     if (Auth::check()) {
+    //         Auth::logout();
 
-        return response()->json(['status' => 1]);
+    //         return response()->json(['status' => 1]);
+    //     }
+    //     return response()->json(['status' => 2]);
+    // }
+    public function logout(Request $request)
+    {
+        if (Auth::check()) {
+            Auth::logout();
+            return redirect('home'); // redirect after logout
+        }
+
+        return redirect('login_page'); // or anywhere you want if not authenticated
     }
-    return response()->json(['status' => 2]);
-}
 
 }

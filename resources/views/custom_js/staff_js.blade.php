@@ -154,4 +154,26 @@
             let checkboxes = document.querySelectorAll('.permission-checkbox');
             checkboxes.forEach(checkbox => checkbox.checked = this.checked);
         });
+
+        function triggerUpload() {
+        document.getElementById("imageUpload").click();
+    }
+
+    function handleImageChange(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById("imagePreview").src = e.target.result;
+                document.getElementById("removeImage").style.display = "block";
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    function removeSelectedImage() {
+        document.getElementById("imagePreview").src = "{{ asset('images/dummy_images/cover-image-icon.png') }}";
+        document.getElementById("imageUpload").value = "";
+        document.getElementById("removeImage").style.display = "none";
+    }
     </script>

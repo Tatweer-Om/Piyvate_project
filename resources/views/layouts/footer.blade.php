@@ -198,7 +198,7 @@
         @include('custom_js.doctor_js')
         @elseif ($route_name == 'department')
         @include('custom_js.department_js')
-        @elseif ($route_name == 'staff')
+        @elseif ($route_name == 'staff_list')
         @include('custom_js.staff_js')
         @elseif ($route_name == 'user')
         @include('custom_js.user_js')

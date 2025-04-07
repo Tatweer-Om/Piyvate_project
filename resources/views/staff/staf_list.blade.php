@@ -186,15 +186,27 @@
                                 <!-- Image Preview (Click to Upload) -->
                                 <label class="col-form-label">Image</label>
 
-                                <img id="imagePreview" src="{{ asset('images/dummy_images/cover-image-icon.png') }}"
-                                    alt="Preview" class="img-fluid rounded employee_image" style="width: 100%; max-width: 100px; max-height: 100px; object-fit: cover; cursor: pointer;">
+                               <!-- Image Preview -->
+<img id="imagePreview" 
+src="{{ asset('images/dummy_images/cover-image-icon.png') }}"
+alt="Preview" 
+class="img-fluid rounded employee_image" 
+style="width: 100%; max-width: 100px; max-height: 100px; object-fit: cover; cursor: pointer;"
+onclick="triggerUpload()" />
 
-                                <!-- Hidden File Input -->
-                                <input type="file" id="imageUpload" name="employee_image" class="d-none employee_image" accept="image/*">
+<!-- Hidden File Input -->
+<input type="file" 
+  id="imageUpload" 
+  name="employee_image" 
+  class="d-none employee_image" 
+  accept="image/*" 
+  onchange="handleImageChange(event)" />
 
-                                <!-- Remove Button (X) -->
-                                <span id="removeImage" class="position-absolute top-0 end-0 bg-danger text-white rounded-circle px-2"
-                                    style="cursor: pointer; display: none;">&times;</span>
+<!-- Remove Button -->
+<span id="removeImage" 
+ class="position-absolute top-0 end-0 bg-danger text-white rounded-circle px-2" 
+ style="cursor: pointer; display: none;" 
+ onclick="removeSelectedImage()">&times;</span>
                             </div>
                         </div>
                     </div>
