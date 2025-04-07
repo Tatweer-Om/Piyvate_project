@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\AllSessioDetail;
 use Carbon\Carbon;
 use App\Models\Branch;
 use App\Models\Doctor;
@@ -10,10 +9,12 @@ use App\Models\History;
 use App\Models\Patient;
 use App\Models\Speciality;
 use App\Models\Appointment;
+use App\Models\SessionList;
 use Illuminate\Http\Request;
+use App\Models\AllSessioDetail;
 use App\Models\AppointmentDetail;
 use App\Models\AppointmentSession;
-use App\Models\SessionList;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
@@ -273,77 +274,86 @@ class DoctorController extends Controller
     }
 
 
-    // public function getDoctorAppointments($doctorId)
-    // {
-    //     $doctor = Doctor::with([
-    //         'appointmentSessions.patient',
-    //         'allSessionDetails.patient'
-    //     ])->findOrFail($doctorId);
-
-    //     // Fetch and merge data from both tables
-    //     $appointments = $doctor->appointmentSessions->map(function ($session) {
-    //         return [
-    //             'id' => $session->id,
-    //             'patient_name' => $session->patient->full_name ?? 'Unknown',
-    //             'date' => $session->session_date,
-    //             'time' => $session->session_time,
-    //             'created_at' => $session->created_at,
-    //             'updated_at' => $session->updated_at
-    //         ];
-    //     });
-
-    //     $allSessions = $doctor->allSessionDetails->map(function ($session) {
-    //         return [
-    //             'id' => $session->id,
-    //             'patient_name' => $session->patient->full_name ?? 'Unknown',
-    //             'date' => $session->session_date,
-    //             'time' => $session->session_time,
-    //             'created_at' => $session->created_at,
-    //             'updated_at' => $session->updated_at
-    //         ];
-    //     });
-
-    //     // Combine, sort by recent updates, and take only the latest 8
-    //     $combinedResults = $appointments->merge($allSessions)
-    //         ->sortByDesc('updated_at')
-    //         ->sortByDesc('created_at')
-    //         ->take(8)
-    //         ->values();
-
-    //     return response()->json($combinedResults);
-    // }
 
     public function getDoctorAppointments($doctorId)
-{
-    $appointments = Appointment::with('patient:id,full_name') // Load only required columns
-    ->where('doctor_id', $doctorId)
-    ->whereIn('session_status', [2, 5])
-    ->whereDate('appointment_date', now()->toDateString()) // Ensure appointment_date is today
-    ->orderByDesc('updated_at')
-    ->orderByDesc('created_at')
-    ->take(8)
-    ->get()
-        ->map(function ($session) {
-            return [
-                'id' => $session->id,
-                'patient_name' => $session->patient->full_name ?? 'Unknown', // Now patient relation works!
-                'date' => $session->appointment_date,
-             'appointment_no' => '<span class="badge text-white px-2 py-1 text-sm" style="background-color: #081339;">'
-            . $session->appointment_no
-            . '</span>',
+    {
+        // Fetch appointments with patient details
+        $appointments = Appointment::with('patient:id,full_name')
+            ->where('doctor_id', $doctorId)
+            ->whereIn('session_status', [2, 5])
+            ->whereDate('appointment_date', now()->toDateString()) // Fetch only today's appointments
+            ->orderByDesc('updated_at')
+            ->orderByDesc('created_at')
+            ->take(3)
+            ->get()
+            ->map(function ($session) {
+                return [
+                    'id' => $session->id,
+                    'patient_id' => $session->patient->id ?? null,  // Added patient ID
+                    'patient_name' => $session->patient->full_name ?? 'Unknown',
+                    'date' => $session->appointment_date,
+                    'appointment_no' => '<span class="badge text-white px-2 py-1 text-sm" style="background-color: #081339;">'
+                                        . $session->appointment_no
+                                        . '</span>',
+                    'time' => '<span class="badge light badge-secondary text-dark px-2 py-1 text-sm">'
+                              . date('h:ia', strtotime($session->time_from))
+                              . ' to '
+                              . date('h:ia', strtotime($session->time_to))
+                              . '</span>',
+                    'created_at' => $session->created_at,
+                    'updated_at' => $session->updated_at
+                ];
+            });
 
-                'time' => '<span class="badge light badge-secondary text-dark px-2 py-1 text-sm">'
-                . date('h:ia', strtotime($session->time_from))
-                . ' to '
-                . date('h:ia', strtotime($session->time_to))
-                . '</span>',                'created_at' => $session->created_at,
-                'created_at' => $session->created_at,
-                'updated_at' => $session->updated_at
-            ];
-        });
+        // Fetch today's appointment sessions with patient names, ordered by session time (most recent first)
+        $appointmentSessions = DB::table('appointment_sessions')
+            ->join('patients', 'appointment_sessions.patient_id', '=', 'patients.id') // Join with patients table
+            ->where('appointment_sessions.doctor_id', $doctorId)
+            ->whereDate('appointment_sessions.session_date', now()->toDateString()) // Fetch only today's sessions
+            ->select(
+                'appointment_sessions.id',
+                'appointment_sessions.session_time',
+                'appointment_sessions.patient_id',
+                'appointment_sessions.session_date',
+                'appointment_sessions.status',
+                'patients.full_name as patient_name', // Fetch the patient_name from the patients table
+                DB::raw("'appointment_sessions' as source")
+            )
+            ->orderByDesc('appointment_sessions.session_time') // Order by session time, most recent first
+            ->take(6) // Limit to the latest 6 sessions
+            ->get();
 
-    return response()->json($appointments);
-}
+        // Fetch today's all session details with patient names, ordered by session time (most recent first)
+        $allSessions = DB::table('all_sessio_details')
+            ->join('patients', 'all_sessio_details.patient_id', '=', 'patients.id') // Join with patients table
+            ->where('all_sessio_details.doctor_id', $doctorId)
+            ->whereDate('all_sessio_details.session_date', now()->toDateString()) // Fetch only today's sessions
+            ->select(
+                'all_sessio_details.id',
+                DB::raw("'' as session_time"),
+                'all_sessio_details.patient_id',
+                'all_sessio_details.session_date',
+                'all_sessio_details.session_time',
+                'all_sessio_details.status',
+                'patients.full_name as patient_name', // Fetch the patient_name from the patients table
+                DB::raw("'all_sessio_details' as source")
+            )
+            ->orderByDesc('all_sessio_details.session_time') // Order by session time, most recent first
+            ->take(6) // Limit to the latest 6 sessions
+            ->get();
+
+        // Merge both appointment and all sessions, and then limit to the latest 6
+        $sessions = $appointmentSessions->merge($allSessions)->take(6);
+
+        return response()->json([
+            'appointments' => $appointments,
+            'sessions' => $sessions
+        ]);
+    }
+
+
+
+
 
 public function show_doctor_patients(Request $request)
 {
@@ -412,6 +422,94 @@ public function show_doctor_patients(Request $request)
 
     return response()->json(['sEcho' => 0, 'iTotalRecords' => 0, 'iTotalDisplayRecords' => 0, 'aaData' => []]);
 }
+
+public function show_all_sessions_by_doctor(Request $request)
+{
+    $doctorId = $request->input('doctor_id');
+    $json = [];
+    $sno = 0;
+
+    // Get appointment sessions
+    $appointmentSessions = DB::table('appointment_sessions')
+        ->where('doctor_id', $doctorId)
+        ->select(
+            'id',
+            'session_time',
+            'patient_id',
+            'session_date',
+            'session_time',
+            'status',
+            DB::raw("'appointment_sessions' as source")
+        )
+        ->get();
+
+    // Get all session details
+    $allSessions = DB::table('all_sessio_details')
+        ->where('doctor_id', $doctorId)
+        ->select(
+            'id',
+            DB::raw("'' as session_time"),
+            'patient_id',
+            'session_date',
+            'session_time',
+            'status',
+            DB::raw("'all_sessio_details' as source")
+        )
+        ->get();
+
+    // Merge both appointment and all sessions
+    $sessions = $appointmentSessions->merge($allSessions);
+
+    // Loop through the sessions to create the table data
+    foreach ($sessions as $session) {
+        $sno++;
+
+        // Optional: Get patient name if needed
+        $patientName = DB::table('patients')->where('id', $session->patient_id)->value('full_name');
+
+        // Determine badge color based on the source
+        $badgeColor = 'bg-warning'; // Default badge color for source
+        $sourceText = ucfirst(str_replace('_', ' ', $session->source)); // Default text for source
+
+        if ($session->source == 'all_sessio_details') {
+            // For direct sessions, use a different badge color and text
+            $badgeColor = 'bg-success';
+            $sourceText = 'Direct Session';
+        }
+
+        // Determine badge color based on status
+        $statusBadgeColor = 'bg-secondary'; // Default badge color for status
+        $statusText = 'Unknown'; // Default text for status
+
+        if ($session->status == 1) {
+            $statusBadgeColor = 'bg-warning'; // Pending
+            $statusText = 'Pending';
+        } elseif ($session->status == 2) {
+            $statusBadgeColor = 'bg-success'; // Completed
+            $statusText = 'Completed';
+        } elseif ($session->status == 3) {
+            $statusBadgeColor = 'bg-info'; // Transferred
+            $statusText = 'Transferred';
+        }
+
+        // Add session data to the response
+        $json[] = [
+            '<span class="text-muted">#' . $sno . '</span>',
+            // '<span class="text-dark ">' . ($session->session_date ?? 'N/A') . '</span>',
+            '<span>' . Carbon::parse($session->session_date)->format('d-m-Y') . '</span>',
+            '<span>' . ($patientName ?? 'Unknown') . '</span>',
+            '<span>' . $session->session_time . '</span>',
+            '<span class="badge ' . $badgeColor . '">' . $sourceText . '</span>',
+            '<span class="badge ' . $statusBadgeColor . '">' . $statusText . '</span>', // Add status badge
+        ];
+    }
+
+    return response()->json(['success' => true, 'aaData' => $json]);
+}
+
+
+
+
 
 
 }

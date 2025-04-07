@@ -72,7 +72,7 @@ class SessionCONTROLLER extends Controller
                 $patient->dob = $request->dob;
                 $patient->age = $request->age;
                 $patient->gender = $request->gender;
-                $patient->country = $request->country;
+                $patient->country_id = $request->country;
                 $patient->branch_id = $branch_id;
                 $patient->added_by = $user;
                 $patient->user_id = $user_id;
@@ -196,7 +196,7 @@ class SessionCONTROLLER extends Controller
 
                 // Calculate price per session
                 $single_session_price = ($request->total_sessions > 0)
-                    ? $request->total_price / $request->total_sessions
+                    ? $request->session_fee / $request->no_of_sessions
                     : 0;
 
 
