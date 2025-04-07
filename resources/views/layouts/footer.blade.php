@@ -214,6 +214,8 @@
         @include('custom_js.offer_js')
         @elseif ($route_name == 'doctor_profile')
         @include('custom_js.doctor_profile_js')
+        @elseif ($route_name == 'patient_profile')
+        @include('custom_js.patient_profile_js')
         @elseif ($route_name == 'all_sessions')
         @include('custom_js.session_js')
         @elseif ($route_name == 'sation')

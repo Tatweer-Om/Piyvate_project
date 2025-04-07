@@ -20,6 +20,16 @@ class Doctor extends Model
     {
         return $this->hasMany(Appointment::class, 'doctor_id');
     }
+    public function appointmentDetails()
+    {
+        return $this->hasMany(AppointmentDetail::class, 'doctor_id'); // Assuming doctor_id is the foreign key in AppointmentDetail table
+    }
+
+    // Define the relationship with SessionDetail
+    public function sessionDetails()
+    {
+        return $this->hasMany(SessionDetail::class, 'doctor_id'); // Assuming doctor_id is the foreign key in SessionDetail table
+    }
 }
 
 

@@ -41,13 +41,20 @@ Route::get('/switch-language/{locale}', [HomeController::class, 'switchLanguage'
 //PatientController
 
 Route::get('patient_list', [PatientController::class, 'patient_list'])->name('patient_list');
-Route::get('patient_profile', [PatientController::class, 'patient_profile'])->name('patient_profile');
+Route::get('patient_profile/{id}', [PatientController::class, 'patient_profile'])->name('patient_profile');
 Route::get('show_patient', [PatientController::class, 'show_patient'])->name('show_patient');
 Route::post('add_patient', [PatientController::class, 'add_patient'])->name('add_patient');
 Route::post('update_patient', [PatientController::class, 'update_patient'])->name('update_patient');
 Route::post('edit_patient', [PatientController::class, 'edit_patient'])->name('edit_patient');
 Route::post('delete_patient', [PatientController::class, 'delete_patient'])->name('delete_patient');
+Route::get('/patient/{id}/appointments-and-sessions', [PatientController::class, 'getAppointmentsAndSessions']);
 
+// routes/web.php
+Route::get('/patient/{id}/appointments', [PatientController::class, 'getAppointments']);
+Route::get('/patient/{id}/sessions', [PatientController::class, 'getSessions']);
+Route::get('/patient/{id}/payments', [PatientController::class, 'getPayments']);
+Route::get('show_all_sessions_by_patient', [PatientController::class, 'show_all_sessions_by_patient'])->name('show_all_sessions_by_patient');
+Route::get('show_all_payment_by_patient', [PatientController::class, 'show_all_payment_by_patient'])->name('show_all_payment_by_patient');
 
 
 //staffController
@@ -326,6 +333,8 @@ Route::post('delete_doctor', [DoctorController::class, 'delete_doctor'])->name('
 Route::get('doctor_list', [DoctorController::class, 'doctor_list'])->name('doctor_list');
 Route::get('show_doctor_patients', [DoctorController::class, 'show_doctor_patients'])->name('show_doctor_patients');
 Route::get('doctor_profile/{id}', [DoctorController::class, 'doctor_profile'])->name('doctor_profile');
+Route::get('show_all_sessions_by_doctor', [DoctorController::class, 'show_all_sessions_by_doctor'])->name('show_all_sessions_by_doctor');
+
 Route::get('/doctor/{doctorId}/appointments', [DoctorController::class, 'getDoctorAppointments']);
 
 //GovtController
