@@ -18,6 +18,7 @@ return new class extends Migration
             $table->decimal('amount', 10, 2)->nullable();
             $table->integer('user_id');
             $table->string('ref_no')->nullable()->default('');
+            $table->string('contract_payment')->nullable()->comment('1 = Pending, 2 = Completed');
             $table->integer('payment_status')->nullable()->comment('0 = Default, 1 = Normal Session, 2 = Offer Session, 3 = Contract Pending');
             $table->integer('branch_id');
             $table->string('added_by');

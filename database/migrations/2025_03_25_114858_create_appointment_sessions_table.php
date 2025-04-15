@@ -13,10 +13,10 @@ return new class extends Migration
     {
         Schema::create('appointment_sessions', function (Blueprint $table) {
             $table->id();
-            $table->integer('appointment_id'); // Removed foreign key constraint
-            $table->string('patient_id'); // Removed foreign key constraint
-            $table->string('doctor_id')->nullable(); // Removed foreign key constraint
-
+            $table->integer('appointment_id');
+            $table->string('patient_id');
+            $table->string('doctor_id')->nullable();
+            $table->string('contract_payment')->nullable()->comment('1 = Pending, 2 = Completed');
             $table->date('session_date')->nullable();
             $table->time('session_time')->nullable();
             $table->decimal('session_price', 10, 2);

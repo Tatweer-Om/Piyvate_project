@@ -87,6 +87,15 @@
                                     @endforeach
                                 </select>
                             </div>
+                            <div class="col-md-3">
+                                <label class="col-form-label">Appointment Type</label>
+                                <select class="form-control form-control-sm appointment_type" id="appointment_type" name="appointment_type">
+                                    <option value="" {{ old('appointment_type', $appointment->appointment_type) == '' ? 'selected' : '' }}>Choose..</option>
+                                    <option value="OT" {{ old('appointment_type', $appointment->appointment_type) == 'OT' ? 'selected' : '' }}>OT</option>
+                                    <option value="PT" {{ old('appointment_type', $appointment->appointment_type) == 'PT' ? 'selected' : '' }}>PT</option>
+                                    <option value="OT_PT" {{ old('appointment_type', $appointment->appointment_type) == 'OT_PT' ? 'selected' : '' }}>Both OT, PT</option>
+                                </select>
+                            </div>
 
                             <div class="col-md-3">
                                 <label class="col-form-label">Appointment Date:</label>

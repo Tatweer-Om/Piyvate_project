@@ -277,7 +277,6 @@ class DoctorController extends Controller
 
     public function getDoctorAppointments($doctorId)
     {
-        // Fetch appointments with patient details
         $appointments = Appointment::with('patient:id,full_name')
             ->where('doctor_id', $doctorId)
             ->whereIn('session_status', [2, 5])
@@ -305,7 +304,6 @@ class DoctorController extends Controller
                 ];
             });
 
-        // Fetch today's appointment sessions with patient names, ordered by session time (most recent first)
         $appointmentSessions = DB::table('appointment_sessions')
             ->join('patients', 'appointment_sessions.patient_id', '=', 'patients.id') // Join with patients table
             ->where('appointment_sessions.doctor_id', $doctorId)
@@ -400,6 +398,12 @@ public function show_doctor_patients(Request $request)
                 $statusClass = 'badge-info';
                 $statusText = 'Pre-Registered';
                 $statusIcon = '<i class="fa fa-user-plus"></i> ';
+                $modal2 = '<span class="badge ' . $statusClass . ' px-2 py-1">' . $statusIcon . $statusText . '</span>';
+            }
+            elseif ($patient->session_status == 7) {
+                $statusClass = 'badge-info';
+                $statusText = 'Appointment Done';
+                $statusIcon = '<i class="fa fa-check-circle"></i> ';
                 $modal2 = '<span class="badge ' . $statusClass . ' px-2 py-1">' . $statusIcon . $statusText . '</span>';
             }
 

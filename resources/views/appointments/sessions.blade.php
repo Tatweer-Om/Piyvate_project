@@ -87,7 +87,7 @@
                                     <option value="">Choose...</option>
                                     <option value="OT">OT</option>
                                     <option value="PT">PT</option>
-                                    <option value="CT">CT</option>
+                                    {{-- <option value="CT">CT</option> --}}
                                 </select>
                             </div>
 

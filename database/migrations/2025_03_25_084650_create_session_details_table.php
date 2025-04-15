@@ -21,6 +21,8 @@ return new class extends Migration
             $table->integer('doctor_id');
             $table->decimal('total_fee', 10, 2);
             $table->integer('total_sessions');
+            $table->string('contract_payment')->nullable()->comment('1 = Pending, 2 = Completed');
+
             $table->decimal('single_session_price', 10, 2);
             $table->json('session_data'); // Stores session details in JSON format
             $table->integer('user_id');

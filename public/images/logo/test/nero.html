@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Physical Therapy Assessment and Treatment Plan</title>
+  <style>
+    body { font-family: Arial, sans-serif; font-size: 12px; }
+    .page { width: 850px; margin: auto; border: 1px solid #000; padding: 15px; }
+    .section-header { text-align: center; font-weight: bold; border: 1px solid #000; padding: 5px; margin-bottom: 10px; }
+    .input-line { border-bottom: 1px dotted #000; display: inline-block; min-width: 80px; }
+    .checkbox-group { display: inline-block; margin-right: 10px; }
+    .flex-row { display: flex; align-items: flex-start; justify-content: space-between; }
+    .body-images { text-align: center; width: 90px; margin-left: 20px; }
+    .stream-section { display: flex; justify-content: space-between; margin-top: 10px; }
+    .stream-table { flex: 1; margin-right: 10px; }
+    .stream-image-box { width: 100px; height: 100px; border: 1px solid #000; text-align: center; display: flex; flex-direction: column; justify-content: center; }
+    .stream-image-box p { margin: 0; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    td, th { border: 1px solid #000; padding: 3px; vertical-align: top; }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="section-header">
+      Physical Therapy Assessment and Treatment Plan for <u>Neuro</u> and Pediatric
+    </div>
+
+    <p>BP (<span class="input-line"></span>) PR (bpm) <span class="input-line"></span> RR (rpm) <span class="input-line"></span> T (°C) <span class="input-line"></span> O<sub>2</sub>sat (%) <span class="input-line"></span> BW (Kg) <span class="input-line"></span></p>
+
+    <p>Chief complaint......................................................................................................................................................................................................</p>
+    <p>History of illness..............................................................................................................................................................................................</p>
+    <p>Underlying................................................................ Precaution...............................................................................................................................</p>
+    <p>Operation..................................................................................</p>
+    <p>Laboratory Radiology result...........................................................................................................................................................................</p>
+
+    <div class="flex-row">
+      <div style="flex: 1;">
+        <p>Level of consciousness:
+          <span class="checkbox-group"><input type="checkbox"> Alert</span>
+          <span class="checkbox-group"><input type="checkbox"> Drowsy</span>
+          <span class="checkbox-group"><input type="checkbox"> Stupor</span>
+          <span class="checkbox-group"><input type="checkbox"> Semi coma</span>
+        </p>
+        <p>
+          <span class="checkbox-group"><input type="checkbox"> Coma</span>
+          Interpretered:
+          <span class="checkbox-group"><input type="checkbox"> No</span>
+          <span class="checkbox-group"><input type="checkbox"> Yes</span>
+        </p>
+        <p>Observation.................................................................................................................................................................................................</p>
+        <p>Muscle tone.................................................................................. Muscle strength.....................................................................................</p>
+        <p>Sensation..................................................... ➝ ASIA.................................................................................................................................</p>
+        <p>Bed mobility <span class="checkbox-group"><input type="checkbox"> Independent</span>
+                    <span class="checkbox-group"><input type="checkbox"> Dependent with.................................</span></p>
+        <p>Transfer <span class="checkbox-group"><input type="checkbox"> Independent</span>
+                 <span class="checkbox-group"><input type="checkbox"> Dependent with.................................</span></p>
+      </div>
+      <div class="body-images">
+        <img src="image.png" alt="Body Diagram" width="100"><br>
+      </div>
+    </div>
+
+    <div class="stream-section">
+      <table class="stream-table">
+        <tr><th>STREAM Score</th><th>Upper extremity</th><th>Lower extremity</th><th>Basic Mobility</th><th>Total</th></tr>
+        <tr><td>Score</td><td></td><td></td><td></td><td rowspan="2"></td></tr>
+        <tr><td>%</td><td></td><td></td><td></td></tr>
+      </table>
+      <div class="stream-image-box">
+        <p style="border-bottom: 1px solid #000;">&nbsp;</p>
+        <div style="display: flex; justify-content: space-between;">
+          <p>Rt.</p><p>Lt.</p>
+        </div>
+      </div>
+    </div>
+
+    <table>
+      <tr><th rowspan="2">Berg Balance Scale</th>
+          <td>Sit to standing</td><td>Stand with eyes closed score</td><td>Turning 360 degree</td></tr>
+      <tr>
+          <td>Standing unsupported</td><td>Standing with feet together score</td><td>Placing alternate foot on stool</td></tr>
+      <tr>
+          <td>Sitting unsupported</td><td>Reaching forward with outstretched arm</td><td>Standing with foot in front</td></tr>
+      <tr>
+          <td>Standing to sitting</td><td>Retrieving object from floor</td><td>Standing on one foot</td></tr>
+      <tr>
+          <td>Transfer</td><td>Turning to look behind</td><td>Total</td>
+      </tr>
+    </table>
+
+    <table>
+      <tr><th colspan="7">GMFM (for Pediatric)</th></tr>
+      <tr>
+        <th>Dimension</th>
+        <td>A. Lying & Rolling</td><td>B. Sitting</td><td>C. Crawling & Kneeling</td><td>D. Standing</td><td>E. Walking, Running and Jumping</td><td>Total Score</td>
+      </tr>
+      <tr><td>Score</td><td colspan="6"></td></tr>
+    </table>
+
+    <p>Gait analysis...................................................................................................................................................................................................</p>
+    <p>Others..............................................................................................................................................................................................................</p>
+
+    <p>ADL Feeding <span class="checkbox-group"><input type="checkbox"> Dependent</span>
+                 <span class="checkbox-group"><input type="checkbox"> Independent</span>
+       Bathing/Toileting <span class="checkbox-group"><input type="checkbox"> Dependent</span>
+                       <span class="checkbox-group"><input type="checkbox"> Independent</span>
+    </p>
+
+    <p>Dressing <span class="checkbox-group"><input type="checkbox"> Dependent</span>
+               <span class="checkbox-group"><input type="checkbox"> Independent</span>
+       Sleeping <span class="checkbox-group"><input type="checkbox"> Dependent</span>
+               <span class="checkbox-group"><input type="checkbox"> Independent</span>
+       Carrying <span class="checkbox-group"><input type="checkbox"> Dependent</span>
+               <span class="checkbox-group"><input type="checkbox"> Independent</span>
+    </p>
+
+    <p>Fall risk assessment:
+      <span class="checkbox-group"><input type="checkbox"> Low risks</span>
+      <span class="checkbox-group"><input type="checkbox"> High risks</span>
+    </p>
+
+    <p>Pain assessment: Does patient have pain? <span class="checkbox-group"><input type="checkbox"> No</span>
+                                            <span class="checkbox-group"><input type="checkbox"> Yes</span></p>
+    <p>Location..............................................................................................................................................................................................</p>
+    <p>Duration <span class="checkbox-group"><input type="checkbox"> Intermittent</span>
+               <span class="checkbox-group"><input type="checkbox"> Constant</span>
+       Characteristic of pain:
+      <span class="checkbox-group"><input type="checkbox"> Prick</span>
+      <span class="checkbox-group"><input type="checkbox"> Sharp</span>
+      <span class="checkbox-group"><input type="checkbox"> Dull</span>
+      <span class="checkbox-group"><input type="checkbox"> Burning</span>
+      <span class="checkbox-group"><input type="checkbox"> Colic</span>
+      <span class="checkbox-group"><input type="checkbox"> Others</span>
+    </p>
+
+    <p>Frequency:
+      <span class="checkbox-group"><input type="checkbox"> Less than daily</span>
+      <span class="checkbox-group"><input type="checkbox"> Daily</span>
+      <span class="checkbox-group"><input type="checkbox"> All the time</span>
+    </p>
+
+    <p>Pain re-assessment score............................................................................................</p>
+
+    <p>Assessment tool:
+      <span class="checkbox-group"><input type="checkbox"> NIPS</span>
+      <span class="checkbox-group"><input type="checkbox"> FLACC</span>
+      <span class="checkbox-group"><input type="checkbox"> FACES</span>
+      <span class="checkbox-group"><input type="checkbox"> NRS</span>
+    </p>
+
+    <p>PT diagnosis / Impression.......................................................................................................................................................................</p>
+
+    <p>Goal of treatment: Long term goal.......................................................................................................................................................</p>
+    <p style="margin-left: 50px;">Short term goal.........................................................................................................................................................................................</p>
+  </div>
+</body>
+</html>
