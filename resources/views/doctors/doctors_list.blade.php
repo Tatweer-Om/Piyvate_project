@@ -162,6 +162,19 @@
                       </select>
                     </div>
                   </div>
+                  <div class="col-lg-4 col-xl-4">
+                    <div class="form-group">
+                        <label class="col-form-label">Annual Leave Name</label>
+                        <input type="text" class="form-control annual_leaves isnumber"   name="annual_leaves"  >
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-xl-4">
+                    <div class="form-group">
+                        <label class="col-form-label">Emergeny Leaves</label>
+                        <input type="text" class="form-control emergency_leaves isnumber"   name="emergency_leaves"  >
+                    </div>
+                </div>
                   <div class="row mt-3">
                     <div class="col-12 col-md-8">
                       <div class="form-group">
