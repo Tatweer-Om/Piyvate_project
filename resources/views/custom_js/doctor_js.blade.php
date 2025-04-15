@@ -84,6 +84,8 @@ function edit(id) {
                 $(".password").val(fetch.password);
                 $(".email").val(fetch.email);
                 $(".phone").val(fetch.phone);
+                $(".annual_leaves").val(fetch.annual_leaves);
+                $(".emergency_leaves").val(fetch.emergency_leaves);
                 $(".notes").val(fetch.notes);
                 $(".doctor_image").attr("src", fetch.doctor_image);
                 $(".branch_id").val(fetch.branch_id).trigger('change');

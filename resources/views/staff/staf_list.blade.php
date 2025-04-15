@@ -169,6 +169,19 @@
                         </div>
                     </div>
 
+                    <div class="col-lg-4 col-xl-4">
+                        <div class="form-group">
+                            <label class="col-form-label">Annual Leave Name</label>
+                            <input type="text" class="form-control annual_leaves isnumber"   name="annual_leaves"  >
+                        </div>
+                    </div>
+ 
+                    <div class="col-lg-4 col-xl-4">
+                        <div class="form-group">
+                            <label class="col-form-label">Emergeny Leaves</label>
+                            <input type="text" class="form-control emergency_leaves isnumber"   name="emergency_leaves"  >
+                        </div>
+                    </div>
 
                     <div class="row mt-3">
                         <!-- Image Section -->
@@ -187,26 +200,26 @@
                                 <label class="col-form-label">Image</label>
 
                                <!-- Image Preview -->
-<img id="imagePreview" 
-src="{{ asset('images/dummy_images/cover-image-icon.png') }}"
-alt="Preview" 
-class="img-fluid rounded employee_image" 
-style="width: 100%; max-width: 100px; max-height: 100px; object-fit: cover; cursor: pointer;"
-onclick="triggerUpload()" />
+                                    <img id="imagePreview" 
+                                    src="{{ asset('images/dummy_images/cover-image-icon.png') }}"
+                                    alt="Preview" 
+                                    class="img-fluid rounded employee_image" 
+                                    style="width: 100%; max-width: 100px; max-height: 100px; object-fit: cover; cursor: pointer;"
+                                    onclick="triggerUpload()" />
 
-<!-- Hidden File Input -->
-<input type="file" 
-  id="imageUpload" 
-  name="employee_image" 
-  class="d-none employee_image" 
-  accept="image/*" 
-  onchange="handleImageChange(event)" />
+                                    <!-- Hidden File Input -->
+                                    <input type="file" 
+                                    id="imageUpload" 
+                                    name="employee_image" 
+                                    class="d-none employee_image" 
+                                    accept="image/*" 
+                                    onchange="handleImageChange(event)" />
 
-<!-- Remove Button -->
-<span id="removeImage" 
- class="position-absolute top-0 end-0 bg-danger text-white rounded-circle px-2" 
- style="cursor: pointer; display: none;" 
- onclick="removeSelectedImage()">&times;</span>
+                                    <!-- Remove Button -->
+                                    <span id="removeImage" 
+                                    class="position-absolute top-0 end-0 bg-danger text-white rounded-circle px-2" 
+                                    style="cursor: pointer; display: none;" 
+                                    onclick="removeSelectedImage()">&times;</span>
                             </div>
                         </div>
                     </div>

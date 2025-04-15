@@ -1,6 +1,19 @@
+<?php
+	$locale = session('locale');
+    
+	if($locale=="ar")
+	{
+		 
+		$class='rtl'; 
+	}
+	else
+	{
+		$class='ltr';
+         
+	}
+?>
 <!DOCTYPE html>
-
-<html lang="en">
+<html lang="en" >
 
 <head>
 
@@ -35,6 +48,9 @@
     <link rel="stylesheet" href="{{ asset('vendor/toastr/css/toastr.min.css') }}">
     <link href="{{ asset('vendor/sweetalert2/dist/sweetalert2.min.css') }}">
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
+    <!-- Material color picker -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="{{ asset('vendor/bootstrap-material-datetimepicker/css/bootstrap-material-datetimepicker.css') }}" rel="stylesheet">
     <link href="{{ url('css/style.css') }}" rel="stylesheet">
     <link class="main-css" href="{{ asset('css/style-rtl.css') }}" rel="stylesheet">
 
@@ -916,6 +932,17 @@
 
                                 </a>
                             </li>
+                            <li class="nav-item dropdown notification_dropdown">
+                                @if($locale == 'ar')
+                                    <a class="nav-link" href="{{ route('switch_language', ['locale' => 'en']) }}">
+                                        <img src="{{ asset('flags/us.png') }}" class="me-1" height="12"> 
+                                    </a>
+                                @else
+                                    <a class="nav-link" href="{{ route('switch_language', ['locale' => 'ar']) }}">
+                                        <img src="{{ asset('flags/om.png') }}" class="me-1" height="12"> 
+                                    </a>
+                                @endif
+                            </li>
                             <li class="nav-item dropdown header-profile">
                                 <a class="nav-link" href="javascript:;" role="button" data-bs-toggle="dropdown">
                                     <img src="{{  url('images/profile/12.png')}}" width="20" alt="image">
@@ -1009,6 +1036,18 @@
 
                     </ul>
                 </li>
+                    <li><a href="javascript:void(0);" class="ai-icon has-arrow" aria-expanded="false">
+                            <i class="flaticon-381-id-card-4"></i>
+                            <span class="nav-text">HR</span>
+                        </a>
+                        <ul aria-expanded="false">
+                            <li><a href="{{ url('payroll') }}">Payroll</a></li>
+                            <li><a href="{{ url('leaves') }}">leaves</a></li>
+                            <li><a href="{{ url('pending_leaves') }}">Pending Leaves</a></li>
+                            <li><a href="{{ url('responded_leaves') }}">Responded Leaves</a></li>
+
+                        </ul>
+                    </li>
                     <li><a href="javascript:void(0);" class="ai-icon has-arrow" aria-expanded="false">
                             <i class="flaticon-381-id-card-4"></i>
                             <span class="nav-text">Doctors</span>

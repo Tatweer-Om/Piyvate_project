@@ -91,6 +91,8 @@ class DoctorController extends Controller
         $doctor->doctor_name = $request->input('doctor_name');
         $doctor->user_name = $request->input('user_name');
         $doctor->email = $request->input('email');
+        $doctor->annual_leaves = $request->input('annual_leaves');
+        $doctor->emergency_leaves = $request->input('emergency_leaves');
         if ($request->filled('password')) {
             $doctor->password = Hash::make($request->input('password'));
         }
@@ -122,6 +124,8 @@ class DoctorController extends Controller
             'password' => $doctor->password,
             'email' => $doctor->email,
             'phone' => $doctor->phone,
+            'annual_leaves' => $doctor->annual_leaves,
+            'emergency_leaves' => $doctor->emergency_leaves,
             'specialization' => $doctor->specialization,
             'doctor_image' => $doctor_image,
             'branch_id' => $doctor->branch_id,
@@ -144,7 +148,7 @@ class DoctorController extends Controller
         // Store previous data before updating
         $previousData = $doctor->only([
             'doctor_name', 'user_name', 'phone', 'email', 'password', 'doctor_image',
-            'branch_id', 'specialization', 'notes', 'user_id', 'added_by', 'created_at'
+            'branch_id', 'specialization','annual_leaves','emergency_leaves', 'notes', 'user_id', 'added_by', 'created_at'
         ]);
 
         // Handle doctor image update
@@ -174,7 +178,8 @@ class DoctorController extends Controller
         if ($request->filled('password')) {
             $doctor->password = Hash::make($request->input('password'));
         }
-
+        $doctor->annual_leaves = $request->input('annual_leaves');
+        $doctor->emergency_leaves = $request->input('emergency_leaves');
         $doctor->phone = $request->input('phone');
         $doctor->specialization = $request->input('speciality');
         $doctor->doctor_image = $doctor_image;
@@ -186,7 +191,7 @@ class DoctorController extends Controller
         // Store updated data for history
         $updatedData = $doctor->only([
             'doctor_name', 'user_name', 'phone', 'email', 'doctor_image',
-            'branch_id', 'specialization', 'notes', 'user_id', 'added_by'
+            'branch_id', 'specialization', 'notes', 'annual_leaves', 'emergency_leaves', 'user_id', 'added_by'
         ]);
 
         // Save update history
@@ -215,7 +220,7 @@ class DoctorController extends Controller
         // Store previous data before deletion
         $previousData = $doctor->only([
             'doctor_name', 'user_name', 'phone', 'email', 'doctor_image',
-            'branch_id', 'specialization', 'notes', 'user_id', 'added_by', 'created_at'
+            'branch_id', 'specialization', 'notes', 'annual_leaves', 'emergency_leaves', 'user_id', 'added_by', 'created_at'
         ]);
 
         // Get current user info

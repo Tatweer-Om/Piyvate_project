@@ -8,6 +8,7 @@ use App\Models\Staff;
 use App\Models\Branch;
 use App\Models\User;
 use App\Models\History;
+use App\Models\Payroll;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
@@ -24,9 +25,7 @@ class StaffController extends Controller
         return view ('staff.staf_list', compact('branches', 'roles'));
     }
 
-    public function staff_profile(){
-        return view ('staff.staf_profile');
-    }
+     
 
 
     public function show_employee()
@@ -40,7 +39,7 @@ class StaffController extends Controller
             foreach($view_authemployee as $value)
             {
 
-                $employee_name='<a class-"patient-info ps-0" href="javascript:void(0);">'.$value->employee_name.'</a>';
+                $employee_name='<a class-"patient-info ps-0" href="staff_profile/' . $value->id . '">'.$value->employee_name.'</a>';
 
                 $modal = '
                 <a href="javascript:void(0);" class="me-3 edit-staff" data-bs-toggle="modal" data-bs-target="#add_employee_modal" onclick=edit("'.$value->id.'")>
@@ -115,6 +114,8 @@ class StaffController extends Controller
 
         $employee->employee_name = $request['employee_name'];
         $employee->employee_email = $request['email'];
+        $employee->annual_leaves = $request['annual_leaves'];
+        $employee->emergency_leaves = $request['emergency_leaves'];
         $employee->employee_phone = $request['phone'];
         // $employee->permissions = implode(',',$request['permissions']);
         $employee->password = Hash::make($request['password']);
@@ -157,6 +158,8 @@ class StaffController extends Controller
             'role_id' => $employee_data->role_id,
             'employee_image' => $employee_image,
             'notes' => $employee_data->notes,
+            'annual_leaves' => $employee_data->annual_leaves,
+            'emergency_leaves' => $employee_data->emergency_leaves,
         ];
 
         return response()->json($data);
@@ -164,6 +167,9 @@ class StaffController extends Controller
 
     public function update_employee(Request $request){
 
+        $user_id = Auth::id(); 
+        $data= User::where('id', $user_id)->first();
+        $user= $data->user_name; 
 
         $employee_id = $request->input('employee_id');
 
@@ -201,28 +207,28 @@ class StaffController extends Controller
         $employee->employee_name = $request['employee_name'];
         $employee->employee_email = $request['email'];
         $employee->employee_phone = $request['phone'];
-        $employee->permissions = implode(',',$request['permissions']);
+        $employee->annual_leaves = $request['annual_leaves'];
+        $employee->emergency_leaves = $request['emergency_leaves'];
+        // $employee->permissions = implode(',',$request['permissions']);
         $employee->password = Hash::make($request['password']);
         $employee->employee_image = $employee_image;
         $employee->branch_id = $request['branch_id'];
-        $employee->role_id = $request['role_id'];
+        $employee->role = $request['role_id'];
         $employee->notes = $request['notes'];
-        $employee->added_by = $employeename;
-        $employee->employee_id = $employee_id;
+        $employee->updated_by = $user;
+        $employee->user_id = $user_id;
         $employee->save();
 
         $history = new History();
-        $history->employee_id = $employee_id;
+        $history->user_id = $user_id;
         $history->table_name = 'staffs';
         $history->function = 'update';
         $history->function_status = 1;
-
-
         $history->branch_id = $branch;
         $history->record_id = $employee->id;
         $history->previous_data = json_encode($previousData);
         $history->updated_data = json_encode($employee->only([
-            'employee_name', 'employee_email', 'employee_phone', 'permissions', 'employee_image', 'branch_id', 'role_id', 'notes', 'employee_id', 'added_by'
+            'employee_name', 'employee_email', 'employee_phone', 'permissions', 'employee_image', 'branch_id', 'role', 'annual_leaves', 'emergency_leaves', 'notes', 'employee_id', 'added_by'
         ]));
         $history->added_by = $employeename;
 
@@ -240,7 +246,7 @@ class StaffController extends Controller
 
         // Store previous data before deletion
         $previousData = $employee->only([
-            'employee_name', 'employee_email', 'employee_phone', 'permissions', 'employee_image', 'branch_id', 'role_id', 'notes', 'employee_id', 'added_by', 'created_at'
+            'employee_name', 'employee_email', 'employee_phone', 'permissions', 'employee_image', 'branch_id', 'role' , 'annual_leaves', 'emergency_leaves', 'notes', 'employee_id', 'added_by', 'created_at'
         ]);
 
         // Get current employee info
@@ -266,5 +272,17 @@ class StaffController extends Controller
             trans('messages.success_lang', [], session('locale')) => trans('messages.employee_deleted_lang', [], session('locale'))
         ]);
     }
+
+
+    public function staff_profile($id){
+        $staff= Staff::where('id', $id)->first();
+        $branch= Branch::where('id', $staff->branch_id)->value('branch_name');
+        $role= Role::where('id', $staff->role)->value('role_name');
+ 
+        return view ('staff.staf_profile', compact('staff','branch','role'));
+    }
+
+
+    
 
 }

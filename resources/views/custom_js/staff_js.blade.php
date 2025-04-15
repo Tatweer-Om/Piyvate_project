@@ -88,6 +88,8 @@
                         $(".password").val(fetch.password);
                         $(".email").val(fetch.employee_email);
                         $(".phone").val(fetch.employee_phone);
+                        $(".emergency_leaves").val(fetch.emergency_leaves);
+                        $(".annual_leaves").val(fetch.annual_leaves);
                         $(".notes").val(fetch.notes);
                         $(".employee_image").attr("src", fetch.employee_image);
                         $("#branch_id").val(fetch.branch_id);
