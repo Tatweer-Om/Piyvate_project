@@ -15,6 +15,8 @@ return new class extends Migration
             $table->id();
             $table->string('appointment_id');
             $table->string('account_id');
+            $table->string('payment_status')->comment('1=appointment-only, 2=appointment-sessions')->nullable;
+            $table->string('session_payment')->comment('1=offer, 2=normal, 3=contract')->nullable();
             $table->string('ref_no')->nullable()->default('');
             $table->decimal('amount', 10, 2);
             $table->integer('user_id');

@@ -16,6 +16,7 @@ return new class extends Migration
             $table->integer('session_id'); // Removed foreign key constraint
             $table->string('patient_id'); // Removed foreign key constraint
             $table->string('doctor_id')->nullable(); // Removed foreign key constraint
+            $table->string('contract_payment')->nullable()->comment('1 = Pending, 2 = Completed');
 
             $table->date('session_date')->nullable();
             $table->time('session_time')->nullable();

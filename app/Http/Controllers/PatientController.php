@@ -2,24 +2,34 @@
 
 namespace App\Http\Controllers;
 
+use Log;
 use App\Models\User;
 use App\Models\Branch;
+use App\Models\Account;
 use App\Models\Country;
 use App\Models\History;
 use App\Models\Patient;
 use App\Models\Setting;
+use App\Models\GovtDept;
 use App\Models\Appointment;
+use App\Models\SessionList;
+use App\Models\Patientfiles;
 use Illuminate\Http\Request;
+use App\Models\SessionDetail;
 use Illuminate\Support\Carbon;
 use App\Models\AllSessioDetail;
+use App\Models\SessionsPayment;
 use App\Models\AppointmentDetail;
 use App\Models\AppointmentSession;
-use App\Models\SessionDetail;
-use App\Models\SessionList;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use App\Models\PatientPrescription;
 use Illuminate\Support\Facades\Auth;
-
+use Illuminate\Support\Facades\File;
+use App\Models\AppointPaymentExpense;
+use App\Models\SessionPaymentExpense;
+use App\Models\SessionsonlyPayment;
+use App\Models\SessionsonlyPaymentExp;
 
 class PatientController extends Controller
 {
@@ -32,19 +42,30 @@ class PatientController extends Controller
 
 
     public function patient_profile($id) {
-        $patient = Patient::where('id', $id)->first();
 
-        // Check if dob exists and calculate the age in years, months, and days
+
+    $user_id = Auth::id();
+    $data = User::where('id', $user_id)->first();
+    $user = $data->user_name;
+    $branch_id = $data->branch_id;
+
+
+    $accounts= Account::where('branch_id',   $branch_id)->get();
+        $patient = Patient::where('id', $id)->first();
+        $country= $patient->country_id ?? '';
+        $country_name= Country::where('id', $country)->value('name');
+
+        $apt = Appointment::where('patient_id', $patient->id)->latest()->first();
+        $total_apt= Appointment::where('patient_id', $patient->id)->count();
+        $apt_id= $apt->id ?? '';
         if ($patient && $patient->dob) {
             $dob = Carbon::parse($patient->dob);
             $now = Carbon::now();
 
-            // Calculate the age in years, months, and days
             $ageInYears = $dob->diffInYears($now);
             $ageInMonths = $dob->diffInMonths($now) % 12;
             $ageInDays = $dob->diffInDays($now) % 30;
 
-            // Logic to return appropriate age format
             if ($ageInYears >= 1) {
                 $age = "$ageInYears years";
             } elseif ($ageInMonths >= 1) {
@@ -53,10 +74,48 @@ class PatientController extends Controller
                 $age = "$ageInDays days";
             }
         } else {
-            $age = 'N/A'; // If no DOB, set age to N/A
+            $age = 'N/A';
         }
 
-        return view('patients.patient_profile', compact('patient', 'age'));
+
+        $sessions = SessionList::where('patient_id', $id)
+        ->whereNotNull('ministry_id')
+        ->get(['ministry_id', 'no_of_sessions', 'session_fee', 'id']);
+
+    $app_sessions = AppointmentDetail::where('patient_id', $id)
+        ->whereNotNull('ministry_id')
+        ->get(['ministry_id', 'total_sessions', 'total_price', 'appointment_id']);
+
+    $ministry_name = null;
+    $ministry_data = null;
+
+    // Check which one has data
+    if ($sessions->isNotEmpty()) {
+        $firstSession = $sessions->first();
+        $ministry_name = GovtDept::where('id', $firstSession->ministry_id)->value('govt_name');
+
+        $ministry_data = [
+            'type' => 'session',
+            'id'=>$firstSession->id,
+            'ministry_id' => $firstSession->ministry_id,
+            'no_of_sessions' => $firstSession->no_of_sessions,
+            'session_fee' => $firstSession->session_fee,
+        ];
+    } elseif ($app_sessions->isNotEmpty()) {
+        $firstAppSession = $app_sessions->first();
+        $ministry_name = GovtDept::where('id', $firstAppSession->ministry_id)->value('govt_name');
+
+        $ministry_data = [
+            'type' => 'appointment',
+            'ministry_id' => $firstAppSession->ministry_id,
+            'appointment_id' => $firstAppSession->appointment_id,
+            'total_sessions' => $firstAppSession->total_sessions,
+            'total_price' => $firstAppSession->total_price,
+        ];
+    }
+
+    return view('patients.patient_profile', compact('patient', 'total_apt', 'country_name', 'accounts', 'apt', 'apt_id', 'age', 'ministry_name', 'ministry_data'));
+
     }
 
 
@@ -334,10 +393,14 @@ class PatientController extends Controller
                 $statusIcon = '<i class="fa fa-calendar"></i> ';
                 $badge = '<span class="badge ' . $statusClass . ' px-2 py-1">' . $statusIcon . $statusText . '</span>';
             } elseif ($appointment->session_status == 3) {
+                $total_sessions = (int) AppointmentDetail::where('appointment_id', $appointment->id)->value('total_sessions');
+
                 $statusText = 'Sessions: ';
                 $statusIcon = '<i class="fa fa-list"></i> ';
-                $badge = '<span class="badge badge-primary px-2 py-1">' . $statusIcon . $statusText. '</span>';
-            } elseif ($appointment->session_status == 4) {
+                $badge = '<span class="badge badge-primary px-2 py-1">' . $statusIcon . $statusText . $total_sessions . '</span>';
+            }
+
+             elseif ($appointment->session_status == 4) {
                 $statusClass = 'badge-dark';
                 $statusText = 'Cancelled';
                 $statusIcon = '<i class="fa fa-times-circle"></i> ';
@@ -347,7 +410,14 @@ class PatientController extends Controller
                 $statusText = 'Pre-Registered';
                 $statusIcon = '<i class="fa fa-user-plus"></i> ';
                 $badge = '<span class="badge ' . $statusClass . ' px-2 py-1">' . $statusIcon . $statusText . '</span>';
-            } else {
+            }
+            elseif ($appointment->session_status == 7) {
+                $statusClass = 'badge-info';
+                $statusText = 'Appointent Done';
+                $statusIcon = '<i class="fa fa-check-circle"></i> ';
+                $badge = '<span class="badge ' . $statusClass . ' px-2 py-1">' . $statusIcon . $statusText . '</span>';
+            }
+             else {
                 $badge = '<span class="badge bg-secondary px-2 py-1">Unknown</span>';
             }
 
@@ -373,6 +443,7 @@ public function show_all_sessions_by_patient(Request $request)
             'doctor_id',
             'session_date',
             'session_time',
+            'session_price',
             'status',
             DB::raw("'appointment_sessions' as source")
         )
@@ -387,6 +458,7 @@ public function show_all_sessions_by_patient(Request $request)
             'doctor_id',
             'session_date',
             'session_time',
+            'session_price',
             'status',
             DB::raw("'all_sessio_details' as source")
         )
@@ -434,6 +506,7 @@ public function show_all_sessions_by_patient(Request $request)
             '<span>' . Carbon::parse($session->session_date)->format('d-m-Y') . '</span>',
             '<span>' . ($doctor_name ?? 'Unknown') . '</span>',
             '<span>' . $session->session_time . '</span>',
+            '<span>' . $session->session_price . '</span>',
             '<span class="badge ' . $statusBadgeColor . '">' . $statusText . '</span>', // Add status badge
             '<span class="badge ' . $badgeColor . '">' . $sourceText . '</span>',
 
@@ -463,13 +536,14 @@ public function getAppointmentsAndSessions($id)
 
     foreach ($appointments as $appointment) {
         $apt_no= Appointment::where('id', $appointment->appointment_id)->value('appointment_no');
+
         $appointmentsAndSessions[] = [
             'type' => 'appointment', // Mark as appointment
             'appointment_no' => $apt_no,
-            'fee' => $appointment->total_fee,
+            'fee' => $appointment->total_price,
             'session_count' => $appointment->total_sessions, // Assuming a relationship exists
             'single_session_fee' => ($appointment->total_sessions > 0)
-                ? $appointment->total_fee / $appointment->total_sessions
+                ? $appointment->total_price / $appointment->total_sessions
                 : 0,
         ];
 
@@ -495,108 +569,482 @@ public function getAppointmentsAndSessions($id)
 }
 
 
-public function show_all_payment_by_patient(Request $request)
+// public function show_all_payment_by_patient(Request $request)
+// {
+//     $patient_id = $request->input('patient_id');
+//     $json = [];
+//     $sno = 0;
+
+//     $appointmentSessions = AppointmentSession::where('patient_id', $patient_id)
+//         ->with('doctor:id,doctor_name')
+//         ->orderBy('session_date', 'desc')
+//         ->get();
+
+//     $allSessions = AllSessioDetail::where('patient_id', $patient_id)
+//         ->with('doctor:id,doctor_name')
+//         ->orderBy('session_date', 'desc')
+//         ->get();
+
+//         foreach ($appointmentSessions as $appointment) {
+//             $sno++;
+//             $total_sessions = null;
+//             $apt_no = null;
+//             $paymen_status = null;
+//             $apt_detail = null; // ✅ initialize to avoid undefined variable
+
+//             if (!empty($appointment->appointment_id)) {
+//                 $apt = Appointment::find($appointment->appointment_id);
+
+//                 if ($apt) {
+//                     $apt_detail = AppointmentDetail::where('appointment_id', $apt->id)->first();
+
+//                     $total_sessions = $apt_detail->total_sessions ?? null;
+//                     $apt_no = $apt->appointment_no ?? null;
+//                     $paymen_status = $apt->payment_status ?? null;
+//                 }
+//             }
+
+//             if ($paymen_status == 0 || $paymen_status == 1) {
+//                 $paymen_status = 'Normal Session';
+//                 $paymentBadge = '<span class="badge bg-primary">Normal - Completed</span>';
+//             } elseif ($paymen_status == 2) {
+//                 $paymen_status = 'Offer';
+//                 $paymentBadge = $appointment->status == 2
+//                     ? '<span class="badge bg-success">Offer - Completed</span>'
+//                     : '<span class="badge bg-warning">Offer - Balance</span>';
+//             } elseif ($paymen_status == 3) {
+//                 $paymen_status = 'Contract';
+//                 $paymentBadge = $appointment->status == 4
+//                     ? '<span class="badge bg-success">Contract - Completed</span>'
+//                     : '<span class="badge bg-danger">Contract - Pending</span>';
+//             } else {
+//                 $paymen_status = 'Unknown';
+//                 $paymentBadge = '<span class="badge bg-secondary">Unknown Status</span>';
+//             }
+
+//             $dedtail_data= AppointmentDetail::where('appointment_id', $appointment->appointment_id)->first();
+//             $fee= $detail_data->single_session_price ?? '';
+
+//             $json[] = [
+//                 '<span class="text-muted">#' . $sno . '</span>',
+//                 '<span class="text-muted">#' . $apt_no . '</span>' . '<br>' .
+//                 '<span class="text-muted">#' . $total_sessions . '</span>' . '<br>' .
+//                 '<span class="text-muted">#' . ($apt_detail->total_price ?? '') . '</span>',
+
+//                 '<span class="badge bg-primary">Appointment</span>',
+//                 $appointment->doctor->doctor_name ?? 'Unknown',
+//                 Carbon::parse($appointment->session_date)->format('d-m-Y'),
+//                 $paymentBadge,
+//                 $fee, // No fee in appointment session
+//             ];
+//         }
+
+
+//         foreach ($allSessions as $session) {
+//             $sno++;
+
+//             // Initialize all needed variables
+//             $session_check = null;
+//             $session_no = null;
+//             $paymen_status = null;
+//             $paymentBadge = '<span class="badge bg-secondary">Unknown</span>'; // default badge
+//             $no_of_sessions = null;
+//             $session_fee = null;
+
+//             // Fetch session details safely
+//             $session_check = SessionList::where('id', $session->session_id)->first();
+
+//             if ($session_check) {
+//                 $session_no = $session_check->session_no ?? null;
+//                 $paymen_status = $session_check->payment_status ?? null;
+//                 $no_of_sessions = $session_check->no_of_sessions ?? null;
+//                 $session_fee = $session_check->session_fee ?? 0;
+
+//                 if ($paymen_status == 0 || $paymen_status == 1) {
+//                     $paymen_status = 'Normal Session';
+//                     $paymentBadge = '<span class="badge bg-success">Normal-Completed</span>';
+//                 } elseif ($paymen_status == 2) {
+//                     $paymen_status = 'Offer';
+//                     $paymentBadge = $session->status == 2
+//                         ? '<span class="badge bg-success">Offer-Completed</span>'
+//                         : '<span class="badge bg-warning">Offer-Balance</span>';
+//                 } elseif ($paymen_status == 3) {
+//                     $paymen_status = 'Contract';
+//                     $paymentBadge = $session->status == 4
+//                         ? '<span class="badge bg-success">Contract-Completed</span>'
+//                         : '<span class="badge bg-danger">Contract-Pending</span>';
+//                 } else {
+//                     $paymen_status = 'Unknown';
+//                     $paymentBadge = '<span class="badge bg-secondary">Unknown</span>';
+//                 }
+//             }
+
+//             $json[] = [
+//                 '<span class="text-muted">#' . $sno . '</span>',
+//                 '<span>Session No: ' . ($session_no ?? '-') . '</span><br>' .
+//                 '<span>Total Sessions: ' . ($no_of_sessions ?? '-') . '</span><br>' .
+//                 '<span>Total Fee: Rs. ' . number_format($session_fee ?? 0, 2) . '</span>',
+
+//                 '<span class="badge bg-success">Session</span>',
+//                 $session->doctor->doctor_name ?? 'Unknown',
+//                 Carbon::parse($session->session_date)->format('d-m-Y'),
+//                 $paymentBadge,
+//                 '<span class="text-dark">OMR. ' . number_format($session->total_fee ?? 0, 2) . '</span>',
+//             ];
+//         }
+
+
+//     return response()->json(['success' => true, 'aaData' => $json]);
+// }
+
+
+
+
+// public function submit_contract_payment(Request $request)
+// {
+
+//     $user_id = Auth::id();
+//     $user = User::find($user_id);
+
+//     $patient_id     = $request->patient_id;
+//     $ministry_id    = $request->ministry_id;
+//     $type           = $request->type;
+//     $total_sessions = $request->total_sessions;
+//     $total_price    = $request->total_price;
+//     $apt_id         = $request->appointment_id;
+//     $session_id     = $request->session_id;
+
+//     $hasValidPayment = false;
+
+//     try {
+//         // 1. Update status (same as before)
+//         if ($type === 'session') {
+//             $session_list = SessionList::find($session_id);
+//             if ($session_list) {
+//                 $session_list->payment_status = 4;
+//                 $session_list->save();
+//             }
+
+//             AllSessioDetail::where('session_id', $session_id)->update(['contract_payment' => 2]);
+
+//             $session_detail = SessionDetail::where('session_id', $session_id)->first();
+//             if ($session_detail) {
+//                 $session_detail->contract_payment = 2;
+//                 $session_detail->save();
+//             }
+//         } elseif ($type === 'appointment') {
+//             $appointment = Appointment::find($apt_id);
+//             $session_payment = SessionsPayment::where('appointment_id', $apt_id)->first();
+
+//             if ($appointment) {
+//                 $appointment->payment_status = 4;
+//                 $appointment->save();
+//             }
+
+//             if ($session_payment) {
+//                 $session_payment->contract_payment = 2;
+//                 $session_payment->save();
+//             }
+
+//             AppointmentSession::where('appointment_id', $apt_id)->update(['contract_payment' => 2]);
+
+//             $detail = AppointmentDetail::where('appointment_id', $apt_id)->first();
+//             if ($detail) {
+//                 $detail->contract_payment = 2;
+//                 $detail->save();
+//             }
+//         }
+
+//         // 2. Handle multiple payment methods (with expense logic)
+//         if (is_array($request->payment_methods) && !empty($request->payment_methods)) {
+//             foreach ($request->payment_methods as $index => $paymentMethodId) {
+//                 // Use the $index to fetch amounts and ref_nos correctly
+//                 $paidAmount = $request->payment_amounts[$paymentMethodId] ?? 0;
+//                 $refNo = $request->ref_nos[$paymentMethodId] ?? null; // Get ref_no if it exists, or null if not
+
+//                 if ($paidAmount > 0) {
+//                     // Create a new payment record
+//                     $payment = new SessionsPayment();
+//                     $payment->appointment_id = $apt_id;
+//                     $payment->contract_payment = 2;
+//                     $payment->payment_status = 4;
+//                     $payment->account_id = $paymentMethodId;
+//                     $payment->ref_no = $refNo;
+//                     $payment->amount = $paidAmount;
+//                     $payment->user_id = $user_id;
+//                     $payment->branch_id = $user->branch_id;
+//                     $payment->added_by = $user->id;
+//                     $payment->save();
+
+//                     // Update the account balance
+//                     $account = Account::find($paymentMethodId);
+//                     if ($account) {
+//                         $account->opening_balance += $paidAmount;
+//                         $account->save();
+
+//                         // Handle commission if applicable
+//                         if ($account->account_status != 1 && !empty($account->commission) && $account->commission > 0) {
+//                             $commissionFee = ($paidAmount / 100) * $account->commission;
+
+//                             // Save payment expense
+//                             $paymentExpense = new SessionPaymentExpense();
+//                             $paymentExpense->total_amount = $paidAmount;
+//                             $paymentExpense->account_tax = $account->commission;
+//                             $paymentExpense->account_tax_fee = $commissionFee;
+//                             $paymentExpense->account_id = $paymentMethodId;
+//                             $paymentExpense->appointment_id = $apt_id;
+//                             $paymentExpense->user_id = $user_id;
+//                             $paymentExpense->branch_id = $user->branch_id;
+//                             $paymentExpense->added_by = $user->id;
+//                             $paymentExpense->save();
+//                         }
+//                     }
+
+//                     $hasValidPayment = true;
+//                 }
+//             }
+//         }
+
+//         return response()->json(['message' => 'Payment recorded successfully']);
+//     } catch (\Exception $e) {
+//         return response()->json(['error' => 'Something went wrong. Please try again later.']);
+//     }
+// }
+
+public function submit_contract_payment(Request $request)
 {
-    $patient_id = $request->input('patient_id');
-    $appointmentsAndSessions = [];
+    $user_id = Auth::id();
+    $user = User::find($user_id);
 
-    $appointmentSessions = AppointmentSession::where('patient_id', $patient_id)
-        ->with('doctor:id,doctor_name')
-        ->orderBy('session_date', 'desc')
-        ->get();
+    $patient_id     = $request->patient_id;
+    $ministry_id    = $request->ministry_id;
+    $type           = $request->type;
+    $total_sessions = $request->total_sessions;
+    $total_price    = $request->total_price;
+    $apt_id         = $request->appointment_id;
+    $session_id     = $request->session_id;
 
+    $hasValidPayment = false;
 
-    $allSessions = AllSessioDetail::where('patient_id', $patient_id)
-        ->with('doctor:id,doctor_name')
-        ->orderBy('session_date', 'desc')
-        ->get();
-
-
-        foreach ($appointmentSessions as $appointment) {
-            $apt = Appointment::where('id', $appointment->appointment_id)->first();
-            $apt_no = $apt->appointment_no;
-            $paymen_status = $apt->payment_status;
-
-            if ($paymen_status == 0 || $paymen_status == 1) {
-                $paymen_status = 'Normal Session';
-                $paymentBadge = '<span class="badge bg-success">Completed</span>';
-            } elseif ($paymen_status == 2) {
-                $paymen_status = 'Offer';
-                if ($appointment->status == 2) {
-                    $paymentBadge = '<span class="badge bg-success">Completed</span>';
-                } else {
-                    $paymentBadge = '<span class="badge bg-warning">Balance</span>';
-                }
-            } elseif ($paymen_status == 3) {
-                $paymen_status = 'Contract';
-                if ($appointment->status == 4) {
-                    $paymentBadge = '<span class="badge bg-success">Completed</span>';
-                } else {
-                    $paymentBadge = '<span class="badge bg-danger">Pending</span>';
-                }
-            } else {
-                $paymen_status = 'Unknown';
-                $paymentBadge = '<span class="badge bg-secondary">Unknown</span>';
+    try {
+        // 1. Update status
+        if ($type === 'session') {
+            $session_list = SessionList::find($session_id);
+            if ($session_list) {
+                $session_list->payment_status = 4;
+                $session_list->save();
             }
 
-            $appointmentsAndSessions[] = [
-                'type' => 'appointment',
-                'doctor_name' => $appointment->doctor->doctor_name ?? 'Unknown',
-                'session_date' => Carbon::parse($appointment->session_date)->format('d-m-Y'),
-                'status' => $appointment->status,
-                'source' => 'appointment_sessions',
-                'payment_status_badge' => $paymentBadge,
-            ];
-        }
+            AllSessioDetail::where('session_id', $session_id)->update(['contract_payment' => 2]);
 
+            $session_detail = SessionDetail::where('session_id', $session_id)->first();
+            if ($session_detail) {
+                $session_detail->contract_payment = 2;
+                $session_detail->save();
+            }
+        } elseif ($type === 'appointment') {
+            $appointment = Appointment::find($apt_id);
+            $session_payment = SessionsPayment::where('appointment_id', $apt_id)->first();
 
-        foreach ($allSessions as $session) {
-            $session_check = SessionList::where('id', $session->session_id)->first();
-            $session_no = $session_check->session_no;
-            $paymen_status = $session_check->payment_status;
-
-            if ($paymen_status == 0 || $paymen_status == 1) {
-                $paymen_status = 'Normal Session';
-                $paymentBadge = '<span class="badge bg-success">Completed</span>';
-            } elseif ($paymen_status == 2) {
-                $paymen_status = 'Offer';
-                if ($session->status == 2) {
-                    $paymentBadge = '<span class="badge bg-success">Completed</span>';
-                } else {
-                    $paymentBadge = '<span class="badge bg-warning">Balance</span>';
-                }
-            } elseif ($paymen_status == 3) {
-                $paymen_status = 'Contract';
-                if ($session->status == 4) {
-                    $paymentBadge = '<span class="badge bg-success">Completed</span>';
-                } else {
-                    $paymentBadge = '<span class="badge bg-danger">Pending</span>';
-                }
-            } else {
-                $paymen_status = 'Unknown';
-                $paymentBadge = '<span class="badge bg-secondary">Unknown</span>';
+            if ($appointment) {
+                $appointment->payment_status = 4;
+                $appointment->save();
             }
 
-            $appointmentsAndSessions[] = [
-                'type' => 'session',
-                'appointment_no' => $session_no,
-                'doctor_name' => $session->doctor->doctor_name ?? 'Unknown',
-                'fee' => $session->total_fee,
-                'session_count' => $session->total_sessions,
-                'single_session_fee' => ($session->total_sessions > 0)
-                    ? $session->total_fee / $session->total_sessions
-                    : 0,
-                'session_date' => Carbon::parse($session->session_date)->format('d-m-Y'),
-                'status' => $session->status,
-                'source' => 'all_sessio_details',
-                'payment_status_badge' => $paymentBadge,
-            ];
+            if ($session_payment) {
+                $session_payment->contract_payment = 2;
+                $session_payment->save();
+            }
+
+            AppointmentSession::where('appointment_id', $apt_id)->update(['contract_payment' => 2]);
+
+            $detail = AppointmentDetail::where('appointment_id', $apt_id)->first();
+            if ($detail) {
+                $detail->contract_payment = 2;
+                $detail->save();
+            }
         }
 
+        // 2. Handle payment recording
+        if (is_array($request->payment_methods) && !empty($request->payment_methods)) {
+            foreach ($request->payment_methods as $index => $paymentMethodId) {
+                $paidAmount = $request->payment_amounts[$paymentMethodId] ?? 0;
+                $refNo = $request->ref_nos[$paymentMethodId] ?? null;
 
+                if ($paidAmount > 0) {
+                    if ($type === 'appointment') {
+                        // Save to SessionsPayment
+                        $payment = new SessionsPayment();
+                        $payment->appointment_id = $apt_id;
+                    } else {
+                        // Save to Sessiononlypayment
+                        $payment = new SessionsonlyPayment();
+                        $payment->session_id = $session_id;
+                    }
 
-    return response()->json($appointmentsAndSessions);
+                    $payment->contract_payment = 2;
+                    $payment->payment_status = 4;
+                    $payment->account_id = $paymentMethodId;
+                    $payment->ref_no = $refNo;
+                    $payment->amount = $paidAmount;
+                    $payment->user_id = $user_id;
+                    $payment->branch_id = $user->branch_id;
+                    $payment->added_by = $user->id;
+                    $payment->save();
+
+                    // Update account balance
+                    $account = Account::find($paymentMethodId);
+                    if ($account) {
+                        $account->opening_balance += $paidAmount;
+                        $account->save();
+
+                        // Save commission if applicable
+                        if ($account->account_status != 1 && !empty($account->commission) && $account->commission > 0) {
+                            $commissionFee = ($paidAmount / 100) * $account->commission;
+
+                            if ($type === 'appointment') {
+                                $paymentExpense = new SessionPaymentExpense();
+                                $paymentExpense->appointment_id = $apt_id;
+                            } else {
+                                $paymentExpense = new SessionsonlyPaymentExp();
+                                $paymentExpense->session_id = $session_id;
+                            }
+
+                            $paymentExpense->total_amount = $paidAmount;
+                            $paymentExpense->account_tax = $account->commission;
+                            $paymentExpense->account_tax_fee = $commissionFee;
+                            $paymentExpense->account_id = $paymentMethodId;
+                            $paymentExpense->user_id = $user_id;
+                            $paymentExpense->branch_id = $user->branch_id;
+                            $paymentExpense->added_by = $user->id;
+                            $paymentExpense->save();
+                        }
+                    }
+
+                    $hasValidPayment = true;
+                }
+            }
+        }
+
+        return response()->json(['message' => 'Payment recorded successfully']);
+    } catch (\Exception $e) {
+        return response()->json(['error' => 'Something went wrong. Please try again later.']);
+    }
 }
+
+
+
+
+
+
+public function save_prescription(Request $request)
+{
+    $user_id = Auth::id();
+    $data = User::where('id', $user_id)->first();
+    $user_name = $data->user_name;
+    $branch_id = $data->branch_id;
+
+    try {
+        // Update session_status in Appointment model based on sessions_recommended
+        $appointment = Appointment::find($request->appointment_id);
+
+        if (!$appointment) {
+            return response()->json(['success' => false, 'message' => 'Appointment not found.']);
+        }
+
+        $appointment->session_status = $request->sessions_recommended == null ?  7: 1;
+        $appointment->save();
+
+        // Determine prescription_type based on session_cat and sessions_recommended
+        $prescription_type = 'appointment'; // Default is 'appointment'
+
+        // Check if session_cat and sessions_recommended are not null
+        if (!is_null($request->session_cat) && !is_null($request->sessions_recommended)) {
+            $prescription_type = 'session'; // Set to 'session' if both are not null
+        }
+
+        // Save new prescription
+        $prescription = new PatientPrescription();
+        $prescription->appointment_id = $request->appointment_id;
+        $prescription->patient_id = $request->patient_id;
+        $prescription->prescription_type = $prescription_type; // Set the correct prescription type
+        $prescription->session_cat = $request->session_cat;
+        $prescription->sessions_reccomended = $request->sessions_recommended;
+        $prescription->session_gap = $request->session_gap;
+        $prescription->notes = $request->notes;
+        $prescription->user_id = $user_id;
+        $prescription->added_by = $user_name;
+        $prescription->branch_id = $branch_id;
+
+        // Save test recommendations as a JSON array if provided
+        if ($request->has('test_recommendations') && is_array($request->test_recommendations)) {
+            $prescription->test_recommendations = json_encode($request->test_recommendations);  // Store as JSON
+        }
+
+        $prescription->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Prescription saved successfully!'
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Error saving prescription: ' . $e->getMessage()
+        ]);
+    }
+}
+
+
+
+public function lab_reports_upload(Request $request)
+{
+    // Validate the incoming files
+    $user_id = Auth::id();
+    $data = User::where('id', $user_id)->first();
+    $user_name = $data->user_name;
+    $branch_id= $data->branch_id;
+
+    try {
+        $folderPath = public_path('images/lab_reports');
+
+        if (!File::isDirectory($folderPath)) {
+            File::makeDirectory($folderPath, 0777, true, true);
+        }
+
+        $savedFiles = [];
+        foreach ($request->file('lab_reports') as $file) {
+            $fileName = time() . '_' . $file->getClientOriginalName();
+            $file->move($folderPath, $fileName);
+            $patientFile = new PatientFiles();
+            $patientFile->patient_id = $request->patient_id;
+            $patientFile->file_name = $fileName;
+            $patientFile->file_path = 'images/lab_reports/' . $fileName;
+            $patientFile->file_type = $file->getClientOriginalExtension();
+            $patientFile->user_id =  $user_id;
+            $patientFile->added_by =  $user_name;
+            $patientFile->branch_id =  $branch_id;
+
+            $patientFile->save();
+
+            $savedFiles[] = $fileName;
+        }
+
+        // Return success response
+        return response()->json([
+            'success' => true,
+            'message' => 'Files uploaded successfully!',
+            'files' => $savedFiles,
+        ]);
+    } catch (\Exception $e) {
+        // Return error response if any exception occurs
+        return response()->json([
+            'success' => false,
+            'message' => 'Error uploading files: ' . $e->getMessage(),
+        ]);
+    }
+}
+
 
 
 }

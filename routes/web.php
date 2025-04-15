@@ -26,7 +26,11 @@ use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\ExpensecatController;
 use App\Http\Controllers\SpecialityController;
 use App\Http\Controllers\AppointmentController;
+<<<<<<< HEAD
+use App\Http\Controllers\ClinicalNotesController;
+=======
 use App\Http\Controllers\HrController;
+>>>>>>> cc1154f30bbb118c936032ab5879d540bebc5933
 
 Route::get('/', function () {
     return view('welcome');
@@ -56,7 +60,10 @@ Route::get('/patient/{id}/sessions', [PatientController::class, 'getSessions']);
 Route::get('/patient/{id}/payments', [PatientController::class, 'getPayments']);
 Route::get('show_all_sessions_by_patient', [PatientController::class, 'show_all_sessions_by_patient'])->name('show_all_sessions_by_patient');
 Route::get('show_all_payment_by_patient', [PatientController::class, 'show_all_payment_by_patient'])->name('show_all_payment_by_patient');
+Route::post('submit_contract_payment', [PatientController::class, 'submit_contract_payment'])->name('submit_contract_payment');
 
+Route::post('/save_prescription', [PatientController::class, 'save_prescription'])->name('save_prescription');
+Route::post('/lab_reports_upload', [PatientController::class, 'lab_reports_upload'])->name('lab_reports_upload');
 
 // HRcontroller
 Route::get('payroll', [HrController::class, 'payroll'])->name('payroll');
@@ -385,3 +392,22 @@ Route::get('show_ministry_category', [MinistryController::class, 'show_ministry_
 Route::post('edit_ministry_category', [MinistryController::class, 'edit_ministry_category'])->name('edit_ministry_category');
 Route::post('update_ministry_category', [MinistryController::class, 'update_ministry_category'])->name('update_ministry_category');
 Route::post('delete_ministry_category', [MinistryController::class, 'delete_ministry_category'])->name('delete_ministry_category');
+
+//ClinicalNotes
+Route::get('soap_ot/{id}', [ClinicalNotesController::class, 'soap_ot'])->name('soap_ot');
+Route::get('soap_pt/{id}', [ClinicalNotesController::class, 'soap_pt'])->name('soap_pt');
+Route::get('otatp_pedriatic/{id}', [ClinicalNotesController::class, 'otatp_pedriatic'])->name('otatp_pedriatic');
+Route::get('neuro_pedriatic/{id}', [ClinicalNotesController::class, 'neuro_pedriatic'])->name('neuro_pedriatic');
+Route::get('physical_dysfunction/{id}', [ClinicalNotesController::class, 'physical_dysfunction'])->name('physical_dysfunction');
+Route::get('otatp_ortho/{id}', [ClinicalNotesController::class, 'otatp_ortho'])->name('otatp_ortho');
+Route::post('/add_otp_pediatric', [ClinicalNotesController::class, 'add_otp_pediatric'])->name('add_otp_pediatric');
+Route::post('/add_soap_ot', [ClinicalNotesController::class, 'add_soap_ot'])->name('add_soap_ot');
+Route::post('/add_soap_pt', [ClinicalNotesController::class, 'add_soap_pt'])->name('add_soap_pt');
+Route::post('/add_neuro_pedriatic', [ClinicalNotesController::class, 'add_neuro_pedriatic'])->name('add_neuro_pedriatic');
+Route::post('/add_physical_dysfunction', [ClinicalNotesController::class, 'add_physical_dysfunction'])->name('add_physical_dysfunction');
+Route::post('/add_otatp_ortho', [ClinicalNotesController::class, 'add_otatp_ortho'])->name('add_otatp_ortho');
+
+
+
+
+

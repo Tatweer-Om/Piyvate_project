@@ -195,11 +195,12 @@ class SessionCONTROLLER extends Controller
                 }
 
                 // Calculate price per session
-                $single_session_price = ($request->total_sessions > 0)
-                    ? $request->session_fee / $request->no_of_sessions
+                $no_of_sessions = $request->no_of_sessions ?? 0;
+                $session_fee = $request->session_fee ?? 0;
+
+                $single_session_price = ($no_of_sessions > 0)
+                    ? $session_fee / $no_of_sessions
                     : 0;
-
-
 
                 $appointment = new SessionDetail();
                 $appointment->session_id = $request->session_id;

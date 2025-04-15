@@ -72,6 +72,15 @@
                                 </select>
                             </div>
                             <div class="col-md-3">
+                                <label class="col-form-label">Appointment Type</label>
+                                <select class="form-control form-control-sm appointment_type" id="appointment_type" name="appointment_type">
+                                    <option value="">Choose..</option>
+                                    <option value="OT">OT</option>
+                                    <option value="PT">PT</option>
+                                    <option value="OT_PT">Both OT,PT</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
                                 <label class="col-form-label">Appointment Date:</label>
                                 <input type="date" class="form-control form-control-sm" id="appointment_date" name="appointment_date">
                             </div>
@@ -121,8 +130,6 @@
                                     <input type="hidden" class="gender" id="gender_input" name="gender">
                                 </div>
                             </div>
-
-
 
                             <div class="col-md-12">
                                 <label class="col-form-label">Notes:</label>
@@ -178,10 +185,8 @@
                                             </label>
                                         </div>
 
-                                        <!-- Amount Input (Initially Hidden) -->
                                         <input type="number" class="form-control form-control-sm payment-amount-input mt-1" id="amount_{{ $account->id }}" name="payment_amounts[{{ $account->id }}]" value="{{ $setting->appointment_fee ?? '0.00' }}" placeholder="Enter amount" min="0" step="0.01" style="display: none;">
 
-                                        <!-- Ref No Input (Initially Hidden, Only if account_status != 1) -->
                                         @if($account->account_status != 1)
                                             <input type="text" class="form-control form-control-sm ref-no-input mt-1" id="ref_no_{{ $account->id }}" name="ref_nos[{{ $account->id }}]" placeholder="Enter Reference Number" style="display: none;">
                                         @endif
@@ -205,7 +210,6 @@
         </div>
     </div>
 
-    <!-- JavaScript to Show Amount & Ref No Input when Checkbox is Selected -->
     <script>
         function toggleAmountInput(accountId, accountStatus) {
             var checkbox = document.getElementById("account_" + accountId);

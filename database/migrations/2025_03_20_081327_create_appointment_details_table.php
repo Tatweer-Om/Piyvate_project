@@ -21,11 +21,17 @@ return new class extends Migration
             $table->integer('ministry_id')->nullable();
             $table->integer('offer_id')->nullable();
             $table->integer('patient_id')->nullable();
+            $table->string('contract_payment')->nullable()->comment('1 = Pending, 2 = Completed');
             $table->integer('doctor_id')->nullable();
             $table->text('session_data')->nullable();
-            $table->decimal('total_price', 10, 2)->nullable(); // Store session price
-            $table->decimal('total_sessions', 10, 2)->nullable(); // Store session price
-            $table->decimal('single_session_price', 10, 2)->nullable(); // Store session price
+            $table->longText('notes')->nullable();
+            $table->string('session_cat')->nullable()->comment('OT, PT, CT');
+            $table->string('sessions_reccomended')->nullable();
+            $table->string('sessions_taken')->nullable();
+            $table->string('session_gap')->nullable();
+            $table->decimal('total_price', 10, 2)->nullable();
+            $table->decimal('total_sessions', 10, 2)->nullable();
+            $table->decimal('single_session_price', 10, 2)->nullable();
             $table->timestamps();
         });
     }
