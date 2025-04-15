@@ -1289,7 +1289,7 @@ function search_barcode(i) {
 
   $(document).ready(function() {
     function get_purchase_payment(id) {
-        alert('1');
+       
         $('#global-loader').show();
         var csrfToken = $('meta[name="csrf-token"]').attr('content');
         $.ajax({

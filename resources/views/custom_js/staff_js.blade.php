@@ -88,6 +88,8 @@
                         $(".password").val(fetch.password);
                         $(".email").val(fetch.employee_email);
                         $(".phone").val(fetch.employee_phone);
+                        $(".emergency_leaves").val(fetch.emergency_leaves);
+                        $(".annual_leaves").val(fetch.annual_leaves);
                         $(".notes").val(fetch.notes);
                         $(".employee_image").attr("src", fetch.employee_image);
                         $("#branch_id").val(fetch.branch_id);
@@ -154,4 +156,26 @@
             let checkboxes = document.querySelectorAll('.permission-checkbox');
             checkboxes.forEach(checkbox => checkbox.checked = this.checked);
         });
+
+        function triggerUpload() {
+        document.getElementById("imageUpload").click();
+    }
+
+    function handleImageChange(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById("imagePreview").src = e.target.result;
+                document.getElementById("removeImage").style.display = "block";
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    function removeSelectedImage() {
+        document.getElementById("imagePreview").src = "{{ asset('images/dummy_images/cover-image-icon.png') }}";
+        document.getElementById("imageUpload").value = "";
+        document.getElementById("removeImage").style.display = "none";
+    }
     </script>

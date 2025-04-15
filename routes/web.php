@@ -26,6 +26,7 @@ use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\ExpensecatController;
 use App\Http\Controllers\SpecialityController;
 use App\Http\Controllers\AppointmentController;
+use App\Http\Controllers\HrController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -57,10 +58,33 @@ Route::get('show_all_sessions_by_patient', [PatientController::class, 'show_all_
 Route::get('show_all_payment_by_patient', [PatientController::class, 'show_all_payment_by_patient'])->name('show_all_payment_by_patient');
 
 
+// HRcontroller
+Route::get('payroll', [HrController::class, 'payroll'])->name('payroll');
+Route::get('show_employee_payroll', [HrController::class, 'show_employee_payroll'])->name('show_employee_payroll');
+Route::get('show_employee_payroll_data', [HrController::class, 'show_employee_payroll_data'])->name('show_employee_payroll_data');
+Route::post('add_payroll', [HrController::class, 'add_payroll'])->name('add_payroll');
+Route::post('delete_payroll', [HrController::class, 'delete_payroll'])->name('delete_payroll');
+Route::get('/download-payroll/{filename}', [HrController::class, 'downloadPayroll'])->name('download_payroll');
+
+Route::get('leaves', [HrController::class, 'leaves'])->name('leaves');
+Route::get('show_employee_leaves', [HrController::class, 'show_employee_leaves'])->name('show_employee_leaves');
+Route::get('show_employee_leaves_data', [HrController::class, 'show_employee_leaves_data'])->name('show_employee_leaves_data');
+Route::post('add_leaves', [HrController::class, 'add_leaves'])->name('add_leaves');
+Route::post('delete_leaves', [HrController::class, 'delete_leaves'])->name('delete_leaves');
+Route::post('get_remaining_leaves', [HrController::class, 'get_remaining_leaves'])->name('get_remaining_leaves');
+Route::get('/download-leaves/{filename}', [HrController::class, 'downloadleaves'])->name('download_leaves');
+Route::get('pending_leaves', [HrController::class, 'pending_leaves'])->name('pending_leaves');
+Route::get('show_pending_leaves', [HrController::class, 'show_pending_leaves'])->name('show_pending_leaves');
+Route::post('add_leaves_reponse', [HrController::class, 'add_leaves_reponse'])->name('add_leaves_reponse');
+Route::get('responded_leaves', [HrController::class, 'responded_leaves'])->name('responded_leaves');
+Route::get('show_responded_leaves', [HrController::class, 'show_responded_leaves'])->name('show_responded_leaves');
+
+
 //staffController
 
 Route::get('staff_list', [StaffController::class, 'staff_list'])->name('staff_list');
-Route::get('staff_profile', [StaffController::class, 'staff_profile'])->name('staff_profile');
+Route::get('staff_profile/{id}', [StaffController::class, 'staff_profile'])->name('staff_profile');
+
 
 //appointmentController
 

@@ -32,6 +32,10 @@
     <script src="{{ asset('vendor/bootstrap-datetimepicker/js/moment.js') }}"></script>
     <script src="{{ asset('vendor/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js') }}"></script>
     <script src="{{ asset('vendor/bootstrap-datetimepicker-master/js/bootstrap-datetimepicker.min.js') }}"></script>
+    <!-- Material color picker -->
+    <script src="{{ asset('vendor/bootstrap-material-datetimepicker/js/bootstrap-material-datetimepicker.js') }}"></script>
+    <!-- Material color picker init -->
+    <script src="{{ asset('js/plugins-init/material-date-picker-init.js') }}"></script>
     <script src="{{ asset('js/dashboard/dashboard-1.js') }}"></script>
     <script src="{{ asset('js/deznav-init.js') }}"></script>
     <script src="{{ asset('js/demo.js') }}"></script>
@@ -198,8 +202,10 @@
         @include('custom_js.doctor_js')
         @elseif ($route_name == 'department')
         @include('custom_js.department_js')
-        @elseif ($route_name == 'staff')
+        @elseif ($route_name == 'staff_list')
         @include('custom_js.staff_js')
+        @elseif ($route_name == 'staff_profile')
+        @include('custom_js.staff_profile_js')
         @elseif ($route_name == 'user')
         @include('custom_js.user_js')
         @elseif ($route_name == 'setting')
@@ -226,6 +232,14 @@
         @include('custom_js.setting_js')
         @elseif ($route_name == 'view_fee_card')
         @include('custom_js.setting_js')
+        @elseif ($route_name == 'payroll')
+        @include('custom_js.payroll_js')
+        @elseif ($route_name == 'leaves')
+        @include('custom_js.leaves_js')
+        @elseif ($route_name == 'pending_leaves')
+        @include('custom_js.pending_leaves_js')
+        @elseif ($route_name == 'responded_leaves')
+        @include('custom_js.responded_leaves_js')
     @endif
 
 </body>
