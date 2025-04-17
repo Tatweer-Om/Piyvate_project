@@ -41,16 +41,25 @@
 </head>
 <body>
 <div class="page">
+    <form action="{{ url('add_soap_ot') }}" method="POST">
+        @csrf
     <div class="header">
         <img src="{{ asset('images/logo/piyalogo-1.png') }}" alt="Center Logo" height="50">
         <div>
-            HN:<input type="text" class="input-line"> PT:<input type="text" class="input-line"><br>
-            Name:<input type="text" class="input-line"> Age:<input type="text" class="input-short input-line">
-            Gender:<label><input type="checkbox">M</label><label><input type="checkbox">F</label><br>
-            Therapist:<input type="text" class="input-line">
+            HN:<input type="text" class="input-line" value="{{ $patient->HN ?? '' }}"> PT:<input type="text" class="input-line"><br>
+            Name:<input type="text" class="input-line" value="{{ $patient->full_name ?? '' }}"> Age:<input type="text" class="input-short input-line" value="{{ $patient->age ?? '' }}">
+            Gender:<label>
+                <input type="checkbox" name="gender_m" value="male" {{ $patient->gender == 'Male' ? 'checked' : '' }}> M
+            </label>
+            <label>
+                <input type="checkbox" name="gender_f" value="female" {{ $patient->gender == 'Female' ? 'checked' : '' }}> F
+            </label><br>
+            Therapist:<input type="text" class="input-line" value="{{ $doctor ?? '' }}">
         </div>
     </div>
-
+    <input type="hidden" value="{{ $apt->id ?? '' }}" name="appointment_id" class="appointment_id">
+    <input type="hidden" value="{{ $patient->id ?? '' }}" name="patient_id" class="patient_id">
+    <input type="hidden" value="{{ $apt->doctor_id ?? '' }}" name="doctor_id" class="doctor_id">
     <div class="section">
         <div class="section-header">Occupational Therapy Follow up and Re-assessment</div>
         <div class="row">
@@ -88,6 +97,7 @@
             #<input type="text" class="input-line"> PT Signature <input type="text" class="input-line">
         </div>
     </div>
+</form>
 </div>
 </body>
 </html>

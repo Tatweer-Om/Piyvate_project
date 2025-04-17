@@ -66,15 +66,21 @@
 </head>
 <body>
   <div class="page">
+    <form action="{{  url('add_physical_dysfunction')}}" method="POST">
+        @scrf
     <div class="header">
       <img src="{{ asset('images/logo/piyalogo-1.png') }}" alt="Center Logo">
       <div class="header-info">
-        HN:<input class="input-dotted input-medium"> PT no:<input class="input-dotted input-medium"><br>
-        Name:<input class="input-dotted input-long"> Age:<input class="input-dotted input-short">
-        Gender: <input type="checkbox">M <input type="checkbox">F<br>
-        Birth Date:<input class="input-dotted input-medium"> Therapist:<input class="input-dotted input-medium">
+        HN:<input class="input-dotted input-medium" value="{{ $patient->HN ?? '' }}" name="hn"> PT no:<input class="input-dotted input-medium" name="pt"><br>
+        Name:<input class="input-dotted input-long" value="{{ $patient->full_name ?? '' }}"> Age:<input class="input-dotted input-short" value="{{ $patient->age ?? '' }}">
+        Gender:   <input type="checkbox" {{ $patient->gender == 'Male' ? 'checked' : '' }}>M
+        <input type="checkbox" {{ $patient->gender == 'Female' ? 'checked' : '' }}>F <br>
+        Birth Date:<input class="input-dotted input-medium" value="{{ $patient->dob ?? '' }}"> Therapist:<input class="input-dotted input-medium" value="{{ $doctor ?? '' }}">
       </div>
     </div>
+    <input type="hidden" value="{{ $apt->id ?? '' }}" name="appointment_id" class="appointment_id">
+    <input type="hidden" value="{{ $patient->id ?? '' }}" name="patient_id" class="patient_id">
+    <input type="hidden" value="{{ $apt->doctor_id ?? '' }}" name="doctor_id" class="doctor_id">
 
     <div class="section-header">Occupational Therapy Assessment and treatment plan for Physical dysfunction</div>
 
@@ -140,6 +146,7 @@
         </div>
       </div>
     </div>
+</form>
   </div>
 </body>
 </html>
