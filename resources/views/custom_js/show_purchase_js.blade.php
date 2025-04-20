@@ -147,4 +147,86 @@ function get_purchase_payment(id) {
         this.style.display = 'none';
     });
 
+// delete purchase
+function del_purchase(id) {
+        var csrfToken = $('meta[name="csrf-token"]').attr('content');
+        Swal.fire({
+            title: '<?php echo trans('messages.sure_lang', [], session('locale')); ?>',
+            text: '<?php echo trans('messages.delete_lang', [], session('locale')); ?>',
+            type: "warning",
+            showCancelButton: !0,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: '<?php echo trans('messages.delete_it_lang', [], session('locale')); ?>',
+            confirmButtonClass: "btn btn-primary",
+            cancelButtonClass: "btn btn-danger ml-1",
+            buttonsStyling: !1
+        }).then(function(result) {
+            if (result.value) {
+                $('#global-loader').show();
+                $.ajax({
+                    url: "<?php echo url('delete_purchase'); ?>",
+                    type: 'POST',
+                    data: {
+                        id: id,
+                        _token: csrfToken
+                    },
+                    error: function() {
+                        $('#global-loader').hide();
+                        show_notification('error', '<?php echo trans('messages.delete_failed_lang', [], session('locale')); ?>');
+                    },
+                    success: function(data) {
+                        $('#global-loader').hide();
+                        $('#all_purchase').DataTable().ajax.reload();
+                        show_notification('success', '<?php echo trans('messages.delete_success_lang', [], session('locale')); ?>');
+                    }
+                });
+            } else if (result.dismiss === Swal.DismissReason.cancel) {
+                show_notification('success', '<?php echo trans('messages.safe_lang', [], session('locale')); ?>');
+            }
+        });
+    }
+
+
+    function del_payment(id) {
+        var csrfToken = $('meta[name="csrf-token"]').attr('content');
+        Swal.fire({
+            title: '<?php echo trans('messages.sure_lang', [], session('locale')); ?>',
+            text: '<?php echo trans('messages.delete_lang', [], session('locale')); ?>',
+            type: "warning",
+            showCancelButton: !0,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: '<?php echo trans('messages.delete_it_lang', [], session('locale')); ?>',
+            confirmButtonClass: "btn btn-primary",
+            cancelButtonClass: "btn btn-danger ml-1",
+            buttonsStyling: !1
+        }).then(function(result) {
+            if (result.value) {
+                $('#global-loader').show();
+                $.ajax({
+                    url: "<?php echo url('delete_purchase_payment'); ?>",
+                    type: 'POST',
+                    data: {
+                        id: id,
+                        _token: csrfToken
+                    },
+                    error: function() {
+                        $('#global-loader').hide();
+                        show_notification('error', '<?php echo trans('messages.delete_failed_lang', [], session('locale')); ?>');
+                    },
+                    success: function(data) {
+                        $('#global-loader').hide();
+                        location.reload();
+                        show_notification('success', '<?php echo trans('messages.delete_success_lang', [], session('locale')); ?>');
+                    }
+                });
+            } else if (result.dismiss === Swal.DismissReason.cancel) {
+                show_notification('success', '<?php echo trans('messages.safe_lang', [], session('locale')); ?>');
+            }
+        });
+    }
+
+
+
 </script>

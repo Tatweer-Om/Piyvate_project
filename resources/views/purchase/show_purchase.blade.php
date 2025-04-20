@@ -109,7 +109,7 @@
                     @csrf
                     <div class="row">
 
-                        <div class="col-xl-4 col-lg-4 col-md-6">
+                        <div class="col-xl-4 col-lg-4 col-md-6 d-none">
                             <div class="form-group">
                                 <label class="col-form-label">Supplier Name</label>
                                 <input type="text" class="form-control supplier_name" name="supplier_name" placeholder="Supplier Name">
@@ -119,7 +119,7 @@
                         <div class="col-xl-4 col-lg-4 col-md-6">
                             <div class="form-group">
                                 <label class="col-form-label">Invoice No</label>
-                                <input type="text" class="form-control invoice_no" name="invoice_no" placeholder="Invoice Number">
+                                <input type="text" class="form-control invoice_no" readonly name="invoice_no" placeholder="Invoice Number">
                             </div>
                         </div>
 
@@ -127,7 +127,7 @@
                         <div class="col-xl-4 col-lg-4 col-md-6">
                             <div class="form-group">
                                 <label class="col-form-label">Purchase Date</label>
-                                <input type="date" class="form-control purchase_date" name="purchase_date">
+                                <input type="text" class="form-control datepicker purchase_date" readonly value="<?php echo date('Y-m-d'); ?>"  name="purchase_date">
                             </div>
                         </div>
 
@@ -149,7 +149,7 @@
                         <div class="col-xl-4 col-lg-4 col-md-6">
                             <div class="form-group">
                                 <label class="col-form-label">Paid Amount</label>
-                                <input type="number" class="form-control paid_amount" name="paid_amount" placeholder="Remaining Amount" step="0.01">
+                                <input type="text" class="form-control paid_amount isnumber" name="paid_amount" placeholder="Remaining Amount" step="0.01">
                             </div>
                         </div>
 
@@ -169,8 +169,8 @@
 
                         <div class="col-xl-4 col-lg-4 col-md-6">
                             <div class="form-group">
-                                <label class="col-form-label">Payment Date</label>
-                                <input type="date" class="form-control payment_date" name="payment_date">
+                                <label class="col-form-label">Payment Date</label> 
+                                <input type="text" class="form-control datepicker payment_date" readonly value="<?php echo date('Y-m-d'); ?>"  name="payment_date">
                             </div>
                         </div>
 

@@ -1241,6 +1241,58 @@
     });
 
 
+    // add patient customer
+    $('.add_patient').submit(function(e) {
+        e.preventDefault();
+
+        var formData = new FormData($('.add_patient')[0]);
+        formData.append('_token', '{{ csrf_token() }}');
+        var firstName = $('#first_name').val();
+        var mobile = $('#mobile').val();
+        var id = $('.patient_id').val();
+
+        if (firstName === "") {
+            show_notification('error', '<?php echo trans('messages.add_patient_name_lang',[],session('locale')); ?>');
+            return false;
+        }
+        if (mobile === "") {
+            show_notification('error', '<?php echo trans('messages.provide_mobile_lang',[],session('locale')); ?>');
+            return false;
+        }
+
+        showPreloader();
+        before_submit();
+
+        $.ajax({
+            type: "POST",
+            url: "{{ url('add_pos_patient') }}",
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function(response) {
+                hidePreloader();
+                after_submit();
+                show_notification('success', id ?
+                    '<?php echo trans('messages.data_update_success_lang',[],session('locale')); ?>' :
+                    '<?php echo trans('messages.data_add_success_lang',[],session('locale')); ?>'
+                );
+                $('#add_patient').modal('hide'); 
+                if (!id) $(".add_patient")[0].reset();
+            },
+            error: function(response) {
+                hidePreloader();
+                after_submit();
+                show_notification('error', id ?
+                    '<?php echo trans('messages.data_update_failed_lang',[],session('locale')); ?>' :
+                    '<?php echo trans('messages.data_add_failed_lang',[],session('locale')); ?>'
+                );
+                $('#all_patient').DataTable().ajax.reload();
+            }
+        });
+    });
+
+
+
     // key up
 
     $(document).on('keyup', '.return_qty', function(e) {

@@ -26,11 +26,9 @@ use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\ExpensecatController;
 use App\Http\Controllers\SpecialityController;
 use App\Http\Controllers\AppointmentController;
-<<<<<<< HEAD
 use App\Http\Controllers\ClinicalNotesController;
-=======
 use App\Http\Controllers\HrController;
->>>>>>> cc1154f30bbb118c936032ab5879d540bebc5933
+ 
 
 Route::get('/', function () {
     return view('welcome');
@@ -265,6 +263,7 @@ Route::post('update_purchase', [PurchaseController::class, 'update_purchase'])->
 Route::post('complete_purchase', [PurchaseController::class, 'complete_purchase'])->name('complete_purchase');
 Route::post('check_tax_active', [PurchaseController::class, 'check_tax_active'])->name('check_tax_active');
 Route::get('download-receipt/{filename}', [PurchaseController::class, 'downloadReceipt']);
+Route::post('delete_purchase_payment', [PurchaseController::class, 'delete_purchase_payment'])->name('delete_purchase_payment');
 
 
 

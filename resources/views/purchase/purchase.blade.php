@@ -40,8 +40,7 @@
                             <div class="col-xl-3 ">
                                 <div class="form-group">
                                     <label class="col-form-label">Purchase Date:</label>
-                                    <input type="date" class="form-control purchase_date datetimepicker"
-                                        value="<?php echo date('Y-m-d'); ?>" name="purchase_date">
+                                    <input type="text" class="form-control datepicker purchase_date" readonly value="<?php echo date('Y-m-d'); ?>"  name="purchase_date">
                                 </div>
                             </div>
 
@@ -356,7 +355,7 @@
                                     <div class="form-group">
                                         <label class="col-form-label">Product Type:</label>
                                         <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="product_type_1"
+                                            <input class="form-check-input" checked="true" type="radio" name="product_type_1"
                                                 id="product_sale_1" value="2">
                                             <label class="form-check-label" for="product_sale_1">Sale</label>
                                         </div>

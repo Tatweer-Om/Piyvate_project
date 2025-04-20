@@ -179,6 +179,8 @@
 
         $('#open_payment_modal').click(function() {
             $('#payment_modal').modal('show');
+            $('#total_amount').text($('#appointment_fee').val());
+            $('.payment_amounts').first().val($('#appointment_fee').val());
         });
 
         $('#confirm_payment').click(function(e) {

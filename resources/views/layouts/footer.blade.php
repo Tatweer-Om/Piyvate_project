@@ -162,7 +162,7 @@
     $routeName = Route::currentRouteName();
     $segments = explode('.', $routeName);
     $route_name = isset($segments[0]) ? $segments[0] : null;
-
+  
 @endphp
 
     @if ($route_name == 'account')
@@ -173,19 +173,19 @@
         @include('custom_js.qty_audit_js')
         @elseif ($route_name == 'purchases')
         @include('custom_js.show_purchase_js')
+        
         @elseif ($route_name == 'products')
         @include('custom_js.product_js')
         @elseif ($route_name == 'category')
-        @include('custom_js.product_js')
+        @include('custom_js.category_js')
         @elseif ($route_name == 'govt')
         @include('custom_js.govt_agency_js')
         @elseif ($route_name == 'expense_category')
         @include('custom_js.expensecat_js')
-		  @elseif ($route_name == 'appointments')
+		@elseif ($route_name == 'appointments')
         @include('custom_js.appointment_js')
         @elseif ($route_name == 'all_appointments')
         @include('custom_js.appointment_js')
-
         @elseif ($route_name == 'sessions_list')
         @include('custom_js.session_js')
         @elseif ($route_name == 'session_detail')
@@ -240,6 +240,8 @@
         @include('custom_js.pending_leaves_js')
         @elseif ($route_name == 'responded_leaves')
         @include('custom_js.responded_leaves_js')
+        @elseif ($route_name == 'purchase_view')
+        @include('custom_js.show_purchase_js')
     @endif
 
 </body>
