@@ -397,12 +397,16 @@ Route::get('soap_ot/{id}', [ClinicalNotesController::class, 'soap_ot'])->name('s
 Route::get('soap_pt/{id}', [ClinicalNotesController::class, 'soap_pt'])->name('soap_pt');
 Route::get('otatp_pedriatic/{id}', [ClinicalNotesController::class, 'otatp_pedriatic'])->name('otatp_pedriatic');
 Route::get('neuro_pedriatic/{id}', [ClinicalNotesController::class, 'neuro_pedriatic'])->name('neuro_pedriatic');
+Route::get('neuro_pedriatic_view/{id}', [ClinicalNotesController::class, 'neuro_pedriatic_view'])->name('neuro_pedriatic_view');
+Route::post('/add_neuro_pedriatic', [ClinicalNotesController::class, 'add_neuro_pedriatic'])->name('add_neuro_pedriatic');
+Route::post('/update_neuro_pedriatic', [ClinicalNotesController::class, 'update_neuro_pedriatic'])->name('update_neuro_pedriatic');
+
 Route::get('physical_dysfunction/{id}', [ClinicalNotesController::class, 'physical_dysfunction'])->name('physical_dysfunction');
 Route::get('otatp_ortho/{id}', [ClinicalNotesController::class, 'otatp_ortho'])->name('otatp_ortho');
 Route::post('/add_otp_pediatric', [ClinicalNotesController::class, 'add_otp_pediatric'])->name('add_otp_pediatric');
 Route::post('/add_soap_ot', [ClinicalNotesController::class, 'add_soap_ot'])->name('add_soap_ot');
 Route::post('/add_soap_pt', [ClinicalNotesController::class, 'add_soap_pt'])->name('add_soap_pt');
-Route::post('/add_neuro_pedriatic', [ClinicalNotesController::class, 'add_neuro_pedriatic'])->name('add_neuro_pedriatic');
+
 Route::post('/add_physical_dysfunction', [ClinicalNotesController::class, 'add_physical_dysfunction'])->name('add_physical_dysfunction');
 Route::post('/add_otatp_ortho', [ClinicalNotesController::class, 'add_otatp_ortho'])->name('add_otatp_ortho');
 

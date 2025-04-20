@@ -15,19 +15,37 @@
         .checkbox-group { display: inline-block; margin-right: 10px; }
         .signature-line { margin-top: 20px; }
         .anatomy-img { float: right; width: 120px; height: auto; }
+        .page_whole {
+            width: 880px;
+            margin: auto;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            background: #fff;
+        }
     </style>
 </head>
 <body>
+    <div class="page_whole">
 <div class="page">
     <div class="header">
+        <form method="POST" action="{{  url('add_otatp_ortho')}}">
+            @csrf
         <img src="{{ asset('images/logo/piyalogo-1.png') }}" alt="Center Logo" height="50">
         <div>
-            HN:<input type="text" class="input-line"> PT:<input type="text" class="input-line"><br>
-            Name:<input type="text" class="input-line"> Age:<input type="text" class="input-short input-line">
-            Gender:<label><input type="checkbox">M</label><label><input type="checkbox">F</label><br>
-            Birth Date:<input type="date" class="input-line"> Therapist:<input type="text" class="input-line">
+            HN:<input type="text" class="input-line" value="{{ $patient->HN ?? '' }}" name="hn" > PT:<input type="text" class="input-line" name="pt"><br>
+            Name:<input type="text" class="input-line" value="{{ $patient->full_name ?? '' }}"> Age:<input type="text" class="input-short input-line" value="{{ $patient->age ?? '' }}" style="width: 150px; !important;"> <br>
+            Gender:  <label>
+                <input type="checkbox" name="gender_m" value="male" {{ $patient->gender == 'Male' ? 'checked' : '' }}> M
+            </label>
+            <label>
+                <input type="checkbox" name="gender_f" value="female" {{ $patient->gender == 'Female' ? 'checked' : '' }}> F
+            </label>
+            Birth Date:<input type="date" class="input-line" value="{{ $patient->dob ?? '' }}"> <br> Therapist:<input type="text" class="input-line" value="{{ $doctor ?? '' }}" >
         </div>
     </div>
+    <input type="hidden" value="{{ $apt->id ?? '' }}" name="appointment_id" class="appointment_id">
+    <input type="hidden" value="{{ $patient->id ?? '' }}" name="patient_id" class="patient_id">
+    <input type="hidden" value="{{ $apt->doctor_id ?? '' }}" name="doctor_id" class="doctor_id">
 
     <div class="section-header">PHYSICAL THERAPY ASSESSMENT AND TREATMENT PLAN FOR ORTHOPEDIC</div>
 
@@ -108,6 +126,8 @@
     <div class="signature-line">
         PT's signature:<input type="text" class="input-line"> Date:<input type="text" class="input-line"> Time:<input type="text" class="input-line">
     </div>
+</form>
+</div>
 </div>
 </body>
 </html>

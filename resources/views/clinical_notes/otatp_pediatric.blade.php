@@ -98,13 +98,13 @@
 </head>
 <body>
   <div class="page">
-    <form action="{{ url('add_otp_pediatric') }}">
+    <form action="{{ url('add_otp_pediatric') }}" method="POST">
         @csrf
     <div class="header">
       <img src="{{ asset('images/logo/piyalogo-1.png') }}" alt="Center Logo">
       <div class="header-info">
-        HN: <input class="input-line" value="{{ $patient->HN ?? '' }}">
-        PT no: <input class="input-line"><br>
+        HN: <input name="hn" class="input-line" value="{{ $patient->HN ?? '' }}">
+        PT no: <input class="input-line" name="pt"><br>
         Name: <input class="input-line" value="{{ $patient->full_name ?? '' }}">
         Age: <input class="input-line" style="width: 40px;" value="{{ $patient->age ?? '' }}">
         Gender:
@@ -116,9 +116,9 @@
       </div>
     </div>
 
-    <input type="hidden" value="{{ $opt->id ?? '' }}" name="appointment_id" class="appointment_id">
+    <input type="hidden" value="{{ $apt->id ?? '' }}" name="appointment_id" class="appointment_id">
     <input type="hidden" value="{{ $patient->id ?? '' }}" name="patient_id" class="patient_id">
-
+    <input type="hidden" value="{{ $apt->doctor_id ?? '' }}" name="doctor_id" class="doctor_id">
 
     <div class="section-header">Occupational Therapy Assessment and treatment plan for Pediatric</div>
 

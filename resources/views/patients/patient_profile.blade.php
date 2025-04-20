@@ -89,14 +89,7 @@
                                         <i class="bi bi-phone-fill text-warning me-2 fs-6"></i>
                                         <span><strong>Mobile: </strong> {{ $patient->mobile ?? '' }}</span>
                                     </div>
-                                    {{-- <div class="col-6 d-flex align-items-center">
-                                        <i class="bi bi-heart-pulse-fill text-danger me-2 fs-6"></i>
-                                        <span><strong>BP:</strong> 120/80</span>
-                                    </div>
-                                    <div class="col-6 d-flex align-items-center">
-                                        <i class="bi bi-clock-fill text-secondary me-2 fs-6"></i>
-                                        <span><strong>Check-in:</strong> 21 Aug 2020</span>
-                                    </div> --}}
+
                                 </div>
 
 
@@ -123,6 +116,12 @@
                                             <div class="fw-bold text-danger">{{  $country_name ?? 'not provided'}}</div>
                                             <div class="text-danger"> Country</div>
                                         </div>
+                                    </div>
+                                    <div class="col-4">
+                                        <a href="{{ url("neuro_pedriatic_view/$patient->id") }}" class="text-decoration-none text-dark">
+                                            <img src="{{ asset('images/logo/4.png') }}" class="img-fluid rounded shadow-sm" style="width: 45px; height: 45px; object-fit: cover;">
+                                            <div class="small mt-1">PT-ORTHO</div>
+                                        </a>
                                     </div>
                                 </div>
 
