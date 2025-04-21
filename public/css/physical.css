@@ -1,0 +1,81 @@
+.full-width-button-wrapper {
+    width: 100%;
+    margin-top: 20px;
+}
+
+.custom-grey-button {
+    width: 100%;
+    padding: 12px 0;
+    background-color: #ccc;
+    border: none;
+    font-size: 16px;
+    color: #000;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.custom-grey-button:hover {
+    background-color: #bbb;
+}
+
+
+body {
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+  background-color: #f9f9f9;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 0;
+}
+.page {
+  width: 850px;
+  background: #fff;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+  padding: 20px;
+  border-radius: 8px;
+}
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.header img {
+  height: 50px;
+}
+.header-info {
+  font-size: 12px;
+}
+.section-header {
+  text-align: center;
+  font-weight: bold;
+  border: 2px solid #000;
+  padding: 5px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+.box-section {
+  border: 2px solid #000;
+  padding: 10px;
+  margin-top: 10px;
+}
+.pain-tool-box {
+  border: 2px solid green;
+  padding: 5px;
+  width: 200px;
+  font-size: 11px;
+}
+.input-dotted {
+  border: none;
+  border-bottom: 1px dotted #000;
+  background: transparent;
+  outline: none;
+  font-size: 12px;
+}
+.input-short { width: 40px; }
+.input-medium { width: 120px; }
+.input-long { width: 300px; }
+.checkbox-group { display: inline-block; margin-right: 10px; }
+

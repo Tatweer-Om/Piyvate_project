@@ -1,0 +1,111 @@
+body {
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+}
+
+.page {
+    width: 850px;
+    margin: auto;
+    border: 1px solid #000;
+    padding: 15px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.section-header {
+    text-align: center;
+    font-weight: bold;
+    border: 1px solid #000;
+    padding: 5px;
+    margin-top: 10px;
+}
+
+.row {
+    margin-bottom: 5px;
+}
+.full-width-button-wrapper {
+    width: 100%;
+    margin-top: 20px;
+}
+
+.custom-grey-button {
+    width: 100%;
+    padding: 12px 0;
+    background-color: #ccc;
+    border: none;
+    font-size: 16px;
+    color: #000;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.custom-grey-button:hover {
+    background-color: #bbb;
+}
+
+
+.input-line {
+    border: none;
+    border-bottom: 1px dotted #000;
+    display: inline-block;
+}
+
+.input-short {
+    width: 50px;
+}
+
+.checkbox-group {
+    display: inline-block;
+    margin-right: 10px;
+}
+
+.signature-line {
+    margin-top: 20px;
+}
+
+.anatomy-img {
+    float: right;
+    width: 120px;
+    height: auto;
+}
+
+.page_whole {
+    width: 880px;
+    margin: auto;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+    padding: 15px;
+    background: #fff;
+}
+
+.form-row {
+    display: flex;
+    align-items: flex-start;
+    margin-right: 60px;
+}
+
+.form-left {
+    width: 70%;
+    padding-right: 20px;
+}
+
+.form-right {
+    width: 20%;
+    display: flex;
+    justify-content: center;
+}
+
+.form-left label {
+    display: block;
+    margin-bottom: 10px;
+}
+
+.input-line {
+    margin-left: 5px;
+    margin-bottom: 10px;
+}

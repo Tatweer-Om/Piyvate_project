@@ -10,7 +10,7 @@
 
 <body>
     <div class="page_whole">
-        <form  method="POST">
+        <form  method="POST" action="{{ url('update_neuro_pedriatic/' . $note->id) }}">
             @csrf
 
             <div class="page">
@@ -21,7 +21,7 @@
                     <div style="text-align: justify;">
                         <div>
                             HN:<input type="text" class="input-line" value="{{ $patient->HN ?? '' }}"
-                                name="hn" /> PT:<input type="text" class="input-line" name="pt" />
+                                name="hn" /> PT:<input type="text" value="{{ $data['pt'] ?? '' }}" class="input-line" name="pt" />
                         </div>
                         <div>
                             Name:<input type="text" class="input-line" value="{{ $patient->full_name ?? '' }}" />
@@ -101,70 +101,95 @@
                         value="{{ $data['lab_radiology_result'] ?? '' }}" />
                 </p>
 
-                <!-- Level of Consciousness -->
-                <div style="margin: 15px 0;">
-                    <p>Level of consciousness:
-                        <label><input type="checkbox" name="level_of_consciousness[]" value="alert"
-                                {{ isset($data['level_of_consciousness']) && in_array('alert', $data['level_of_consciousness']) ? 'checked' : '' }}>
-                            Alert</label>
-                        <label><input type="checkbox" name="level_of_consciousness[]" value="drowsy"
-                                {{ isset($data['level_of_consciousness']) && in_array('drowsy', $data['level_of_consciousness']) ? 'checked' : '' }}>
-                            Drowsy</label>
-                        <label><input type="checkbox" name="level_of_consciousness[]" value="stupor"
-                                {{ isset($data['level_of_consciousness']) && in_array('stupor', $data['level_of_consciousness']) ? 'checked' : '' }}>
-                            Stupor</label>
-                        <label><input type="checkbox" name="level_of_consciousness[]" value="semi_coma"
-                                {{ isset($data['level_of_consciousness']) && in_array('semi_coma', $data['level_of_consciousness']) ? 'checked' : '' }}>
-                            Semi coma</label>
-                        <label><input type="checkbox" name="level_of_consciousness[]" value="coma"
-                                {{ isset($data['level_of_consciousness']) && in_array('coma', $data['level_of_consciousness']) ? 'checked' : '' }}>
-                            Coma</label>
-                    </p>
-                    <p>
-                        Interpretered:
-                        <label><input type="checkbox" name="interpreted" value="no"
-                                {{ isset($data['interpreted']) && $data['interpreted'] === 'no' ? 'checked' : '' }}> No</label>
-                        <label><input type="checkbox" name="interpreted" value="yes"
-                                {{ isset($data['interpreted']) && $data['interpreted'] === 'yes' ? 'checked' : '' }}> Yes</label>
-                    </p>
-                    <p>
-                        Observation
-                        <input type="text" class="input-line" name="observation" style="width:500px;"
-                            value="{{ $data['observation'] ?? '' }}" />
-                    </p>
-                    <p>
-                        Muscle tone
-                        <input type="text" class="input-line" name="muscle_tone" style="width:180px;"
-                            value="{{ $data['muscle_tone'] ?? '' }}" />
-                        Muscle strength
-                        <input type="text" class="input-line" name="muscle_strength" style="width:180px;"
-                            value="{{ $data['muscle_strength'] ?? '' }}" />
-                    </p>
-                    <p>
-                        Sensation
-                        <input type="text" class="input-line" name="sensation" style="width:120px;"
-                            value="{{ $data['sensation'] ?? '' }}" /> ➝ ASIA
-                        <input type="text" class="input-line" name="asia" style="width:300px;"
-                            value="{{ $data['asia'] ?? '' }}" />
-                    </p>
-                </div>
+
 
                 <!-- Canvas Section for Image -->
                 <div class="flex-row" style="margin: 20px 0;">
                     <div style="flex: 1;">
-                        <!-- Other fields or canvases can be added here -->
+                        <p>Level of consciousness:
+                            <label><input type="checkbox" name="level_of_consciousness[]" value="alert"
+                                    {{ isset($data['level_of_consciousness']) && in_array('alert', $data['level_of_consciousness']) ? 'checked' : '' }}>
+                                Alert</label>
+                            <label><input type="checkbox" name="level_of_consciousness[]" value="drowsy"
+                                    {{ isset($data['level_of_consciousness']) && in_array('drowsy', $data['level_of_consciousness']) ? 'checked' : '' }}>
+                                Drowsy</label>
+                            <label><input type="checkbox" name="level_of_consciousness[]" value="stupor"
+                                    {{ isset($data['level_of_consciousness']) && in_array('stupor', $data['level_of_consciousness']) ? 'checked' : '' }}>
+                                Stupor</label>
+                            <label><input type="checkbox" name="level_of_consciousness[]" value="semi_coma"
+                                    {{ isset($data['level_of_consciousness']) && in_array('semi_coma', $data['level_of_consciousness']) ? 'checked' : '' }}>
+                                Semi coma</label>
+                            <label><input type="checkbox" name="level_of_consciousness[]" value="coma"
+                                    {{ isset($data['level_of_consciousness']) && in_array('coma', $data['level_of_consciousness']) ? 'checked' : '' }}>
+                                Coma</label>
+                        </p>
+                        <p>
+                            Interpretered:
+                            <label><input type="checkbox" name="interpreted" value="no"
+                                    {{ isset($data['interpreted']) && $data['interpreted'] === 'no' ? 'checked' : '' }}> No</label>
+                            <label><input type="checkbox" name="interpreted" value="yes"
+                                    {{ isset($data['interpreted']) && $data['interpreted'] === 'yes' ? 'checked' : '' }}> Yes</label>
+                        </p>
+                        <p>
+                            Observation
+                            <input type="text" class="input-line" name="observation" style="width:500px;"
+                                value="{{ $data['observation'] ?? '' }}" />
+                        </p>
+                        <p>
+                            Muscle tone
+                            <input type="text" class="input-line" name="muscle_tone" style="width:180px;"
+                                value="{{ $data['muscle_tone'] ?? '' }}" />
+                            Muscle strength
+                            <input type="text" class="input-line" name="muscle_strength" style="width:180px;"
+                                value="{{ $data['muscle_strength'] ?? '' }}" />
+                        </p>
+                        <p>
+                            Sensation
+                            <input type="text" class="input-line" name="sensation" style="width:120px;"
+                                value="{{ $data['sensation'] ?? '' }}" /> ➝ ASIA
+                            <input type="text" class="input-line" name="asia" style="width:300px;"
+                                value="{{ $data['asia'] ?? '' }}" />
+                        </p>
+                        <p>
+                            Bed mobility
+                            <span class="checkbox-group">
+                                <input type="checkbox" name="bed_mobility[]" value="independent"
+                                    {{ isset($data['bed_mobility']) && in_array('independent', $data['bed_mobility']) ? 'checked' : '' }}>
+                                Independent
+                            </span>
+                            <span class="checkbox-group">
+                                <input type="checkbox" name="bed_mobility[]" value="dependent"
+                                    {{ isset($data['bed_mobility']) && in_array('dependent', $data['bed_mobility']) ? 'checked' : '' }}>
+                                Dependent with
+                                <input type="text" class="input-line" name="bed_mobility_assist" style="width: 100px;"
+                                    value="{{ isset($data['bed_mobility_assist']) ? $data['bed_mobility_assist'] : '' }}" />
+                            </span>
+                        </p>
+
+                        <p>
+                            Transfer
+                            <span class="checkbox-group">
+                                <input type="checkbox" name="transfer[]" value="independent"
+                                    {{ isset($data['transfer']) && $data['transfer'] == 'on' ? 'checked' : '' }}>
+                                Independent
+                            </span>
+                            <span class="checkbox-group">
+                                <input type="checkbox" name="transfer[]" value="dependent"
+                                    {{ isset($data['transfer']) && $data['transfer'] == 'on' ? 'checked' : '' }}>
+                                Dependent with
+                                <input type="text" class="input-line" name="transfer_assist" style="width: 100px;"
+                                    value="{{ isset($data['transfer_assist']) ? $data['transfer_assist'] : '' }}" />
+                            </span>
+                        </p>
+
+
                     </div>
                     <div>
-                        @if(isset($data['image_path']))
-                            <p>Current Image:</p>
-                            <img src="{{ asset($data['image_path']) }}" alt="Marked Image" style="max-width:300px;">
-                        @endif
-                        <p>Update Image (if needed):</p>
-                        <canvas id="body-canvas" width="300" height="300" style="border: 1px solid #000;"></canvas>
-                        <!-- Hidden values to be populated by canvas interaction -->
+                        <canvas id="body-canvas" width="300" height="300" style="border: none;"></canvas>
                         <input type="hidden" id="ticked-points" name="ticked_points">
                         <input type="hidden" id="canvas-image" name="canvas_image">
                     </div>
+
                 </div>
                 <table>
                     <tr>
@@ -239,65 +264,66 @@
 
                 <p>ADL Feeding
                     <span class="checkbox-group">
-                        <input type="checkbox" name="adl_feeding[]" value="dependent" {{ in_array('dependent', $adl_feeding ?? []) ? 'checked' : '' }}> Dependent
+                        <input type="checkbox" name="adl_feeding[]" value="dependent" {{ isset($data['adl_feeding']) && in_array('dependent', $data['adl_feeding']) ? 'checked' : '' }}> Dependent
                     </span>
                     <span class="checkbox-group">
-                        <input type="checkbox" name="adl_feeding[]" value="independent" {{ in_array('independent', $adl_feeding ?? []) ? 'checked' : '' }}> Independent
+                        <input type="checkbox" name="adl_feeding[]" value="independent" {{ isset($data['adl_feeding']) && in_array('independent', $data['adl_feeding']) ? 'checked' : '' }}> Independent
                     </span>
+                </p>
 
-                    Bathing/Toileting
+                <p>Bathing/Toileting
                     <span class="checkbox-group">
-                        <input type="checkbox" name="adl_bathing_toileting[]" value="dependent" {{ in_array('dependent', $data->adl_bathing_toileting ?? []) ? 'checked' : '' }}> Dependent
+                        <input type="checkbox" name="adl_bathing_toileting[]" value="dependent" {{ isset($data['adl_bathing_toileting']) && in_array('dependent', $data['adl_bathing_toileting']) ? 'checked' : '' }}> Dependent
                     </span>
                     <span class="checkbox-group">
-                        <input type="checkbox" name="adl_bathing_toileting[]" value="independent" {{ in_array('independent', $data->adl_bathing_toileting ?? []) ? 'checked' : '' }}> Independent
+                        <input type="checkbox" name="adl_bathing_toileting[]" value="independent" {{ isset($data['adl_bathing_toileting']) && in_array('independent', $data['adl_bathing_toileting']) ? 'checked' : '' }}> Independent
                     </span>
                 </p>
 
                 <p>Dressing
                     <span class="checkbox-group">
-                        <input type="checkbox" name="adl_dressing[]" value="dependent" {{ in_array('dependent', $data->adl_dressing ?? []) ? 'checked' : '' }}> Dependent
+                        <input type="checkbox" name="adl_dressing[]" value="dependent" {{ isset($data['adl_dressing']) && in_array('dependent', $data['adl_dressing']) ? 'checked' : '' }}> Dependent
                     </span>
                     <span class="checkbox-group">
-                        <input type="checkbox" name="adl_dressing[]" value="independent" {{ in_array('independent', $data->adl_dressing ?? []) ? 'checked' : '' }}> Independent
+                        <input type="checkbox" name="adl_dressing[]" value="independent" {{ isset($data['adl_dressing']) && in_array('independent', $data['adl_dressing']) ? 'checked' : '' }}> Independent
                     </span>
+                </p>
 
-                    Sleeping
+                <p>Sleeping
                     <span class="checkbox-group">
-                        <input type="checkbox" name="adl_sleeping[]" value="dependent" {{ in_array('dependent', $data->adl_sleeping ?? []) ? 'checked' : '' }}> Dependent
+                        <input type="checkbox" name="adl_sleeping[]" value="dependent" {{ isset($data['adl_sleeping']) && in_array('dependent', $data['adl_sleeping']) ? 'checked' : '' }}> Dependent
                     </span>
                     <span class="checkbox-group">
-                        <input type="checkbox" name="adl_sleeping[]" value="independent" {{ in_array('independent', $data->adl_sleeping ?? []) ? 'checked' : '' }}> Independent
+                        <input type="checkbox" name="adl_sleeping[]" value="independent" {{ isset($data['adl_sleeping']) && in_array('independent', $data['adl_sleeping']) ? 'checked' : '' }}> Independent
                     </span>
+                </p>
 
-                    Carrying
+                <p>Carrying
                     <span class="checkbox-group">
-                        <input type="checkbox" name="adl_carrying[]" {{ in_array('dependent', $data->adl_carrying ?? []) ? 'checked' : '' }}> Dependent
+                        <input type="checkbox" name="adl_carrying[]" value="dependent" {{ isset($data['adl_carrying']) && in_array('dependent', $data['adl_carrying']) ? 'checked' : '' }}> Dependent
                     </span>
                     <span class="checkbox-group">
-                        <input type="checkbox" name="adl_carrying[]"  {{ in_array('independent', $data->adl_carrying ?? []) ? 'checked' : '' }}> Independent
+                        <input type="checkbox" name="adl_carrying[]" value="independent" {{ isset($data['adl_carrying']) && in_array('independent', $data['adl_carrying']) ? 'checked' : '' }}> Independent
                     </span>
                 </p>
 
                 <p>Fall risk assessment:
                     <span class="checkbox-group">
-                        <input type="checkbox" name="fall_risk[]" value="low" {{ in_array('low', $data->fall_risk ?? []) ? 'checked' : '' }}> Low risks
+                        <input type="checkbox" name="fall_risk[]" value="low" {{ isset($data['fall_risk']) && in_array('low', $data['fall_risk']) ? 'checked' : '' }}> Low risks
                     </span>
                     <span class="checkbox-group">
-                        <input type="checkbox" name="fall_risk[]" value="high" {{ in_array('high', $data->fall_risk ?? []) ? 'checked' : '' }}> High risks
+                        <input type="checkbox" name="fall_risk[]" value="high" {{ isset($data['fall_risk']) && in_array('high', $data['fall_risk']) ? 'checked' : '' }}> High risks
                     </span>
                 </p>
 
                 <p>Pain assessment: Does patient have pain?
                     <span class="checkbox-group">
-                        <input type="checkbox" name="has_pain[]" value="no" {{ in_array('no', $data->has_pain ?? []) ? 'checked' : '' }}> No
+                        <input type="checkbox" name="has_pain[]" value="no" {{ isset($data['has_pain']) && in_array('no', $data['has_pain']) ? 'checked' : '' }}> No
                     </span>
                     <span class="checkbox-group">
-                        <input type="checkbox" name="has_pain[]" value="yes" {{ in_array('yes', $data->has_pain ?? []) ? 'checked' : '' }}> Yes
+                        <input type="checkbox" name="has_pain[]" value="yes" {{ isset($data['has_pain']) && in_array('yes', $data['has_pain']) ? 'checked' : '' }}> Yes
                     </span>
                 </p>
-
-
 
                 <p>
                     Location
@@ -306,78 +332,81 @@
 
                 <p>Duration
                     <span class="checkbox-group">
-                        <input type="checkbox" name="pain_duration[]" value="intermittent" {{ in_array('intermittent', $data->pain_duration ?? []) ? 'checked' : '' }}> Intermittent
+                        <input type="checkbox" name="pain_duration[]" value="intermittent" {{ isset($data['pain_duration']) && in_array('intermittent', $data['pain_duration']) ? 'checked' : '' }}> Intermittent
                     </span>
                     <span class="checkbox-group">
-                        <input type="checkbox" name="pain_duration[]" value="constant" {{ in_array('constant', $data->pain_duration ?? []) ? 'checked' : '' }}> Constant
+                        <input type="checkbox" name="pain_duration[]" value="constant" {{ isset($data['pain_duration']) && in_array('constant', $data['pain_duration']) ? 'checked' : '' }}> Constant
                     </span>
+                </p>
 
-                    Characteristic of pain:
+                <p>Characteristic of pain:
                     <span class="checkbox-group">
-                        <input type="checkbox" name="pain_character[]" value="prick" {{ in_array('prick', $data->pain_character ?? []) ? 'checked' : '' }}> Prick
+                        <input type="checkbox" name="pain_character[]" value="prick" {{ isset($data['pain_character']) && in_array('prick', $data['pain_character']) ? 'checked' : '' }}> Prick
                     </span>
                     <span class="checkbox-group">
-                        <input type="checkbox" name="pain_character[]" value="sharp" {{ in_array('sharp', $data->pain_character ?? []) ? 'checked' : '' }}> Sharp
+                        <input type="checkbox" name="pain_character[]" value="sharp" {{ isset($data['pain_character']) && in_array('sharp', $data['pain_character']) ? 'checked' : '' }}> Sharp
                     </span>
                     <span class="checkbox-group">
-                        <input type="checkbox" name="pain_character[]" value="dull" {{ in_array('dull', $data->pain_character ?? []) ? 'checked' : '' }}> Dull
+                        <input type="checkbox" name="pain_character[]" value="dull" {{ isset($data['pain_character']) && in_array('dull', $data['pain_character']) ? 'checked' : '' }}> Dull
                     </span>
                     <span class="checkbox-group">
-                        <input type="checkbox" name="pain_character[]" value="burning" {{ in_array('burning', $data->pain_character ?? []) ? 'checked' : '' }}> Burning
+                        <input type="checkbox" name="pain_character[]" value="burning" {{ isset($data['pain_character']) && in_array('burning', $data['pain_character']) ? 'checked' : '' }}> Burning
                     </span>
                     <span class="checkbox-group">
-                        <input type="checkbox" name="pain_character[]" value="colic" {{ in_array('colic', $data->pain_character ?? []) ? 'checked' : '' }}> Colic
+                        <input type="checkbox" name="pain_character[]" value="colic" {{ isset($data['pain_character']) && in_array('colic', $data['pain_character']) ? 'checked' : '' }}> Colic
                     </span>
                     <span class="checkbox-group">
-                        <input type="checkbox" name="pain_character[]" value="others" {{ in_array('others', $data->pain_character ?? []) ? 'checked' : '' }}> Others
+                        <input type="checkbox" name="pain_character[]" value="others" {{ isset($data['pain_character']) && in_array('others', $data['pain_character']) ? 'checked' : '' }}> Others
                     </span>
                 </p>
 
                 <p>Frequency:
                     <span class="checkbox-group">
-                        <input type="checkbox" name="pain_frequency[]" value="less_than_daily" {{ in_array('less_than_daily', $data->pain_frequency ?? []) ? 'checked' : '' }}> Less than daily
+                        <input type="checkbox" name="pain_frequency[]" value="less_than_daily" {{ isset($data['pain_frequency']) && in_array('less_than_daily', $data['pain_frequency']) ? 'checked' : '' }}> Less than daily
                     </span>
                     <span class="checkbox-group">
-                        <input type="checkbox" name="pain_frequency[]" value="daily" {{ in_array('daily', $data->pain_frequency ?? []) ? 'checked' : '' }}> Daily
+                        <input type="checkbox" name="pain_frequency[]" value="daily" {{ isset($data['pain_frequency']) && in_array('daily', $data['pain_frequency']) ? 'checked' : '' }}> Daily
                     </span>
                     <span class="checkbox-group">
-                        <input type="checkbox" name="pain_frequency[]" value="all_the_time" {{ in_array('all_the_time', $data->pain_frequency ?? []) ? 'checked' : '' }}> All the time
+                        <input type="checkbox" name="pain_frequency[]" value="all_the_time" {{ isset($data['pain_frequency']) && in_array('all_the_time', $data['pain_frequency']) ? 'checked' : '' }}> All the time
                     </span>
                 </p>
 
+
                 <p>
                     Pain re-assessment score
-                    <input type="text" class="input-line" style="width: 300px;" name="pain_reassessment_score" value="{{ $data->pain_reassessment_score ?? '' }}" />
+                    <input type="text" class="input-line" style="width: 300px;" name="pain_reassessment_score" value="{{ $data['pain_reassessment_score'] ?? '' }}" />
                 </p>
 
                 <p>Assessment tool:
                     <span class="checkbox-group">
-                        <input type="checkbox" name="assessment_tool[]" value="nips" {{ in_array('nips', $data->assessment_tool ?? []) ? 'checked' : '' }}> NIPS
+                        <input type="checkbox" name="assessment_tool[]" value="nips" {{ isset($data['assessment_tool']) && in_array('nips', $data['assessment_tool']) ? 'checked' : '' }}> NIPS
                     </span>
                     <span class="checkbox-group">
-                        <input type="checkbox" name="assessment_tool[]" value="flacc" {{ in_array('flacc', $data->assessment_tool ?? []) ? 'checked' : '' }}> FLACC
+                        <input type="checkbox" name="assessment_tool[]" value="flacc" {{ isset($data['assessment_tool']) && in_array('flacc', $data['assessment_tool']) ? 'checked' : '' }}> FLACC
                     </span>
                     <span class="checkbox-group">
-                        <input type="checkbox" name="assessment_tool[]" value="faces" {{ in_array('faces', $data->assessment_tool ?? []) ? 'checked' : '' }}> FACES
+                        <input type="checkbox" name="assessment_tool[]" value="faces" {{ isset($data['assessment_tool']) && in_array('faces', $data['assessment_tool']) ? 'checked' : '' }}> FACES
                     </span>
                     <span class="checkbox-group">
-                        <input type="checkbox" name="assessment_tool[]" value="nrs" {{ in_array('nrs', $data->assessment_tool ?? []) ? 'checked' : '' }}> NRS
+                        <input type="checkbox" name="assessment_tool[]" value="nrs" {{ isset($data['assessment_tool']) && in_array('nrs', $data['assessment_tool']) ? 'checked' : '' }}> NRS
                     </span>
                 </p>
 
+
                 <p>
                     PT diagnosis / Impression
-                    <input type="text" class="input-line" style="width: 500px;" name="pt_diagnosis" value="{{ $data->pt_diagnosis ?? '' }}" />
+                    <input type="text" class="input-line" style="width: 500px;" name="pt_diagnosis" value="{{ $data['pt_diagnosis'] ?? '' }}" />
                 </p>
 
                 <p>
                     Goal of treatment: Long term goal
-                    <input type="text" class="input-line input-line-short" style="width: 500px;" name="long_term_goal" value="{{ $data->long_term_goal ?? '' }}" />
+                    <input type="text" class="input-line input-line-short" style="width: 500px;" name="long_term_goal" value="{{ $data['long_term_goal'] ?? '' }}" />
                 </p>
 
                 <p class="indented">
                     Short term goal
-                    <input type="text" class="input-line input-line-short" style="width: 500px;" name="short_term_goal" value="{{ $data->short_term_goal ?? '' }}" />
+                    <input type="text" class="input-line input-line-short" style="width: 500px;" name="short_term_goal" value="{{ $data['short_term_goal'] ?? '' }}" />
                 </p>
 
                 <!-- Submit Button -->
@@ -391,65 +420,86 @@
 
     <script>
         const canvas = new fabric.Canvas('body-canvas', {
-            width: 300,
-            height: 300
-        });
+    width: 300,
+    height: 300
+});
 
-        fabric.Image.fromURL("{{ asset('images/logo/model.png') }}", function(img) {
-            img.scaleToWidth(250);
-            img.scaleToHeight(250);
-            img.set({
-                left: 0,
-                top: 0,
-                selectable: false,
-                evented: false,
-                hoverCursor: 'default'
+// Clear the canvas before loading the new image
+canvas.clear();
+
+// Load the existing image onto the canvas
+fabric.Image.fromURL("{{ asset($data['image_path']) }}", function(img) {
+    img.scaleToWidth(270);
+    img.scaleToHeight(270);
+    img.set({
+        left: 0,
+        top: 0,
+        selectable: false,
+        evented: false,
+        hoverCursor: 'default'
+    });
+
+    img.hasBorders = false;
+    img.hasControls = false;
+
+    canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas));
+
+    // Recreate the existing tick marks from the database if any
+    @if(isset($data['ticked_points']) && is_array($data['ticked_points']))
+        @foreach($data['ticked_points'] as $point)
+            const tick = new fabric.Text('✔', {
+                left: {{ $point['x'] }},
+                top: {{ $point['y'] }},
+                fontSize: 25,
+                fill: 'green',
+                selectable: false
             });
+            canvas.add(tick);
+        @endforeach
+    @endif
+});
 
-            img.hasBorders = false;
-            img.hasControls = false;
+// Handle canvas click event to add/remove tick marks
+canvas.on('mouse:down', function(event) {
+    const clickedObject = event.target;
 
-            canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas));
+    if (clickedObject && clickedObject.type === 'text') {
+        // Remove the tick mark if clicked again
+        canvas.remove(clickedObject);
+    } else {
+        const pointer = canvas.getPointer(event.e);
+        const tick = new fabric.Text('✔', {
+            left: pointer.x - 5,
+            top: pointer.y - 5,
+            fontSize: 25,
+            fill: 'green',
+            selectable: false
         });
+        canvas.add(tick);
+    }
 
-        canvas.on('mouse:down', function(event) {
-            const clickedObject = event.target;
+    updateTickedPoints();
+});
 
-            if (clickedObject && clickedObject.type === 'text') {
-                canvas.remove(clickedObject);
-            } else {
-                const pointer = canvas.getPointer(event.e);
-                const tick = new fabric.Text('✔', {
-                    left: pointer.x - 5,
-                    top: pointer.y - 5,
-                    fontSize: 25,
-                    fill: 'green',
-                    selectable: false
-                });
-                canvas.add(tick);
-            }
+function updateTickedPoints() {
+    const points = canvas.getObjects('text').map(t => ({
+        x: t.left,
+        y: t.top
+    }));
+    document.getElementById('ticked-points').value = JSON.stringify(points);
+}
 
-            updateTickedPoints();
-        });
+// Capture canvas image and set it before form submission
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector("form"); // adjust selector if needed
+    const imageInput = document.getElementById("canvas-image");
 
-        function updateTickedPoints() {
-            const points = canvas.getObjects('text').map(t => ({
-                x: t.left,
-                y: t.top
-            }));
-            document.getElementById('ticked-points').value = JSON.stringify(points);
-        }
+    form.addEventListener('submit', function(e) {
+        const imageData = canvas.toDataURL("image/png");
+        imageInput.value = imageData;
+    });
+});
 
-        // 🟡 Capture canvas image and set it before form submission
-        document.addEventListener('DOMContentLoaded', function() {
-            const form = document.querySelector("form"); // adjust selector if needed
-            const imageInput = document.getElementById("canvas-image");
-
-            form.addEventListener('submit', function(e) {
-                const imageData = canvas.toDataURL("image/png");
-                imageInput.value = imageData;
-            });
-        });
     </script>
 
 

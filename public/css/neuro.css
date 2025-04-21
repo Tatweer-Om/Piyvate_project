@@ -6,20 +6,25 @@ body {
     background-color: #f0f0f0;
 }
 
+.full-width-button-wrapper {
+    width: 100%;
+    margin-top: 20px;
+}
+
 .custom-grey-button {
-background-color: grey; /* Set the grey background */
-color: white;           /* Set text color to white */
-font-size: 18px;        /* Increase font size */
-padding: 15px 30px;     /* Add padding for larger button */
-width: 100%;            /* Ensure it takes up full width */
-border: none;           /* Remove default border */
-border-radius: 5px;     /* Rounded corners */
-cursor: pointer;       /* Change cursor on hover */
-transition: background-color 0.3s; /* Smooth background color transition */
+    width: 100%;
+    padding: 12px 0;
+    background-color: #ccc;
+    border: none;
+    font-size: 16px;
+    color: #000;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
 }
 
 .custom-grey-button:hover {
-background-color: #5a5a5a; /* Darker grey on hover */
+    background-color: #bbb;
 }
 
 .page {
