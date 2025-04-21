@@ -998,23 +998,7 @@
                     'customer_number':customer_number
                 },
                 success: function(data) {
-                    let draw_name = data.draw_name+' ('+data.get_draw_price+')'
-                    $('.customer_draw').val(data.draw_name)
-                    $('.customer_draw_price').val(data.get_draw_price)
                     $('.payment_customer_name').val(data.customer_name)
-                    $('.payment_customer_point').val(data.points)
-                    $('.customer_point').val(data.points)
-                    let total_point_amount = 0;
-                    if (parseFloat(data.points_amount) > 0) {
-                        total_point_amount = parseFloat(data.points_amount).toFixed(3);
-                    }
-                    $('.payment_customer_point_amount').val(total_point_amount)
-                    $('.payment_customer_point_from').val(data.points_from)
-                    $('.payment_customer_amount_to').val(data.amount_to)
-                    $('.customer_offer').val(data.offer_name)
-                    $('.offer_pros').val(data.offer_pros)
-                    $('.offer_discount').val(data.offer_discount)
-                    $('.offer_id').val(data.offer_id)
                     total_calculation();
                     // response(data);
                 }
@@ -1276,6 +1260,9 @@
                     '<?php echo trans('messages.data_update_success_lang',[],session('locale')); ?>' :
                     '<?php echo trans('messages.data_add_success_lang',[],session('locale')); ?>'
                 );
+                get_customer_data(response.hn);
+                $('#customer_input_data').val(response.full_name_input);
+                $('.pos_customer_id').val(response.hn);
                 $('#add_patient').modal('hide'); 
                 if (!id) $(".add_patient")[0].reset();
             },
@@ -1286,7 +1273,7 @@
                     '<?php echo trans('messages.data_update_failed_lang',[],session('locale')); ?>' :
                     '<?php echo trans('messages.data_add_failed_lang',[],session('locale')); ?>'
                 );
-                $('#all_patient').DataTable().ajax.reload();
+               
             }
         });
     });

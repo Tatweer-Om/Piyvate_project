@@ -21,6 +21,7 @@ use App\Models\SessionDetail;
 use App\Models\AllSessioDetail;
 use App\Models\AppointmentSession;
 use App\Models\SessionsallSession;
+use App\Models\Voucher;
 use Illuminate\Support\Facades\DB;
 use App\Models\SessionsonlyPayment;
 use Illuminate\Support\Facades\Auth;
@@ -240,6 +241,7 @@ class SessionCONTROLLER extends Controller
                     'success' => true,
                     'message' => trans('messages.appointment_add_success_lang'),
                     'session_id' => $appointment->id,
+                    'session_type' => $request->session_type
                 ]);
 
             } catch (\Exception $e) {
@@ -297,6 +299,7 @@ public function save_session_payment2(Request $request)
 {
     $user_id = Auth::id();
     $user = User::find($user_id);
+    $user_name = $user->user_name;
 
     if (!$user) {
         return response()->json(['success' => false, 'message' => 'User not found'], 404);
@@ -316,6 +319,21 @@ public function save_session_payment2(Request $request)
             'message' => 'Session not found'
         ], 404);
     }
+    $voucher_id= "";
+    $voucher_code= "";
+    $voucher_discount= 0;
+    $voucher_user_id= "";
+    $voucher_added= "";
+    if(!empty($request->voucher_code))
+    {
+        $voucher_data = Voucher::where('code',$request->voucher_code)->first();
+        $voucher_id= $voucher_data->id;
+        $voucher_code= $request->voucher_code;
+        $voucher_discount= $request->voucher_amount;
+        $voucher_user_id= $user_id;
+        $voucher_added= $user_name;
+    }
+
 
     if (is_array($request->payment_methods) && !empty($request->payment_methods)) {
         foreach ($request->payment_methods as $paymentData) {
@@ -330,9 +348,14 @@ public function save_session_payment2(Request $request)
                 $payment->account_id = $paymentMethodId;
                 $payment->ref_no = $refNo;
                 $payment->amount = $paidAmount;
+                $payment->voucher_code = $voucher_code;
+                $payment->voucher_amount = $voucher_discount;
+                $payment->voucher_added = $voucher_added;
+                $payment->voucher_user_id = $voucher_user_id;
+                $payment->voucher_id = $voucher_id;
                 $payment->user_id = $user_id;
                 $payment->branch_id = $user->branch_id;
-                $payment->added_by = $user->id;
+                $payment->added_by = $user_name;
                 $payment->save();
 
                 $appointii= SessionList::where('id', $request->session_id)->first();
@@ -362,18 +385,19 @@ public function save_session_payment2(Request $request)
                 $totalPaid += $paidAmount;
             }
         }
-    } else {
+    } 
+    // else {
 
-        $payment = new SessionsonlyPayment();
-        $payment->session_id = $request->session_id;
-        $payment->account_id = null; // No account since no payment method
-        $payment->payment_status = $request->payment_status;
-        $payment->amount = $request->input('totalAmount'); // No amount since no payment made
-        $payment->user_id = $user_id;
-        $payment->branch_id = $user->branch_id;
-        $payment->added_by = $user->id;
-        $payment->save();
-    }
+    //     $payment = new SessionsonlyPayment();
+    //     $payment->session_id = $request->session_id;
+    //     $payment->account_id = null; // No account since no payment method
+    //     $payment->payment_status = $request->payment_status;
+    //     $payment->amount = $request->input('totalAmount'); // No amount since no payment made
+    //     $payment->user_id = $user_id;
+    //     $payment->branch_id = $user->branch_id;
+    //     $payment->added_by = $user->id;
+    //     $payment->save();
+    // }
 
     return response()->json([
         'success' => true,
@@ -461,5 +485,26 @@ public function show_sessions()
         echo json_encode($response);
     }
 }
+
+    public function check_voucher(Request $request)
+    {
+        $voucher_data = Voucher::where('code',$request->code)->first();
+        $discount_price =0;
+        if (!$voucher_data) {
+            $msg = 3;
+        }
+        $session_payment = SessionsonlyPayment::where('voucher_id',$voucher_data->id)->first();
+        if ($session_payment) {
+            $msg = 2;
+        }
+        if ($voucher_data) {
+            $discount_price = $voucher_data->amount;
+            $msg=1;
+        }
+         return response()->json([
+            'success' => $msg,
+            'discount_price' => $discount_price, 
+        ]);
+    }
 
 }

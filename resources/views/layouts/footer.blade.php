@@ -242,6 +242,8 @@
         @include('custom_js.responded_leaves_js')
         @elseif ($route_name == 'purchase_view')
         @include('custom_js.show_purchase_js')
+        @elseif ($route_name == 'voucher')
+        @include('custom_js.add_voucher_js')
     @endif
 
 </body>

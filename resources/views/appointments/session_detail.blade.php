@@ -37,7 +37,8 @@
 
                                     <!-- Hidden Inputs for Submission -->
                                     <input type="hidden" name="session_id" value="{{ $session->id ?? '' }}">
-
+                                    <input type="hidden" name="session_type" value="{{ $session->session_type ?? '' }}">
+                                    
                                     <input type="hidden" name="patient_id" value="{{ $session->patient_id ?? '' }}">
                                     <input type="hidden" name="doctor_id" value="{{ $session->doctor_id ?? '' }}">
                                     <input type="hidden" name="mini_id" value="{{ $session->ministry_id ?? '' }}">
@@ -93,8 +94,14 @@
 
                     <!-- Total Amount -->
                     <div class="mb-3 text-center">
-                        <h4 class="fw-bold text-danger">Total Amount: OMR <span id="total_amount">{{ $session->session_fee ?? '' }}</span></h4>
+                        <h4 class="fw-bold text-danger">Total Amount: OMR <span id="total_amount">{{ $session->session_fee ?? '0.000' }}</span></h4>
+                        <h4 class="fw-bold text-danger" style="disply:none" id="voucher_discount_div">Discount: OMR <span id="voucher_discount">0.000</span></h4>
+                        <h4 class="fw-bold text-danger" style="disply:none" id="after_discount_div">After Discount: OMR <span id="after_discount">{{ $session->session_fee ?? '0.000' }}</span></h4>
+                        
                     </div>
+                    <input type="hidden" id="total_amount_input" value="{{ $session->session_fee ?? 0.000 }}">
+                    <input type="hidden" id="total_amount_discount" name="total_amount_discount" value="0.000">
+                    <input type="hidden" id="total_amount_after_discount" value="{{ $session->session_fee ?? 0.000 }}">
 
                     <hr>
 
@@ -105,7 +112,15 @@
                     <div id="pendingPaymentAlert" class="alert alert-warning text-center d-none">
                         <i class="fas fa-exclamation-triangle"></i> <strong>This payment will be kept as pending.</strong>
                     </div>
-
+                    {{-- voucerh only for normal sessions --}}
+                    <div class="mb-3 col-md-6" style="disply:none" id="voucher_div">
+                        <label class="col-form-label fw-bold fs-5">Voucher Code</label>
+                        <input type="text" class="form-control form-control-sm  mt-1" id="voucher_code" name="voucher_code"  >
+                        <br>
+                        <button type="button" class="btn btn-success w-100" id="check_voucher">
+                              Check Voucher
+                        </button>
+                    </div>
                     <!-- Payment Method Title -->
                     <div class="mb-3">
                         <label class="col-form-label fw-bold fs-5">Select Payment Method</label>
@@ -124,11 +139,11 @@
                                 </div>
                                 <!-- Amount Input (Initially Hidden) -->
 
-                                <input type="number" class="form-control form-control-sm payment-amount-input mt-1" id="amount_{{ $account->id }}" name="payment_amounts[{{ $account->id }}]" placeholder="Enter amount" min="0" step="0.01" style="display: none;">
+                                <input type="text" class="form-control form-control-sm payment-amount-input mt-1 isnumber" id="amount_{{ $account->id }}" name="payment_amounts[{{ $account->id }}]"   style="display: none;">
                                 @if($account->account_status != 1)
-                                <input type="text" class="form-control form-control-sm payment-ref-input mt-1"
-                                id="ref_no_{{ $account->id }}" name="payment_ref_nos[{{ $account->id }}]"
-                                placeholder="Enter Ref No (if required)" style="display: none;">
+                                    <input type="text" class="form-control form-control-sm payment-ref-input mt-1"
+                                    id="ref_no_{{ $account->id }}" name="payment_ref_nos[{{ $account->id }}]"
+                                    placeholder="Enter Ref No (if required)" style="display: none;">
                                 @endif
                             </div>
                         @endforeach
@@ -154,27 +169,6 @@
 
 
 
-
-<script>
- function toggleAmountInput(accountId) {
-    var checkbox = document.getElementById("account_" + accountId);
-    var amountInput = document.getElementById("amount_" + accountId);
-    var refNoInput = document.getElementById("ref_no_" + accountId);
-
-    if (checkbox.checked) {
-        amountInput.style.display = "block";
-        refNoInput.style.display = "block";
-        amountInput.required = true;
-    } else {
-        amountInput.style.display = "none";
-        refNoInput.style.display = "none";
-        amountInput.required = false;
-        amountInput.value = "";
-        refNoInput.value = "";
-    }
-}
-
-
-</script>
+ 
 @include('layouts.footer')
 @endsection

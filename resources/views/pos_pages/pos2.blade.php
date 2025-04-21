@@ -193,7 +193,7 @@
                                     </thead>
                                 </table>
                                 <div class="d-flex justify-content-end" style="width: 30%">
-                                    <a href="javascript:void(0);" id="hold" class="btn btn-info btn-icon flex-fill me-2 submit_form" data-bs-toggle="modal" data-bs-target="#hold-order"><i data-feather="pause" class="feather-16"></i> Hold</a>
+                                    {{-- <a href="javascript:void(0);" id="hold" class="btn btn-info btn-icon flex-fill me-2 submit_form" data-bs-toggle="modal" data-bs-target="#hold-order"><i data-feather="pause" class="feather-16"></i> Hold</a> --}}
                                     <a href="javascript:void(0);" id="payment_modal_id" class="btn btn-success btn-icon flex-fill"><i data-feather="credit-card" class="feather-16"></i> Payment</a>
                                 </div>
                             </div>

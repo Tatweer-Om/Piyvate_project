@@ -18,6 +18,7 @@ use App\Models\PosOrderDetail;
 use App\Models\PendingOrderDetail; 
 use App\Models\Setting;
 use App\Models\Patient;
+use App\Models\Country;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
@@ -35,6 +36,7 @@ class PosController extends Controller
 
         $orders = PosOrder::latest()->take(10)->get();
         $categories = Category::all();
+        $countries = Country::all();
 
         $count_products = Product::all()->count();
 
@@ -50,6 +52,7 @@ class PosController extends Controller
             'count_products',
             'view_account',
             'orders',
+            'countries'
         ));
         // } else {
 
@@ -212,102 +215,47 @@ class PosController extends Controller
     // }
 
     //customer autocomplte
-    // public function customer_autocomplete(Request $request)
-    // {
-    //     $term = $request->input('term');
+    public function customer_autocomplete(Request $request)
+    {
+        $term = $request->input('term');
 
-    //     $customers = Customer::where('customer_name', 'like', "%{$term}%")
-    //     ->orWhere('customer_phone', 'like', "%{$term}%")
-    //     ->get(['id', 'customer_name', 'customer_phone','customer_number']);
-    //     $response = [];
-    //     foreach ($customers as $customer) {
-    //         $response[] = [
-    //             'label' => $customer->customer_number . ': ' . $customer->customer_name . ' (' . $customer->customer_phone . ')',
-    //             'value' => $customer->customer_number . ': ' . $customer->customer_name . ' (' . $customer->customer_phone . ')',
-    //             'phone' => $customer->customer_phone,
-    //         ];
-    //     }
+        $customers = Patient::where('full_name', 'like', "%{$term}%")
+        ->orWhere('mobile', 'like', "%{$term}%")
+        ->get(['id', 'full_name', 'mobile','HN']);
+        $response = [];
+        foreach ($customers as $customer) {
+            $response[] = [
+                'label' => $customer->HN . ': ' . $customer->full_name . ' (' . $customer->mobile . ')',
+                'value' => $customer->HN . ': ' . $customer->full_name . ' (' . $customer->mobile . ')',
+                'phone' => $customer->mobile,
+            ];
+        }
 
-    //     return response()->json($response);
-    // }
+        return response()->json($response);
+    }
 
-    // public function get_customer_data(Request $request)
-    // {
-    //     $customer_number = $request->input('customer_number');
+    public function get_customer_data(Request $request)
+    {
+        $customer_number = $request->input('customer_number');
 
-    //     $get_draw_name = "";
-    //     $get_draw_price = "";
-    //     $customer_name = "";
-    //     $points = "";
-    //     $total_omr = "";
-    //     $points_from = "";
-    //     $amount_to = "";
-    //     $get_offer_name = "";
-    //     $get_offer_pros = "";
-    //     $offer_discount = "";
-    //     $offer_id = "";
-    //     if(!empty($customer_number))
-
-    //     {
-    //         $customer = Customer::where('customer_number', $customer_number)->first();
-    //         $customer_name = $customer->customer_name;
-    //         $points = $customer->points;
-    //         $get_draw_data = get_draw_name($customer->id);
-    //         if(!empty($get_draw_data))
-    //         {
-    //             $get_draw_name = $get_draw_data[0];
-    //             $get_draw_price = $get_draw_data[1];
-    //         }
-
-    //         $get_offer_data= get_offer_name($customer->id);
-    //         $get_offer_name = $get_offer_data[0];
-    //         $get_offer_pros = $get_offer_data[1];
-    //         $offer_discount = $get_offer_data[2];
-    //         $offer_id = $get_offer_data[3];
-
-    //         // get amount from point
-    //         $points=$customer->points;
-    //         $point_manager=Point::first();
-    //         $total_omr=0;
-    //         $points_from=0;
-    //         $amount_to=0;
-
-    //         if(!empty($point_manager) && !empty($customer->points))
-    //         {
-    //             $points_from=$point_manager->points;
-    //             $amount_to=$point_manager->omr;
-    //             if($point_manager->points > 0 && $point_manager->omr > 0)
-    //             {
-    //                 $one_point_value=$points/$point_manager->points;
-    //                 $total_omr=$one_point_value*$point_manager->omr ;
-    //             }
-    //             else
-    //             {
-    //                 $one_point_value= $points;
-    //                 $total_omr=$one_point_value;
-
-    //             }
-    //         }
-    //     }
+         
+        $customer_name = "";
+       
+        if(!empty($customer_number))
+        {
+            $customer = Patient::where('HN', $customer_number)->first();
+            $customer_name = $customer->full_name;
+        }
 
 
-    //     $response = [
-    //         'draw_name' => $get_draw_name,
-    //         'get_draw_price' => $get_draw_price,
-    //         'customer_name' => $customer_name,
-    //         'points' => $points,
-    //         'points_amount' => $total_omr,
-    //         'points_from' => $points_from,
-    //         'amount_to' => $amount_to,
-    //         'offer_name' => $get_offer_name,
-    //         'offer_pros' => $get_offer_pros,
-    //         'offer_discount' => $offer_discount,
-    //         'offer_id' => $offer_id,
-    //     ];
+        $response = [
+            
+            'customer_name' => $customer_name, 
+        ];
 
 
-    //     return response()->json($response);
-    // }
+        return response()->json($response);
+    }
 
     // add customer
     public function add_pos_patient(Request $request)
@@ -371,7 +319,9 @@ class PosController extends Controller
                 $patient->HN = $clinicNumber;
                 $patient->save();
 
-                return response()->json(['success' => 'Patient added successfully', 'patient_id' => $patient->id]);
+                $full_name_input = $clinicNumber . ': ' . $full_name . ' (' . $request->mobile . ')';
+
+                return response()->json(['success' => 'Patient added successfully', 'patient_id' => $patient->id,'hn'=>$clinicNumber,'full_name_input'=>$full_name_input]);
             } else {
                 return response()->json(['error' => 'Patient with this mobile number already exists'], 400);
             }
@@ -438,7 +388,7 @@ class PosController extends Controller
         if ($not_available <= 0) {
             // get customer id
             $customer_contact = "";
-            $customer_data = Patient::where('id', $customer_id)->first();
+            $customer_data = Patient::where('HN', $customer_id)->first();
             if ($customer_data) {
                 $customer_id = $customer_data->id;
                 $customer_contact = $customer_data->mobile;
