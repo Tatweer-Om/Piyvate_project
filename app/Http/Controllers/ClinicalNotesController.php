@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use App\Models\Doctor;
 use App\Models\Patient;
 use App\Models\Appointment;
+use App\Models\AppointmentDetail;
 use App\Models\Otppediatric;
 use Illuminate\Http\Request;
 use App\Models\ClinicalNotes;
+use App\Models\AppointmentSession;
 use Illuminate\Support\Facades\Auth;
 
 class ClinicalNotesController extends Controller
@@ -95,7 +98,6 @@ class ClinicalNotesController extends Controller
     $user = Auth::user();
     $branch_id = $user->branch_id;
 
-
     $base64Image = $request->input('canvas_image');
     if ($base64Image) {
         [$type, $data] = explode(';', $base64Image);
@@ -137,6 +139,10 @@ class ClinicalNotesController extends Controller
     $neuroPediatric->patient_id =  $request->patient_id;
 
     $neuroPediatric->save();
+
+    $appointment = Appointment::findOrFail($neuroPediatric->appointment_id);
+    $appointment->session_status=7;
+    $appointment->save();
 
     return redirect()->back()->with('success', 'Data saved successfully.');
 }
@@ -261,6 +267,10 @@ public function add_otatp_ortho(Request $request)
 
     $neuroPediatric->save();
 
+    $appointment = Appointment::findOrFail($neuroPediatric->appointment_id);
+    $appointment->session_status=7;
+    $appointment->save();
+
     return redirect()->back()->with('success', 'Data saved successfully.');
 }
 
@@ -356,6 +366,11 @@ public function add_otp_pediatric(Request $request)
 
     $neuroPediatric->save();
 
+
+    $appointment = Appointment::findOrFail($neuroPediatric->appointment_id);
+    $appointment->session_status=7;
+    $appointment->save();
+
     return redirect()->back()->with('success', 'Data saved successfully.');
 }
 
@@ -429,6 +444,10 @@ public function add_physical_dysfunction(Request $request)
     $neuroPediatric->patient_id =  $request->patient_id;
 
     $neuroPediatric->save();
+
+    $appointment = Appointment::findOrFail($neuroPediatric->appointment_id);
+    $appointment->session_status=7;
+    $appointment->save();
 
     return redirect()->back()->with('success', 'Data saved successfully.');
 }
@@ -523,7 +542,35 @@ public function add_soap_ot(Request $request)
 
     $neuroPediatric->patient_id =  $request->patient_id;
 
+
+
+    if (!is_null($neuroPediatric->appointment_id)) {
+
+        $session_apt = AppointmentDetail::where('appointment_id', $neuroPediatric->appointment_id)->first();
+
+        if ($session_apt) {
+            $session_apt->sessions_taken += 1;
+            $session_apt->save();
+        }
+
+        $today = Carbon::today()->toDateString();
+
+        $apt_session = AppointmentSession::where('appointment_id', $neuroPediatric->appointment_id)
+            ->whereDate('session_date', $today) // make sure 'session_date' is the correct column
+            ->orderBy('id', 'asc')
+            ->first();
+
+        if ($apt_session) {
+            $apt_session->status = 2;
+            $apt_session->save();
+        }
+    }
+
     $neuroPediatric->save();
+
+
+
+
 
     return redirect()->back()->with('success', 'Data saved successfully.');
 }
@@ -659,6 +706,27 @@ public function add_soap_pt(Request $request)
 
     $note->save();
 
+    if (!is_null($note->appointment_id)) {
+        $session_apt = AppointmentSession::where('appointment_id', $note->appointment_id)->first();
+
+        if ($session_apt) {
+            $session_apt->sessions_taken += 1;
+            $session_apt->save();
+        }
+
+        $today = Carbon::today()->toDateString();
+
+        $apt_session = AppointmentSession::where('appointment_id', $note->appointment_id)
+            ->whereDate('session_date', $today)
+            ->orderBy('id', 'asc')
+            ->first();
+
+        if ($apt_session) {
+            $apt_session->status = 2;
+            $apt_session->save();
+        }
+    }
+
     return redirect()->back()->with('success', 'Data saved successfully.');
 }
 
@@ -754,14 +822,6 @@ public function update_soap_pt(Request $request, $id)
 
     return redirect()->back()->with('success', 'SOAP PT updated successfully.');
 }
-
-
-
-
-
-
-
-
 
 
 }
