@@ -32,6 +32,8 @@
                     <div class="col-md-4">
                         <a href="/patient_profile/${appointment.patient_id}" class="text-decoration-none">
                             <div class="timeline-panel bgl-dark border-0 p-3 rounded text-center shadow-sm">
+                                <input type="hidden" name="session_ids[]" value="${session.id}">
+
                                 <p class="mb-1 fs-12 text-dark fw-bold">${appointment.appointment_no}</p>
                                 <p class="mb-1 fs-12 text-dark">${appointment.patient_name}</p>
                                 <small class="text-dark d-block fs-10">

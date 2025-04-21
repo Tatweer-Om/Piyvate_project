@@ -414,7 +414,7 @@ Route::post('/add_otp_pediatric', [ClinicalNotesController::class, 'add_otp_pedi
 Route::get('/edit_otp_pediatric/{id}', [ClinicalNotesController::class, 'edit_otp_pediatric'])->name('edit_otp_pediatric');
 Route::post('/update_otp_pediatric/{id}', [ClinicalNotesController::class, 'update_otp_pediatric'])->name('update_otp_pediatric');
 
-Route::post('/update_soap_ot', [ClinicalNotesController::class, 'add_soap_ot'])->name('add_soap_ot');
+Route::post('/add_soap_ot', [ClinicalNotesController::class, 'add_soap_ot'])->name('add_soap_ot');
 Route::get('edit_soap_ot/{id}', [ClinicalNotesController::class, 'edit_soap_ot'])->name('edit_soap_ot');
 Route::post('update_soap_ot/{id}', [ClinicalNotesController::class, 'update_soap_ot'])->name('update_soap_ot');
 

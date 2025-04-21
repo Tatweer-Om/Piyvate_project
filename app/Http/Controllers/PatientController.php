@@ -27,6 +27,7 @@ use App\Models\PatientPrescription;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use App\Models\AppointPaymentExpense;
+use App\Models\ClinicalNotes;
 use App\Models\SessionPaymentExpense;
 use App\Models\SessionsonlyPayment;
 use App\Models\SessionsonlyPaymentExp;
@@ -48,6 +49,8 @@ class PatientController extends Controller
     $data = User::where('id', $user_id)->first();
     $user = $data->user_name;
     $branch_id = $data->branch_id;
+
+    $notes= ClinicalNotes::where('patient_id', $id)->get();
 
 
     $accounts= Account::where('branch_id',   $branch_id)->get();
@@ -114,7 +117,7 @@ class PatientController extends Controller
         ];
     }
 
-    return view('patients.patient_profile', compact('patient', 'total_apt', 'country_name', 'accounts', 'apt', 'apt_id', 'age', 'ministry_name', 'ministry_data'));
+    return view('patients.patient_profile', compact('patient', 'notes', 'total_apt', 'country_name', 'accounts', 'apt', 'apt_id', 'age', 'ministry_name', 'ministry_data'));
 
     }
 
@@ -413,7 +416,7 @@ class PatientController extends Controller
             }
             elseif ($appointment->session_status == 7) {
                 $statusClass = 'badge-info';
-                $statusText = 'Appointent Done';
+                $statusText = 'Appointment Done';
                 $statusIcon = '<i class="fa fa-check-circle"></i> ';
                 $badge = '<span class="badge ' . $statusClass . ' px-2 py-1">' . $statusIcon . $statusText . '</span>';
             }
@@ -508,7 +511,7 @@ public function show_all_sessions_by_patient(Request $request)
             '<span>' . $session->session_time . '</span>',
             '<span>' . $session->session_price . '</span>',
             '<span class="badge ' . $statusBadgeColor . '">' . $statusText . '</span>', // Add status badge
-            '<span class="badge ' . $badgeColor . '">' . $sourceText . '</span>',
+            // '<span class="badge ' . $badgeColor . '">' . $sourceText . '</span>',
 
         ];
     }
@@ -1044,6 +1047,8 @@ public function lab_reports_upload(Request $request)
         ]);
     }
 }
+
+
 
 
 
