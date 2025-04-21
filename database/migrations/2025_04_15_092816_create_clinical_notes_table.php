@@ -19,6 +19,11 @@ return new class extends Migration
             $table->string('form_type')->nullable();  // 'clinical_notes', 'neuro_assessments', etc.
             $table->string('notes_status')->nullable();
             $table->longText('form_data')->nullable();
+            $table->string('added_by')->nullable();
+            $table->string('updated_by')->nullable();
+            $table->string('branch_id')->nullable();
+            $table->string('user_id')->nullable();
+
             $table->timestamps();
         });
     }

@@ -10,13 +10,13 @@
 </head>
 <body>
 <div class="page">
-    <form action="{{ url('add_soap_pt') }}" method="POST">
+    <form action="{{ url('update_soap_pt/'.$note->id) }}" method="POST">
         @csrf
         <div class="header">
             <img src="{{ asset('images/logo/piyalogo-1.png') }}" alt="Center Logo" height="50">
             <div>
                 HN: <input type="text" class="input-line" name="hn" value="{{ $patient->HN ?? '' }}">
-                PT: <input type="text" class="input-line" name="pt"><br>
+                PT: <input type="text" class="input-line" name="pt" value="{{ $data['pt'] ?? '' }}"><br>
                 Name: <input type="text" class="input-line" name="full_name" value="{{ $patient->full_name ?? '' }}">
                 Age: <input type="text" class="input-short input-line" name="age" value="{{ $patient->age ?? '' }}">
                 Gender:
@@ -80,56 +80,52 @@
 
         <!-- Wrapper for dynamic sections -->
         <div id="sections-wrapper">
-            <!-- JS will move the initial section here -->
-        </div>
+            @foreach ($data['soap_sections'] ?? [] as $index => $section)
+            <div class="section-header" style="position: relative;">
+                Physical Therapy Follow up and Re-assessment
 
-        <div class="col-lg-12">
-            <button type="submit" class="custom-grey-button">
-                Save Prescription
-            </button>
-        </div>
-    </form>
+                <!-- Add and Remove Buttons -->
+                <div style="position: absolute; top: 0; right: 0;">
+                    <button type="button" onclick="addSection()" class="btn btn-success btn-sm">+</button>
+                    <button type="button" onclick="removeSection(this)" class="btn btn-danger btn-sm">−</button>
+                </div>
+            </div>
+            <div class="soap-wrapper">
+                <div class="soap-content">
+                    <div class="row">
+                        Date <input type="text" class="input-line" name="date[]" value="{{ $section['date'] ?? '' }}">
+                        Time <input type="text" class="input-line" name="time[]" value="{{ $section['time'] ?? '' }}">
+                        V/S BP <input type="text" class="input-line" name="bp[]" value="{{ $section['bp'] ?? '' }}">
+                        P <input type="text" class="input-line" name="pulse[]" value="{{ $section['pulse'] ?? '' }}">
+                        O2sat <input type="text" class="input-line" name="o2sat[]" value="{{ $section['o2sat'] ?? '' }}">
+                        % T <input type="text" class="input-line" name="temp[]" value="{{ $section['temp'] ?? '' }}">
+                        PS: <input type="text" class="input-line" name="ps[]" value="{{ $section['ps'] ?? '' }}">/10
+                    </div>
+                    <div class="row">S:<br><textarea rows="2" name="s[]">{{ $section['s'] ?? '' }}</textarea></div>
+                    <div class="row">O:<br><textarea rows="2" name="o[]">{{ $section['o'] ?? '' }}</textarea></div>
+                    <div class="row">A:<br><textarea rows="2" name="a[]">{{ $section['a'] ?? '' }}</textarea></div>
+                    <div class="row">P:<br><textarea rows="2" name="p[]">{{ $section['p'] ?? '' }}</textarea></div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.0/fabric.min.js"></script>
+                    <div class="signature-line">
+                        #<input type="text" class="input-line" name="number[]" value="{{ $section['number'] ?? '' }}">
+                        PT Signature <input type="text" class="input-line" name="signature[]" value="{{ $section['signature'] ?? '' }}">
+                    </div>
+                </div>
+                <div class="anatomy-img-wrapper">
 
+                        <canvas id="body-canvas" ></canvas>
+                        <input type="hidden" id="ticked-points" name="ticked_points">
+                        <input type="hidden" id="canvas-image" name="canvas_image">
 
-    <!-- 💡 JavaScript for dynamic section handling -->
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const firstSection = document.getElementById('section-template');
-            const wrapper = document.getElementById('sections-wrapper');
-            wrapper.appendChild(firstSection);
-        });
-
-        function addSection() {
-            const wrapper = document.getElementById('sections-wrapper');
-            const template = document.getElementById('section-template');
-            const clone = template.cloneNode(true);
-
-            // Clear input and textarea values
-            clone.querySelectorAll('input, textarea').forEach(input => {
-                input.value = '';
-            });
-
-            wrapper.appendChild(clone);
-        }
-
-        function removeSection(button) {
-            const wrapper = document.getElementById('sections-wrapper');
-            if (wrapper.children.length > 1) {
-                button.closest('.section').remove();
-            } else {
-                alert("At least one section is required.");
-            }
-        }
-
-
-        const canvas = new fabric.Canvas('body-canvas', {
+                </div>
+            </div>
+            <script>
+                  const canvas = new fabric.Canvas('body-canvas', {
             width: 300,
             height: 300
         });
 
-        fabric.Image.fromURL("{{ asset('images/logo/model3.png') }}", function(img) {
+        fabric.Image.fromURL("{{ asset($section['image_path']) }}", function(img) {
             img.scaleToWidth(100);
             img.scaleToHeight(200);
             img.set({
@@ -184,6 +180,53 @@
                 imageInput.value = imageData;
             });
         });
+            </script>
+            @endforeach
+
+        </div>
+
+        <div class="col-lg-12">
+            <button type="submit" class="custom-grey-button">
+                Save Prescription
+            </button>
+        </div>
+    </form>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.0/fabric.min.js"></script>
+
+
+    <!-- 💡 JavaScript for dynamic section handling -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const firstSection = document.getElementById('section-template');
+            const wrapper = document.getElementById('sections-wrapper');
+            wrapper.appendChild(firstSection);
+        });
+
+        function addSection() {
+            const wrapper = document.getElementById('sections-wrapper');
+            const template = document.getElementById('section-template');
+            const clone = template.cloneNode(true);
+
+            // Clear input and textarea values
+            clone.querySelectorAll('input, textarea').forEach(input => {
+                input.value = '';
+            });
+
+            wrapper.appendChild(clone);
+        }
+
+        function removeSection(button) {
+            const wrapper = document.getElementById('sections-wrapper');
+            if (wrapper.children.length > 1) {
+                button.closest('.section').remove();
+            } else {
+                alert("At least one section is required.");
+            }
+        }
+
+
+
 
     </script>
 
