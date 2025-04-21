@@ -144,7 +144,7 @@
                                         <input type="text" class="add_customer form-control" id="customer_input_data" name="customer_id" placeholder="Enter Customer">
                                     </div>
                                     <div class="ms-3">
-                                        <a href="javascript:void(0);" class="btn btn-primary btn-icon" data-bs-toggle="modal" data-bs-target="#add_customer_modal"><i data-feather="user-plus" class="feather-16"></i></a>
+                                        <a href="javascript:void(0);" class="btn btn-primary btn-icon" data-bs-toggle="modal" data-bs-target="#add_patient"><i data-feather="user-plus" class="feather-16"></i></a>
                                     </div>
                                     {{-- <div class="input-block ms-3" style="width: 95px">
                                         <p>Points</p>
@@ -193,7 +193,7 @@
                                     </thead>
                                 </table>
                                 <div class="d-flex justify-content-end" style="width: 30%">
-                                    <a href="javascript:void(0);" id="hold" class="btn btn-info btn-icon flex-fill me-2 submit_form" data-bs-toggle="modal" data-bs-target="#hold-order"><i data-feather="pause" class="feather-16"></i> Hold</a>
+                                    {{-- <a href="javascript:void(0);" id="hold" class="btn btn-info btn-icon flex-fill me-2 submit_form" data-bs-toggle="modal" data-bs-target="#hold-order"><i data-feather="pause" class="feather-16"></i> Hold</a> --}}
                                     <a href="javascript:void(0);" id="payment_modal_id" class="btn btn-success btn-icon flex-fill"><i data-feather="credit-card" class="feather-16"></i> Payment</a>
                                 </div>
                             </div>
@@ -379,59 +379,27 @@
                 </div>
                 <div class="modal-body p-4">
                     <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+                         
                         <li class="nav-item">
-                            <a class="nav-link active" id="pills-return-tab" data-bs-toggle="pill" href="#pills-return" role="tab" aria-controls="pills-return" aria-selected="true">{{ trans('messages.replace_lang',[],session('locale')) }}</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" id="pills-restore-tab" data-bs-toggle="pill" href="#pills-restore" role="tab" aria-controls="pills-restore" aria-selected="false">{{ trans('messages.restore_lang',[],session('locale')) }}</a>
+                            <a class="nav-link active" id="pills-restore-tab" data-bs-toggle="pill" href="#pills-restore" role="tab" aria-controls="pills-restore" aria-selected="false">{{ trans('messages.restore_lang',[],session('locale')) }}</a>
                         </li>
                     </ul>
                     <div class="tab-content" id="pills-tabContent">
-                        <div class="tab-pane fade show active" id="pills-return" role="tabpanel" aria-labelledby="pills-return-tab">
+                         
+                        <div class="tab-pane fade show active" id="pills-restore" role="tabpanel" aria-labelledby="pills-restore-tab">
                             <div class="row d-none">
-                                <div class="col-md-4 col-6">
-                                    <label class="radios">
-                                        <input type="radio" checked class="return" name="return" value="1" id="replace">
-                                        <span class="radiomarks" for="replace"></span> {{ trans('messages.replace_lang',[],session('locale')) }}
-                                    </label>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-lg-4 col-sm-6 col-12">
-                                    <div class="form-group">
-                                        <label>{{ trans('messages.order_or_reference_no_lang', [], session('locale')) }}</label>
-                                        <input type="text" class="form-control return_order_no" name="return_order_no">
-                                     </div>
-                                </div>
-                            </div>
-                            <div class="row" id="return_data">
-                            </div>
-                        </div>
-                        <div class="tab-pane fade" id="pills-restore" role="tabpanel" aria-labelledby="pills-restore-tab">
-                            <div class="row">
+                                
                                 <div class="col-md-3 col-4">
                                     <label class="radios">
-                                        <input type="radio" checked class="restore_type" name="restore_type" value="1">
-                                        <span class="radiomarks" for="contact"></span> {{ trans('messages.contact_lang',[],session('locale')) }}
-                                    </label>
-                                </div>
-                                <div class="col-md-3 col-4">
-                                    <label class="radios">
-                                        <input type="radio" class="restore_type" name="restore_type" value="2">
+                                        <input type="radio" checked class="restore_type" name="restore_type" value="2">
                                         <span class="radiomarks" for="order_no"></span> {{ trans('messages.order_no_lang',[],session('locale')) }}
                                     </label>
-                                </div>
-                                <div class="col-md-3 col-4">
-                                    <label class="radios">
-                                        <input type="radio" class="restore_type" name="restore_type" value="3">
-                                        <span class="radiomarks" for="imei_no"></span> {{ trans('messages.imei_no_lang',[],session('locale')) }}
-                                    </label>
-                                </div>
+                                </div> 
                             </div>
                             <div class="row d-none>
                                 <div class="col-lg-4 col-sm-6 col-12">
                                     <div class="form-group">
-                                        <label>{{ trans('messages.order_or_contact_or_imei_no_lang', [], session('locale')) }}</label>
+                                        <label>{{ trans('messages.order_no_lang', [], session('locale')) }}</label>
                                         <input type="text" class="form-control restore_order_no" name="restore_order_no">
                                         <input type="hidden" class="form-control restore_order_nos" name="restore_order_nos">
                                      </div>
@@ -658,7 +626,90 @@
     </div>
 
 
-
+    <div class="modal fade" id="add_patient" tabindex="-1" aria-labelledby="patientModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="patientModalLabel">Add New Patient</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form class="add_patient">
+                        @csrf
+                        <input type="hidden" name="patient_id" id="patient_id" class="patient_id">
+    
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <label class="col-form-label">Title:</label>
+                                <select class="form-control form-control-sm" id="title" name="title">
+                                    <option value="">Choose..</option>
+                                    <option value="1">Miss</option>
+                                    <option value="2">Mr.</option>
+                                    <option value="3">Mrs.</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="col-form-label">First Name:</label>
+                                <input type="text" class="form-control form-control-sm" id="first_name" name="first_name" >
+                            </div>
+                            <div class="col-md-3">
+                                <label class="col-form-label">Second Name:</label>
+                                <input type="text" class="form-control form-control-sm" id="second_name" name="second_name">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="col-form-label">Mobile No:</label>
+                                <input type="tel" class="form-control form-control-sm" id="mobile" name="mobile" >
+                            </div>
+                            <div class="col-md-3">
+                                <label class="col-form-label">ID / Passport No:</label>
+                                <input type="text" class="form-control form-control-sm" id="id_passport" name="id_passport" >
+                            </div>
+                            <div class="col-md-3">
+                                <label class="col-form-label">Date Of Birth:</label>
+                                <input type="date" class="form-control form-control-sm" id="dob" name="dob" >
+                            </div>
+                            <div class="col-md-3">
+                                <label class="col-form-label">Country:</label>
+                                <select class="form-control form-control-sm country" id="country" name="country" >
+                                    <option value="">Select Country</option>
+                                    @foreach ($countries as $country)
+                                        <option value="{{ $country->id }}">{{ $country->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-3 mt-3">
+                                <div class="col-md-3 d-flex align-items-center">
+                                    <span id="age_badge" class="badge bg-success" style="display: none; font-size: 12px;">
+                                        <i class="fas fa-birthday-cake"></i> Age: <span id="age_value">--</span>
+                                    </span>
+                                    <input type="hidden" id="age_input" name="age">
+                                </div>
+                                <br>
+                                <div class="col-md-3 d-flex align-items-center">
+                                    <span id="gender_badge" class="badge bg-info" style="display: none; font-size: 12px;">
+                                        <i class="fas fa-venus-mars"></i> Gender: <span id="gender_value">--</span>
+                                    </span>
+                                    <input type="hidden" class="gender" id="gender_input" name="gender">
+                                </div>
+                            </div>
+                        </div>
+    
+    
+                        <!-- Details Section -->
+                        <div class="mt-3">
+                            <label class="col-form-label">Additional Details:</label>
+                            <textarea class="form-control" name="details" id="details" rows="3" placeholder="Enter any additional details about the patient..."></textarea>
+                        </div>
+    
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-danger light" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary">Add Patient</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 
 
 

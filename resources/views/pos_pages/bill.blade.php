@@ -112,11 +112,11 @@
 <body class="receipt">
     <section class="sheet">
 
-        <p align="center"><img src="{{ asset('images/setting_images/' . $shop->invo_logo) }}"
+        <p align="center"><img src="{{ asset('images/company_logo/' . $shop->logo) }}"
                 style="width:150px;height:50px; margin-right: 11px"></p>
         <p align="center">{{ $shop->company_address }} العنوان </p>
-        <p align="center"> CR No: {{ $shop->cr_no }} </p>
-        <p align="center"> Contact: {{ $invo->contact }} هاتف </p>
+        <p align="center"> CR No: {{ $shop->company_cr }} </p>
+        <p align="center"> Contact: {{ $shop->company_phone }} هاتف </p>
         <hr style="border-top: 1px dotted #000000;">
 
         <table style="border-collapse: collapse;" >
@@ -204,15 +204,7 @@
                     <p>Net Amount</p>
                 </td>
             </tr>
-            <tr>
-                <td colspan="3"></td>
-
-                <td style="width:20%;text-align:right;border-bottom: 1px dotted #000;">{{ number_format($point_amount, 3) }} </td>
-                <td style="width:35%;text-align:right;border-bottom: 1px dotted #000;">
-                    <p style="margin-top: 2px;">المبلغ المذفوع بالىقاط</p>
-                    <p>Payment by points </p>
-                </td>
-            </tr>
+            
             <tr>
                 <td colspan="3" ></td>
 
@@ -232,13 +224,13 @@
                 </td>
             </tr>
         </table><br>
-        <p style="text-align: center">www.superelection.com</p>
+        <p style="text-align: center">www.clinic.com</p>
 
         <center>
             <div id="barcode"></div>
         </center>
         {{-- <p align="center" style="font-size:12px; !important;">الرجاء االحتفاظ بالفاتورة لالستبدال شكرا لتسوقكم</p> --}}
-        <p align="center" style="font-size:12px; !important; white-space:pre-line">{{ $invo->footer }}</p>
+        {{-- <p align="center" style="font-size:12px; !important; white-space:pre-line">{{ $invo->footer }}</p> --}}
 
 
     </section>
