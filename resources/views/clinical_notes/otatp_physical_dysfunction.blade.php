@@ -3,150 +3,137 @@
 <head>
   <meta charset="UTF-8">
   <title>Occupational Therapy Assessment and Treatment Plan</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      font-size: 12px;
-      background-color: #f9f9f9;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 40px 0;
-    }
-    .page {
-      width: 850px;
-      background: #fff;
-      box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
-      padding: 20px;
-      border-radius: 8px;
-    }
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 10px;
-    }
-    .header img {
-      height: 50px;
-    }
-    .header-info {
-      font-size: 12px;
-    }
-    .section-header {
-      text-align: center;
-      font-weight: bold;
-      border: 2px solid #000;
-      padding: 5px;
-      margin-top: 10px;
-      margin-bottom: 10px;
-    }
-    .box-section {
-      border: 2px solid #000;
-      padding: 10px;
-      margin-top: 10px;
-    }
-    .pain-tool-box {
-      border: 2px solid green;
-      padding: 5px;
-      width: 200px;
-      font-size: 11px;
-    }
-    .input-dotted {
-      border: none;
-      border-bottom: 1px dotted #000;
-      background: transparent;
-      outline: none;
-      font-size: 12px;
-    }
-    .input-short { width: 40px; }
-    .input-medium { width: 120px; }
-    .input-long { width: 300px; }
-    .checkbox-group { display: inline-block; margin-right: 10px; }
-  </style>
+  <link rel="stylesheet" href="{{ asset('css/physical.css') }}">
+
 </head>
 <body>
   <div class="page">
-    <form action="{{  url('add_physical_dysfunction')}}" method="POST">
-        @scrf
-    <div class="header">
-      <img src="{{ asset('images/logo/piyalogo-1.png') }}" alt="Center Logo">
-      <div class="header-info">
-        HN:<input class="input-dotted input-medium" value="{{ $patient->HN ?? '' }}" name="hn"> PT no:<input class="input-dotted input-medium" name="pt"><br>
-        Name:<input class="input-dotted input-long" value="{{ $patient->full_name ?? '' }}"> Age:<input class="input-dotted input-short" value="{{ $patient->age ?? '' }}">
-        Gender:   <input type="checkbox" {{ $patient->gender == 'Male' ? 'checked' : '' }}>M
-        <input type="checkbox" {{ $patient->gender == 'Female' ? 'checked' : '' }}>F <br>
-        Birth Date:<input class="input-dotted input-medium" value="{{ $patient->dob ?? '' }}"> Therapist:<input class="input-dotted input-medium" value="{{ $doctor ?? '' }}">
-      </div>
-    </div>
-    <input type="hidden" value="{{ $apt->id ?? '' }}" name="appointment_id" class="appointment_id">
-    <input type="hidden" value="{{ $patient->id ?? '' }}" name="patient_id" class="patient_id">
-    <input type="hidden" value="{{ $apt->doctor_id ?? '' }}" name="doctor_id" class="doctor_id">
-
-    <div class="section-header">Occupational Therapy Assessment and treatment plan for Physical dysfunction</div>
-
-    <div class="box-section">
-      Chief complaint <input class="input-dotted input-long"><br>
-      History of birth and illness <input class="input-dotted input-long"><br>
-      Underlying <input class="input-dotted input-medium"> Operation <input class="input-dotted input-medium"><br>
-      Laboratory Radiology result <input class="input-dotted input-long">
-    </div>
-
-    <div class="box-section">
-      <strong>Physical examination</strong><br>
-      Muscle tone <input class="input-dotted input-medium"> Muscle strength <input class="input-dotted input-medium"><br>
-      ROM <input class="input-dotted input-long"><br>
-      Sensory (light touch / pressure / proprioceptive / tactile localization) <input class="input-dotted input-long"><br>
-      Coordination <input class="input-dotted input-medium"> Endurance <input class="input-dotted input-medium"><br>
-      ADL Independence <input class="input-dotted input-medium"> Assist <input class="input-dotted input-medium"> Dependence <input class="input-dotted input-medium"><br>
-      Hand function and prehension <input class="input-dotted input-long"><br>
-      Dominant Hand <input type="checkbox">Right <input type="checkbox">Left &nbsp;&nbsp;
-      Affected hand <input type="checkbox">Right <input type="checkbox">Left<br>
-      Swallowing function <input type="checkbox">normal <input type="checkbox">risk for aspiration &nbsp;&nbsp;
-      Current status <input class="input-dotted input-medium"><br>
-      Neck control <input type="checkbox">Good <input type="checkbox">Fair <input type="checkbox">Poor<br>
-      Oral phase <input class="input-dotted input-medium"> Pharyngeal phase <input class="input-dotted input-medium"><br>
-      Comments <input class="input-dotted input-long">
-    </div>
-
-    <div class="box-section">
-      <strong>Perception and cognitive function</strong><br>
-      Perception <input type="checkbox">intact <input type="checkbox">impaired
-      Attention <input type="checkbox">intact <input type="checkbox">impaired<br>
-      Memory <input type="checkbox">intact <input type="checkbox">impaired
-      Orientation <input type="checkbox">intact <input type="checkbox">impaired<br>
-      Executive function <input type="checkbox">intact <input type="checkbox">impaired<br>
-      Splint requirement <input class="input-dotted input-long"><br>
-      Fall risk assessment <input type="checkbox">Low <input type="checkbox">High
-    </div>
-
-    <div class="box-section">
-      <div style="display: flex; justify-content: space-between;">
-        <div style="flex: 1; margin-right: 10px;">
-          <strong>Pain assessment</strong><br>
-          Does patient have pain? <input type="checkbox">No <input type="checkbox">Yes<br>
-          Score <input class="input-dotted input-short"> pain location <input class="input-dotted input-medium">
-          duration <input class="input-dotted input-medium"> characteristic <input class="input-dotted input-medium">
-          Frequency <input class="input-dotted input-medium"><br>
-          OT diagnosis is <input class="input-dotted input-long"><br>
-          OT program <input class="input-dotted input-long"><br>
-          Goal of treatment<br>
-          Short term goal <input class="input-dotted input-long"><br>
-          Long term goal <input class="input-dotted input-long"><br>
-          Patient and family education <input class="input-dotted input-long"><br>
-          Occupational Therapist's name <input class="input-dotted input-medium"><br>
-          Date <input class="input-dotted input-short"> Time <input class="input-dotted input-short">
+    <form action="{{ url('add_physical_dysfunction') }}" method="POST">
+        @csrf
+        <div class="header">
+            <img src="{{ asset('images/logo/piyalogo-1.png') }}" alt="Center Logo">
+            <div class="header-info">
+                HN: <input class="input-dotted input-medium" value="{{ $patient->HN ?? '' }}" name="hn">
+                PT no: <input class="input-dotted input-medium" name="pt_no"><br>
+                Name: <input class="input-dotted input-long" value="{{ $patient->full_name ?? '' }}" name="name">
+                Age: <input class="input-dotted input-short" value="{{ $patient->age ?? '' }}" name="age">
+                Gender:
+                <input type="checkbox" name="gender_m" {{ $patient->gender == 'Male' ? 'checked' : '' }}>M
+                <input type="checkbox" name="gender_f" {{ $patient->gender == 'Female' ? 'checked' : '' }}>F <br>
+                Birth Date: <input class="input-dotted input-medium" value="{{ $patient->dob ?? '' }}" name="birth_date">
+                Therapist: <input class="input-dotted input-medium" value="{{ $doctor ?? '' }}" name="therapist">
+            </div>
         </div>
-        <div class="pain-tool-box">
-          <strong>Pain assessment tool</strong><br>
-          <input type="checkbox"> &lt;1 year (NIPS)<br>
-          <input type="checkbox"> 1-3 years (FLACC)<br>
-          <input type="checkbox"> &gt;3-8 years (FLACC)<br>
-          <input type="checkbox"> &gt;8 years (NRS)<br>
-          <input type="checkbox"> BPS (impaired cognition / elder)
+
+        <input type="hidden" value="{{ $apt->id ?? '' }}" name="appointment_id">
+        <input type="hidden" value="{{ $patient->id ?? '' }}" name="patient_id">
+        <input type="hidden" value="{{ $apt->doctor_id ?? '' }}" name="doctor_id">
+
+        <div class="section-header">Occupational Therapy Assessment and treatment plan for Physical dysfunction</div>
+
+        <div class="box-section">
+            Chief complaint <input class="input-dotted input-long" name="chief_complaint" style="width: 730px;"><br>
+            History of birth and illness <input class="input-dotted input-long" name="birth_history" style="width: 674px;"><br>
+            <input class="input-dotted input-long" name="birth_history_2" style="width: 813px;"><br>
+            Underlying <input class="input-dotted input-medium" name="underlying" style="width: 752px;"><br>
+            Operation <input class="input-dotted input-medium" name="operation" style="width: 754px;"><br>
+            Laboratory Radiology result <input class="input-dotted input-long" name="lab_result" style="width: 660px;">
         </div>
-      </div>
-    </div>
-</form>
+
+        <div class="box-section">
+            <strong>Physical examination</strong><br>
+            Muscle tone <input class="input-dotted input-medium" name="muscle_tone" style="width: 320px;">
+            Muscle strength <input class="input-dotted input-medium" name="muscle_strength" style="width: 320px;"><br>
+            ROM <input class="input-dotted input-long" name="rom" style="width: 770px;"><br>
+            Sensory <input class="input-dotted input-long" name="sensory" style="width: 754px;"><br>
+            Coordination <input class="input-dotted input-medium" name="coordination" style="width: 320px;">
+            Endurance <input class="input-dotted input-medium" name="endurance" style="width: 340px;"><br>
+            ADL Independence <input class="input-dotted input-medium" name="adl_independence" style="width: 694px;">
+            Assist <input class="input-dotted input-medium" name="adl_assist" style="width: 340px;">
+            Dependence <input class="input-dotted input-medium" name="adl_dependence" style="width: 344px;"><br>
+            Hand function and prehension <input class="input-dotted input-long" name="hand_function"><br>
+            Dominant Hand
+            <input type="checkbox" name="dominant_hand_right">Right
+            <input type="checkbox" name="dominant_hand_left">Left &nbsp;&nbsp;
+            Affected hand
+            <input type="checkbox" name="affected_hand_right">Right
+            <input type="checkbox" name="affected_hand_left">Left<br>
+            Swallowing function
+            <input type="checkbox" name="swallowing_normal">Normal
+            <input type="checkbox" name="swallowing_aspiration">Risk for aspiration &nbsp;&nbsp;
+            Current status <input class="input-dotted input-medium" name="current_status" style="width: 420px;"><br>
+            Neck control
+            <input type="checkbox" name="neck_good">Good
+            <input type="checkbox" name="neck_fair">Fair
+            <input type="checkbox" name="neck_poor">Poor<br>
+            Oral phase <input class="input-dotted input-medium" name="oral_phase" style="width: 320px;">
+            Pharyngeal phase <input class="input-dotted input-medium" name="pharyngeal_phase" style="width: 310px;"><br>
+            Comments <input class="input-dotted input-long" name="comments" style="width: 740px;">
+        </div>
+
+        <div class="box-section">
+            <strong>Perception and cognitive function</strong><br>
+            Perception
+            <input type="checkbox" name="perception_intact">Intact
+            <input type="checkbox" name="perception_impaired">Impaired
+            Attention
+            <input type="checkbox" name="attention_intact">Intact
+            <input type="checkbox" name="attention_impaired">Impaired<br>
+            Memory
+            <input type="checkbox" name="memory_intact">Intact
+            <input type="checkbox" name="memory_impaired">Impaired
+            Orientation
+            <input type="checkbox" name="orientation_intact">Intact
+            <input type="checkbox" name="orientation_impaired">Impaired<br>
+            Executive function
+            <input type="checkbox" name="executive_function_intact">Intact
+            <input type="checkbox" name="executive_function_impaired">Impaired<br>
+            Splint requirement <input class="input-dotted input-long" name="splint_requirement" style="width: 700px;"><br>
+            Fall risk assessment
+            <input type="checkbox" name="fall_risk_low">Low
+            <input type="checkbox" name="fall_risk_high">High
+        </div>
+
+        <div class="box-section">
+            <div style="display: flex; justify-content: space-between;">
+                <div style="flex: 1; margin-right: 10px;">
+                    <strong>Pain assessment</strong><br>
+                    Does patient have pain?
+                    <input type="checkbox" name="pain_no">No
+                    <input type="checkbox" name="pain_yes">Yes<br>
+                    Score <input class="input-dotted input-short" name="pain_score" style="width: 50px;">
+                    Pain location <input class="input-dotted input-medium" name="pain_location" style="width: 50px;">
+                    Duration <input class="input-dotted input-medium" name="pain_duration" style="width: 50px;">
+                    Characteristic <input class="input-dotted input-medium" name="pain_characteristic" style="width: 50px;">
+                    Frequency <input class="input-dotted input-medium" name="pain_frequency" style="width: 70px;"><br>
+                    OT diagnosis is <input class="input-dotted input-long" name="ot_diagnosis" style="width: 505px;"><br>
+                    OT program <input class="input-dotted input-long" name="ot_program" style="width: 520px;"><br>
+                    Goal of treatment<br>
+                    Short term goal <input class="input-dotted input-long" name="goal_short" style="width: 500px;"><br>
+                    Long term goal <input class="input-dotted input-long" name="goal_long" style="width: 500px;"><br>
+                    Patient and family education <input class="input-dotted input-long" name="education" style="width: 430px;"><br>
+                    Occupational Therapist's name <input class="input-dotted input-medium" name="ot_name" style="width: 412px;"><br>
+                    Date <input class="input-dotted input-short" name="date" style="width: 120px;">
+                    Time <input class="input-dotted input-short" name="time" style="width: 120px;">
+                </div>
+                <div class="pain-tool-box">
+                    <strong>Pain assessment tool</strong><br>
+                    <input type="checkbox" name="tool_nips">&lt;1 year (NIPS)<br>
+                    <input type="checkbox" name="tool_flacc_1_3">1–3 years (FLACC)<br>
+                    <input type="checkbox" name="tool_flacc_3_8">&gt;3–8 years (FLACC)<br>
+                    <input type="checkbox" name="tool_nrs">&gt;8 years (NRS)<br>
+                    <input type="checkbox" name="tool_bps">BPS (impaired cognition / elder)
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-12">
+            <button type="submit" class="custom-grey-button">
+                Save Prescription
+            </button>
+        </div>
+    </form>
+
   </div>
 </body>
 </html>

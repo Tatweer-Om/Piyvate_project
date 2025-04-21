@@ -381,11 +381,12 @@
                 </p>
 
             </div>
-            <div class="col-lg-12">
+            <div class="full-width-button-wrapper">
                 <button type="submit" class="custom-grey-button">
                     Save Prescription
                 </button>
             </div>
+
 
         </form>
     </div>

@@ -9,13 +9,13 @@
 </head>
 <body>
 <div class="page">
-    <form action="{{ url('add_soap_ot') }}" method="POST">
+    <form action="{{ url('update_soap_ot/'.$note->id) }}" method="POST">
         @csrf
         <div class="header">
             <img src="{{ asset('images/logo/piyalogo-1.png') }}" alt="Center Logo" height="50">
             <div>
                 HN:<input type="text" class="input-line" name="hn" value="{{ $patient->HN ?? '' }}">
-                PT:<input type="text" class="input-line" name="pt"><br>
+                PT:<input type="text" class="input-line" name="pt" value="{{ $data['pt'] ?? '' }}"><br>
                 Name:<input type="text" class="input-line" name="full_name" value="{{ $patient->full_name ?? '' }}">
                 Age:<input type="text" class="input-short input-line" name="age" value="{{ $patient->age ?? '' }}">
                 Gender:
@@ -66,10 +66,43 @@
             </div>
         </div>
 
-        <!-- Wrapper for all sections -->
         <div id="sections-wrapper">
-            <!-- Your first section will be inside here -->
+            @foreach ($data['soap_sections'] ?? [] as $index => $section)
+            <div class="section">
+                <div class="section-header" style="position: relative;">
+                    Occupational Therapy Follow up and Re-assessment
+
+                    <!-- Add and Remove Buttons -->
+                    <div style="position: absolute; top: 0; right: 0;">
+                        <button type="button" onclick="addSection()" class="btn btn-success btn-sm">+</button>
+                        <button type="button" onclick="removeSection(this)" class="btn btn-danger btn-sm">−</button>
+                    </div>
+                </div>
+
+                <div class="row">
+                    Date <input type="text" class="input-line" name="date[]" value="{{ $section['date'] ?? '' }}">
+                    Time <input type="text" class="input-line" name="time[]" value="{{ $section['time'] ?? '' }}">
+                    V/S BP <input type="text" class="input-line" name="bp[]" value="{{ $section['bp'] ?? '' }}">
+                    P <input type="text" class="input-line" name="pulse[]" value="{{ $section['pulse'] ?? '' }}">
+                    O2sat <input type="text" class="input-line" name="o2sat[]" value="{{ $section['o2sat'] ?? '' }}">
+                    % T <input type="text" class="input-line" name="temp[]" value="{{ $section['temp'] ?? '' }}">
+                    PS: <input type="text" class="input-line" name="ps[]" value="{{ $section['ps'] ?? '' }}">/10
+                </div>
+
+                <div class="row">S:<br><textarea rows="2" name="s[]">{{ $section['s'] ?? '' }}</textarea></div>
+                <div class="row">O:<br><textarea rows="2" name="o[]">{{ $section['o'] ?? '' }}</textarea></div>
+                <div class="row">A:<br><textarea rows="2" name="a[]">{{ $section['a'] ?? '' }}</textarea></div>
+                <div class="row">P:<br><textarea rows="2" name="p[]">{{ $section['p'] ?? '' }}</textarea></div>
+
+                <div class="signature-line">
+                    #<input type="text" class="input-line" name="number[]" value="{{ $section['number'] ?? '' }}">
+                    OT Signature <input type="text" class="input-line" name="signature[]" value="{{ $section['signature'] ?? '' }}">
+                </div>
+            </div>
+            @endforeach
         </div>
+
+
 
         <script>
             document.addEventListener('DOMContentLoaded', () => {
@@ -103,7 +136,7 @@
 
 <div class="col-lg-12">
     <button type="submit" class="custom-grey-button">
-        Save Prescription
+        update Prescription
     </button>
 </div>
 
