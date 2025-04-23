@@ -2,6 +2,9 @@
 
 namespace App\Models;
 
+use App\Models\Doctor;
+use App\Models\Patient;
+use App\Models\SessionsonlyPayment;
 use Illuminate\Database\Eloquent\Model;
 
 class AllSessioDetail extends Model
@@ -15,4 +18,9 @@ class AllSessioDetail extends Model
     {
         return $this->belongsTo(Patient::class, 'patient_id');
     }
+
+    public function payment()
+{
+    return $this->belongsTo(SessionsonlyPayment::class, 'session_id', 'session_id');
+}
 }

@@ -15,6 +15,7 @@ use App\Models\AllSessioDetail;
 use App\Models\AppointmentDetail;
 use App\Models\AppointmentSession;
 use Illuminate\Support\Facades\DB;
+use App\Models\SessionsonlyPayment;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
@@ -332,7 +333,7 @@ class DoctorController extends Controller
             ->where('all_sessio_details.doctor_id', $doctorId)
             ->whereDate('all_sessio_details.session_date', now()->toDateString()) // Fetch only today's sessions
             ->select(
-                'all_sessio_details.id',
+                'all_sessio_details.session_id',
                 DB::raw("'' as session_time"),
                 'all_sessio_details.patient_id',
                 'all_sessio_details.session_date',
@@ -345,8 +346,22 @@ class DoctorController extends Controller
             ->take(6) // Limit to the latest 6 sessions
             ->get();
 
-        // Merge both appointment and all sessions, and then limit to the latest 6
-        $sessions = $appointmentSessions->merge($allSessions)->take(6);
+
+            $matchingSessions = collect();
+
+
+            foreach ($allSessions as $session) {
+                // Check if the session_id exists in the SessionsonlyPayment table
+                $paymentExists = SessionsonlyPayment::where('session_id', $session->session_id)->exists();
+
+                if ($paymentExists) {
+                    $matchingSessions->push($session);
+                }
+            }
+
+        $sessions = $appointmentSessions->merge($matchingSessions)->take(6);
+
+
 
         return response()->json([
             'appointments' => $appointments,
