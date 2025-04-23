@@ -145,6 +145,8 @@
                             </tbody>
                         </table>
                     </div>
+                    <input type="hidden" name="sessions" id="sessions_input">
+
                 </form>
             </div>
             <div class="modal-footer">

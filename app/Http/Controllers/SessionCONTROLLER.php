@@ -418,7 +418,7 @@ public function show_sessions()
 
     if ($appointments->count() > 0) {
         foreach ($appointments as $appointment) {
-            $total_sessions = (int) SessionDetail::where('session_id', $appointment->id)->value('total_sessions');
+            $total_sessions = AllSessioDetail::where('session_id', $appointment->id)->count();
 
             $modal = '
             <a href="javascript:void(0);" class="me-3" >
@@ -451,16 +451,15 @@ public function show_sessions()
 
             }
 
-            $remaining_sessions= AppointmentSession::where('status', 1)->where('appointment_id', $appointment->id)->count();
+            $remaining_sessions= AllSessioDetail::where('status', 1)->where('session_id', $appointment->id)->count();
 
 
             $sno++;
             $json[] = array(
                 '<span class="patient-info ps-0">' . $appointment->session_no . '</span>',
                 '<span class="text-nowrap ms-2">' . $patient_name . '</span>',
-                // '<span class="text-primary">' . $doctor_name . '</span>',
                 '<span class="badge bg-success bg-sm text-center">
-                    <i class="fas fa-list-alt me-1"></i>' . $appointment->no_of_sessions . '
+                    <i class="fas fa-list-alt me-1"></i>' . $total_sessions . '
                 </span>',
                 '<span class="badge bg-success bg-sm text-center"> <i class="fas fa-clock me-1"></i>' . $remaining_sessions . '</span>',
 
