@@ -331,47 +331,63 @@
     }
 
 
-    $(document).ready(function() {
-        $("#addSessionBtn").click(function() {
-            let lastRow = $("#session_table tbody tr:last");
-            let currentSessionCount = $("#session_table tbody td").length;
-            let newSessionNumber = currentSessionCount + 1; // Next session number
+   $(document).ready(function () {
+    // Add Session
+    $("#addSessionBtn").click(function () {
+        let lastRow = $("#session_table tbody tr:last");
+        let currentSessionCount = $("#session_table tbody td").length;
+        let newSessionNumber = currentSessionCount + 1;
+        let formattedDate = new Date().toISOString().split('T')[0];
 
-            let formattedDate = new Date().toISOString().split('T')[0];
+        let sessionTd = `
+        <td class="col-md-2 text-center">
+            <label class="session-label">Session ${newSessionNumber}</label>
+            <input type="date" class="form-control form-control-sm session-date mt-1"
+                name="session_dates[]" value="${formattedDate}" />
+            <div class="input-group clockpicker mt-1">
+                <input type="text" class="form-control form-control-sm success_time"
+                    name="session_times[]" value="10:30">
+                <span class="input-group-text"><i class="fas fa-clock"></i></span>
+            </div>
+        </td>`;
 
-            let sessionTd = `
-            <td class="col-md-2 text-center">
-                <label class="session-label">Session ${newSessionNumber}</label>
-                <input type="date" class="form-control form-control-sm session-date mt-1" value="${formattedDate}" />
-                <div class="input-group clockpicker mt-1">
-                    <input type="text" class="form-control form-control-sm success_time" id="time_to_${newSessionNumber}" name="time_to" value="10:30">
-                    <span class="input-group-text"><i class="fas fa-clock"></i></span>
-                </div>
-            </td>`;
-
-            if (lastRow.length === 0 || lastRow.children("td").length >= 6) {
-                $("#session_table tbody").append(`<tr>${sessionTd}</tr>`);
-            } else {
-                lastRow.append(sessionTd);
-            }
-        });
-
-        $("#removeSessionBtn").click(function() {
-            let lastRow = $("#session_table tbody tr:last");
-
-            if (lastRow.length > 0) {
-                let lastTd = lastRow.children("td:last");
-
-                if (lastRow.children("td").length > 1) {
-                    // Remove last session cell from the row
-                    lastTd.remove();
-                } else {
-                    // If only one session left in the row, remove the whole row
-                    lastRow.remove();
-                }
-            }
-        });
+        if (lastRow.length === 0 || lastRow.children("td").length >= 6) {
+            $("#session_table tbody").append(`<tr>${sessionTd}</tr>`);
+        } else {
+            lastRow.append(sessionTd);
+        }
     });
+
+    // Remove Session
+    $("#removeSessionBtn").click(function () {
+        let lastRow = $("#session_table tbody tr:last");
+        if (lastRow.length > 0) {
+            let lastTd = lastRow.children("td:last");
+            if (lastRow.children("td").length > 1) {
+                lastTd.remove();
+            } else {
+                lastRow.remove();
+            }
+        }
+    });
+
+    // On form submit, collect sessions into JSON
+    $("form").on("submit", function () {
+        let dates = $("input[name='session_dates[]']");
+        let times = $("input[name='session_times[]']");
+        let sessions = [];
+
+        for (let i = 0; i < dates.length; i++) {
+            sessions.push({
+                session_date: dates[i].value,
+                session_time: times[i] ? times[i].value : ''
+            });
+        }
+
+        $("#sessions_input").val(JSON.stringify(sessions));
+    });
+});
+
 
 
     document.addEventListener("DOMContentLoaded", function() {

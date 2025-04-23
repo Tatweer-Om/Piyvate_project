@@ -213,30 +213,40 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     $(document).ready(function() {
-        $("#addSessionBtn").click(function() {
-            let lastRow = $("#session_table tbody tr:last");
-            let currentSessionCount = $("#session_table tbody td").length;
-            let newSessionNumber = currentSessionCount + 1; // Next session number
+        $("#addSessionBtn").click(function () {
+    let lastRow = $("#session_table tbody tr:last");
+    let currentSessionCount = $("#session_table tbody td").length;
+    let newSessionNumber = currentSessionCount + 1;
 
-            let formattedDate = new Date().toISOString().split('T')[0];
+    // Generate a random number of days between 1 and 60
+    let randomDays = Math.floor(Math.random() * 60) + 1;
+    let currentDate = new Date();
+    currentDate.setDate(currentDate.getDate() + randomDays);
+    let formattedDate = currentDate.toISOString().split('T')[0];
 
-            let sessionTd = `
-            <td class="col-md-3 text-center">
-                <label class="session-label">Session ${newSessionNumber}</label>
-                <input type="date" class="form-control form-control-sm session-date mt-1" value="${formattedDate}" />
-                <div class="input-group clockpicker mt-1">
-                    <input type="text" class="form-control form-control-sm success_time" id="time_to_${newSessionNumber}" name="time_to" value="10:30">
-                    <span class="input-group-text"><i class="fas fa-clock"></i></span>
-                </div>
-            </td>`;
+    let sessionTd = `
+        <td class="col-md-3 text-center">
+            <label class="session-label">Session ${newSessionNumber}</label>
+            <input type="date" class="form-control form-control-sm session-date mt-1" value="${formattedDate}" />
+            <div class="input-group clockpicker mt-1">
+                <input type="text" class="form-control form-control-sm success_time" id="time_to_${newSessionNumber}" name="time_to" value="10:30">
+                <span class="input-group-text"><i class="fas fa-clock"></i></span>
+            </div>
+        </td>`;
 
-            // If no row exists or last row already has 6 <td>, create a new row
-            if (lastRow.length === 0 || lastRow.children("td").length >= 4) {
-                $("#session_table tbody").append(`<tr>${sessionTd}</tr>`);
-            } else {
-                lastRow.append(sessionTd);
-            }
-        });
+    if (lastRow.length === 0 || lastRow.children("td").length >= 4) {
+        $("#session_table tbody").append(`<tr>${sessionTd}</tr>`);
+    } else {
+        lastRow.append(sessionTd);
+    }
+
+    // Re-initialize clockpicker for new elements
+    $('.clockpicker').clockpicker({
+        autoclose: true,
+        donetext: 'Done'
+    });
+});
+
 
         $("#removeSessionBtn").click(function() {
             let lastRow = $("#session_table tbody tr:last");

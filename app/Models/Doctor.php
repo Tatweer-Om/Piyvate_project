@@ -2,6 +2,11 @@
 
 namespace App\Models;
 
+use App\Models\Appointment;
+use App\Models\SessionDetail;
+use App\Models\AllSessioDetail;
+use App\Models\AppointmentDetail;
+use App\Models\AppointmentSession;
 use Illuminate\Database\Eloquent\Model;
 
 class Doctor extends Model

@@ -162,7 +162,7 @@
 
                         <!-- Total Amount -->
                         <div class="mb-3">
-                            <h4 class="text-center fw-bold text-danger">Total Amount: OMR <span id="total_amount">{{ $setting->appointment_fee ?? '0.00' }}</span></h4>
+                            <h4 class="text-center fw-bold text-danger">Total Amount: OMR <span id="total_amount"></span></h4>
                         </div>
 
                         <hr>
@@ -236,6 +236,19 @@
                 }
             }
         }
+
+        document.addEventListener('DOMContentLoaded', function () {
+        const appointmentFeeInput = document.getElementById('appointment_fee');
+        const totalAmountSpan = document.getElementById('total_amount');
+
+        // Set initial value on page load
+        totalAmountSpan.textContent = appointmentFeeInput.value;
+
+        // Update on input change
+        appointmentFeeInput.addEventListener('input', function () {
+            totalAmountSpan.textContent = this.value;
+        });
+    });
     </script>
 
 

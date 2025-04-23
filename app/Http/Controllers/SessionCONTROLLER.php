@@ -319,11 +319,11 @@ public function save_session_payment2(Request $request)
             'message' => 'Session not found'
         ], 404);
     }
-    $voucher_id= "";
-    $voucher_code= "";
+    $voucher_id= null;
+    $voucher_code= null;
     $voucher_discount= 0;
-    $voucher_user_id= "";
-    $voucher_added= "";
+    $voucher_user_id= null;
+    $voucher_added= null;
     if(!empty($request->voucher_code))
     {
         $voucher_data = Voucher::where('code',$request->voucher_code)->first();
@@ -335,7 +335,10 @@ public function save_session_payment2(Request $request)
     }
 
 
+
     if (is_array($request->payment_methods) && !empty($request->payment_methods)) {
+
+
         foreach ($request->payment_methods as $paymentData) {
             $paymentMethodId = $paymentData['account_id'];
             $paidAmount = $paymentData['amount'];
@@ -386,8 +389,10 @@ public function save_session_payment2(Request $request)
             }
         }
     }
+ 
     $voucher_data->status = 2;
     $voucher_data->save();
+ 
     // else {
 
     //     $payment = new SessionsonlyPayment();
@@ -416,11 +421,12 @@ return view('appointments.all_sessions');
 public function show_sessions()
 {
     $sno = 0;
-    $appointments = SessionList::all();
-
-    if ($appointments->count() > 0) {
-        foreach ($appointments as $appointment) {
-            $total_sessions = (int) SessionDetail::where('session_id', $appointment->id)->value('total_sessions');
+    $sessions = SessionList::whereHas('payment', function ($query) {
+        $query->whereNotNull('session_id');
+    })->get();
+    if ($sessions->count() > 0) {
+        foreach ($sessions as $appointment) {
+            $total_sessions = AllSessioDetail::where('session_id', $appointment->id)->count();
 
             $modal = '
             <a href="javascript:void(0);" class="me-3" >
@@ -429,8 +435,6 @@ public function show_sessions()
             <a href="javascript:void(0);" onclick=del("'.$appointment->id.'")>
                 <i class="fa fa-trash fs-18 text-danger"></i>
             </a>';
-
-
 
             $appointment_date_time = $appointment->appointment_date . ' <br> (' . Carbon::parse($appointment->time_from)->format('h:i A') . ' - ' . Carbon::parse($appointment->time_to)->format('h:i A') . ')';
             $added_date = Carbon::parse($appointment->created_at)->format('d-m-Y (h:i a)');
@@ -449,20 +453,19 @@ public function show_sessions()
                     $session_payment = '<span class="badge bg-danger bg-sm text-center">' . $session->amount . ' OMR (Normal)</span>'; // Red
                 }
             } else {
-                 $session_payment = '<span class="badge bg-info bg-sm text-center">Referenerce</span>'; // Red
+                 $session_payment = '<span class="badge bg-info bg-sm text-center">Unknown</span>'; // Red
 
             }
 
-            $remaining_sessions= AppointmentSession::where('status', 1)->where('appointment_id', $appointment->id)->count();
+            $remaining_sessions= AllSessioDetail::where('status', 1)->where('session_id', $appointment->id)->count();
 
 
             $sno++;
             $json[] = array(
                 '<span class="patient-info ps-0">' . $appointment->session_no . '</span>',
                 '<span class="text-nowrap ms-2">' . $patient_name . '</span>',
-                // '<span class="text-primary">' . $doctor_name . '</span>',
                 '<span class="badge bg-success bg-sm text-center">
-                    <i class="fas fa-list-alt me-1"></i>' . $appointment->no_of_sessions . '
+                    <i class="fas fa-list-alt me-1"></i>' . $total_sessions . '
                 </span>',
                 '<span class="badge bg-success bg-sm text-center"> <i class="fas fa-clock me-1"></i>' . $remaining_sessions . '</span>',
 
@@ -505,7 +508,7 @@ public function show_sessions()
         }
          return response()->json([
             'success' => $msg,
-            'discount_price' => $discount_price, 
+            'discount_price' => $discount_price,
         ]);
     }
 

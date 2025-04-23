@@ -139,9 +139,7 @@
                 {
                     "title": "Status"
                 },
-                {
-                    "title": "Source"
-                }
+
             ],
             "pagingType": "numbers",
             "ordering": true,
