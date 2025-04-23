@@ -332,6 +332,8 @@ public function save_session_payment2(Request $request)
         $voucher_discount= $request->voucher_amount;
         $voucher_user_id= $user_id;
         $voucher_added= $user_name;
+        $voucher_data->status = 2;
+        $voucher_data->save();
     }
 
 
@@ -390,8 +392,7 @@ public function save_session_payment2(Request $request)
         }
     }
  
-    $voucher_data->status = 2;
-    $voucher_data->save();
+    
  
     // else {
 
