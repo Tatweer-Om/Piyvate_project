@@ -128,11 +128,11 @@ public function show_appointment()
             $session_payment = '';
 
             if ($session) {
-                if ($session->payment_status == 3) {
+                if ($appointment->payment_status == 3) {
                     $session_payment = '<span class="badge bg-secondary bg-sm text-center">' . $session->total_price . ' OMR (Pending)</span>';
-                } elseif ($session->payment_status == 2) {
+                } elseif ($appointment->payment_status == 2) {
                     $session_payment = '<span class="badge bg-warning bg-sm text-center text-dark">' . $session->total_price . ' OMR (Offer)</span>';
-                } elseif ($session->payment_status == 4) {
+                } elseif ($appointment->payment_status == 4) {
                     $session_payment = '<span class="badge bg-warning bg-sm text-center text-dark">' . $session->total_price . ' OMR (Contract-Paid)</span>';
                 } else {
                     $session_payment = '<span class="badge bg-danger bg-sm text-center">' . $session->total_price . ' OMR (Normal)</span>';
@@ -649,77 +649,7 @@ public function getSessionPrice(Request $request)
     }
 
 
-    // public function save_sessions(Request $request)
-    // {
 
-    //     try {
-    //         $user_id = Auth::id();
-    //         $user = User::find($user_id);
-
-
-    //         if (!$user) {
-    //             return response()->json(['message' => 'User not found'], 404);
-    //         }
-
-    //         if ($request->session_type == 'ministry') {
-    //             $appoint = Appointment::where('id', $request->appointment_id)->first();
-
-    //             if ($appoint) {
-    //                 $appoint->payment_status = 3;
-    //                 $appoint->save();
-    //             } else {
-    //                 dd('Appointment not found');
-    //             }
-    //         }
-
-
-    //         $single_session_price = ($request->total_sessions > 0)
-    //         ? $request->total_price / $request->total_sessions
-    //         : 0;
-
-    //         $appointment = new AppointmentDetail();
-    //         $appointment->appointment_id = $request->appointment_id;
-    //         $appointment->session_type = $request->session_type;
-    //         $appointment->ministry_id = $request->ministry_id;
-    //         $appointment->offer_id = $request->offer_id;
-    //         $appointment->patient_id = $request->patient_id;
-    //         $appointment->doctor_id = $request->doctor_id;
-    //         $appointment->total_price = $request->total_price;
-    //         $appointment->total_sessions = $request->total_sessions;
-    //         $appointment->single_session_price = $single_session_price;
-    //         $appointment->session_data = json_encode($request->sessions);
-    //         $appointment->user_id = $user->id;
-    //         $appointment->contract_payment = 1;
-    //         $appointment->added_by = $user->id;
-    //         $appointment->branch_id = $user->branch_id;
-    //         $appointment->save();
-    //         if (!empty($request->sessions)) {
-    //             foreach ($request->sessions as $session) {
-    //                 $sessiondetail = new AppointmentSession();
-    //                 $sessiondetail->appointment_id = $appointment->id;
-    //                 $sessiondetail->patient_id =   $appointment->patient_id;
-    //                 $sessiondetail->doctor_id =   $appointment->doctor_id;
-    //                 $sessiondetail->contract_payment = 1;
-    //                 $sessiondetail->session_date = $session['session_date'];
-    //                 $sessiondetail->session_time = $session['session_time'];
-    //                 $sessiondetail->session_price = $single_session_price;
-    //                 $sessiondetail->status = '1';
-    //                 $sessiondetail->save();
-    //             }
-    //         }
-
-    //         return response()->json([
-    //             'success' => trans('messages.appointment_add_success_lang'),
-    //             'data' => $appointment,
-    //         ]);
-
-    //     } catch (\Exception $e) {
-    //         return response()->json([
-    //             'error' => trans('messages.appointment_add_failed_lang'),
-    //             'message' => $e->getMessage(),
-    //         ], 500);
-    //     }
-    // }
     public function save_sessions(Request $request)
     {
         try {
@@ -730,16 +660,36 @@ public function getSessionPrice(Request $request)
                 return response()->json(['message' => 'User not found'], 404);
             }
 
-            if ($request->session_type == 'ministry') {
-                $appoint = Appointment::where('id', $request->appointment_id)->first();
+            $sessions = is_string($request->sessions)
+            ? json_decode($request->sessions, true)
+            : $request->sessions;
 
-                if ($appoint) {
+
+
+
+
+            $appoint = Appointment::find($request->appointment_id);
+
+
+
+            if ($appoint) {
+                if ($request->session_type == 'ministry') {
                     $appoint->payment_status = 3;
-                    $appoint->save();
+                } else if ($request->session_type == 'offer') {
+                    $appoint->payment_status = 2;
+                } else if ($request->session_type == 'normal') {
+                    $appoint->payment_status = 1;
                 } else {
-                    dd('Appointment not found');
+                    dd('Invalid session type');
                 }
+
+                $appoint->save();
+            } else {
+                dd('Appointment not found');
             }
+
+
+
 
             $single_session_price = ($request->total_sessions > 0)
                 ? $request->total_price / $request->total_sessions
@@ -756,15 +706,16 @@ public function getSessionPrice(Request $request)
             $appointment->total_price = $request->total_price;
             $appointment->total_sessions = $request->total_sessions;
             $appointment->single_session_price = $single_session_price;
-            $appointment->session_data = json_encode($request->sessions);
+            $appointment->session_data = json_encode($sessions);
+
             $appointment->user_id = $user->id;
             $appointment->contract_payment = 1;
             $appointment->added_by = $user->id;
             $appointment->branch_id = $user->branch_id;
             $appointment->save();
 
-            if (!empty($request->sessions)) {
-                foreach ($request->sessions as $session) {
+            if (!empty($sessions)) {
+                foreach ($sessions as $session) {
                     // Check if session already exists to avoid duplication
                     $existingSession = AppointmentSession::where('appointment_id', $appointment->id)
                                                          ->where('session_date', $session['session_date'])

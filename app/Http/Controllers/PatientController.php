@@ -42,7 +42,7 @@ class PatientController extends Controller
 
 
 
-    public function patient_profile($id) {
+    public function patient_profile($id, Request $request) {
 
 
     $user_id = Auth::id();
@@ -50,9 +50,32 @@ class PatientController extends Controller
     $user = $data->user_name;
     $branch_id = $data->branch_id;
 
+    $total_sessions_apt = AppointmentSession::where('patient_id', $id)->count();
+    $total_sessions_dir = AllSessioDetail::where('patient_id', $id)->count();
+
+    $total_sessions_apt = $total_sessions_apt ?: 0;
+    $total_sessions_dir = $total_sessions_dir ?: 0;
+
+    $patient_total_sessions = $total_sessions_apt + $total_sessions_dir;
+
+    $sessions_taken_apt = AppointmentDetail::where('patient_id', $id)->value('sessions_taken');
+    $sessions_taken_dir = AllSessioDetail::where('patient_id', $id)->where('status', 2)->count();
+
+    $sessions_taken_apt = $sessions_taken_apt ?: 0;
+    $sessions_taken_dir = $sessions_taken_dir ?: 0;
+
+    $total_session_taken = $sessions_taken_apt + $sessions_taken_dir;
+
+    $active_sessions_apt = AppointmentSession::where('patient_id', $id)->where('status', 1)->count();
+    $active_sessions_dir = AllSessioDetail::where('patient_id', $id)->where('status', 1)->count();
+
+    $active_sessions_apt = $active_sessions_apt ?: 0;
+    $active_sessions_dir = $active_sessions_dir ?: 0;
+
+    $total_active_session = $active_sessions_apt + $active_sessions_dir;
+
+
     $notes= ClinicalNotes::where('patient_id', $id)->get();
-
-
     $accounts= Account::where('branch_id',   $branch_id)->get();
         $patient = Patient::where('id', $id)->first();
         $country= $patient->country_id ?? '';
@@ -117,7 +140,7 @@ class PatientController extends Controller
         ];
     }
 
-    return view('patients.patient_profile', compact('patient', 'notes', 'total_apt', 'country_name', 'accounts', 'apt', 'apt_id', 'age', 'ministry_name', 'ministry_data'));
+    return view('patients.patient_profile', compact('patient', 'notes', 'patient_total_sessions', 'total_session_taken', 'total_active_session', 'total_apt', 'country_name', 'accounts', 'apt', 'apt_id', 'age', 'ministry_name', 'ministry_data'));
 
     }
 
@@ -948,7 +971,6 @@ public function save_prescription(Request $request)
     $branch_id = $data->branch_id;
 
     try {
-        // Update session_status in Appointment model based on sessions_recommended
         $appointment = Appointment::find($request->appointment_id);
 
         if (!$appointment) {
@@ -958,12 +980,10 @@ public function save_prescription(Request $request)
         $appointment->session_status = $request->sessions_recommended == null ?  7: 1;
         $appointment->save();
 
-        // Determine prescription_type based on session_cat and sessions_recommended
-        $prescription_type = 'appointment'; // Default is 'appointment'
+        $prescription_type = 'appointment';
 
-        // Check if session_cat and sessions_recommended are not null
         if (!is_null($request->session_cat) && !is_null($request->sessions_recommended)) {
-            $prescription_type = 'session'; // Set to 'session' if both are not null
+            $prescription_type = 'session';
         }
 
         // Save new prescription

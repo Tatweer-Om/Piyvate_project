@@ -16,6 +16,8 @@ return new class extends Migration
             $table->string('doctor_id')->nullable();
             $table->string('patient_id')->nullable();
             $table->string('appointment_id')->nullable();
+            $table->string('session_id')->nullable();
+
             $table->string('form_type')->nullable();  // 'clinical_notes', 'neuro_assessments', etc.
             $table->string('notes_status')->nullable();
             $table->longText('form_data')->nullable();

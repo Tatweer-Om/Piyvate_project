@@ -98,29 +98,55 @@
                                 <hr class="my-3">
 
                                 <div class="row text-center small">
-                                    <div class="col-4">
-                                        <div class="bg-warning bg-opacity-10 rounded-3 p-2">
-                                            <i class="bi bi-calendar2-check-fill text-info fs-5"></i>
-                                            <div class="fw-bold text-warning">{{ $total_apt ?? '' }}</div>
-                                            <div class="text-warning"> Total Appointments</div>
+                                    <div class="col-4 d-flex align-items-stretch">
+                                        <div class="bg-warning bg-opacity-10 rounded-3 p-3 d-flex flex-column justify-content-between" style="height: 120px;">
+                                            <i class="fas fa-calendar-check text-info fs-5 mb-2"></i>
+                                            <div class=" text-warning">{{ $total_apt ?? 'N/A' }}</div>
+                                            <div class="text-warning">Total Appointments</div>
                                         </div>
                                     </div>
-                                    <div class="col-4">
-                                        <div class="bg-success bg-opacity-10 rounded-3 p-2">
-                                            <i class="bi bi-person-video2 text-success fs-5"></i>
-                                            <div class="fw-bold text-success">{{ $apt->appointment_type ?? '' }}</div>
+                                    <div class="col-4 d-flex align-items-stretch">
+                                        <div class="bg-success bg-opacity-10 rounded-3 p-3 d-flex flex-column justify-content-between" style="height: 120px;">
+                                            <i class="fas fa-video text-success fs-5 mb-2"></i>
+                                            <div class=" text-success">{{ $apt->appointment_type ?? 'N/A' }}</div>
                                             <div class="text-success">Appointment Type</div>
                                         </div>
                                     </div>
-                                    <div class="col-4">
-                                        <div class="bg-danger bg-opacity-10 rounded-3 p-2">
-                                            <i class="bi bi-geo-alt-fill text-danger fs-5"></i>
-                                            <div class="fw-bold text-danger">{{ $country_name ?? 'not provided' }}</div>
-                                            <div class="text-danger"> Country</div>
+                                    <div class="col-4 d-flex align-items-stretch">
+                                        <div class="bg-danger bg-opacity-10 rounded-3 p-3 d-flex flex-column justify-content-between" style="height: 120px;">
+                                            <i class="fas fa-map-marker-alt text-danger fs-5 mb-2"></i>
+                                            <div class=" text-danger">{{ $country_name ?? 'Not Provided' }}</div>
+                                            <div class="text-danger">Country</div>
                                         </div>
                                     </div>
-
                                 </div>
+                                <hr>
+
+                                <div class="row text-center small">
+                                    <div class="col-4 d-flex align-items-stretch">
+                                        <div class="bg-success bg-opacity-10 rounded-3 p-3 d-flex flex-column justify-content-between" style="height: 120px;">
+                                            <i class="fas fa-check-circle text-success fs-5 mb-2"></i>
+                                            <div class=" text-success">{{ $patient_total_sessions ?? 'N/A' }}</div>
+                                            <div class="text-success">Total Sessions</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-4 d-flex align-items-stretch">
+                                        <div class="bg-danger bg-opacity-10 rounded-3 p-3 d-flex flex-column justify-content-between" style="height: 120px;">
+                                            <i class="fas fa-user-times text-danger fs-5 mb-2"></i>
+                                            <div class=" text-danger">{{ $total_active_session ?? 'N/A' }}</div>
+                                            <div class="text-danger">Active Sessions</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-4 d-flex align-items-stretch">
+                                        <div class="bg-info bg-opacity-10 rounded-3 p-3 d-flex flex-column justify-content-between" style="height: 120px;">
+                                            <i class="fas fa-check text-info fs-5 mb-2"></i>
+                                            <div class=" text-info">{{ $total_session_taken ?? 'N/A' }}</div>
+                                            <div class="text-info">Sessions Taken</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+
 
                             </div>
                         </div>
