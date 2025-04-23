@@ -61,7 +61,33 @@ return [
     'accepted_lang' => 'Accepted',  
     'rejected_lang' => 'Rejected',  
     'pending_lang' => 'Pending',  
-     
+    
+    
+    // purchase
+    'purchase_detail_lang' => 'Purchase Detail',  
+    'company_detail_lang' => 'Company Detail',  
+    'invoice_no_lang' => 'Invoice #',  
+    'created_by_lang' => 'Created By',  
+    'purchase_date_lang' => 'Purchase Date',  
+    'purchase_customer_details_lang' => 'Customer Detail',  
+    'product_detail_lang' => 'Product Detail',  
+    'image_lang' => 'Image',  
+    'unit_price_lang' => 'Unit Price',  
+    'quantity_lang' => 'Quantity',  
+    'tax_lang' => 'Tax',  
+    'subtotal_lang' => 'sub total',  
+    'purchase_detail_lang' => 'Purchase Detail',  
+    'payment_date_lang' => 'payment date',  
+    'payment_method_lang' => 'payment method',  
+    'total_price_lang' => 'total price',  
+    'paid_amount_lang' => 'paid amount',  
+    'remaining_amount_lang' => 'remaining',  
+    'invoice_detail' => 'Invoice Detail',  
+    'shipping_lang' => 'Shipping',  
+    'invoice_total_lang' => 'Invoice total',  
+    'products_subtotal_lang' => 'Product subtotal',        
+    'products_total_paid_lang' => 'Total Paid',   
+    
    
 
     // js

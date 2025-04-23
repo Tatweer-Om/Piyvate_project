@@ -306,6 +306,12 @@ document.addEventListener('DOMContentLoaded', function () {
                     $("#addSessionForm")[0].reset(); // Reset form
                     $(".session_id").val(response.session_id);
                     $("#secondModal2").modal("show");
+                    if(response.session_type == 1)
+                    {
+                        $('#voucher_div').show();
+                        $('#voucher_discount_div').show();
+                        $('#after_discount_div').show();
+                    }
                 } else {
                     show_notification('error', '{{ trans("messages.data_add_failed_lang", [], session("locale")) }}');
                 }
@@ -429,8 +435,9 @@ $(document).ready(function () {
         let totalPaid = 0;
         let paymentStatus = parseInt($("#payment_status").val()) || 0;
         let totalAmount = parseFloat($("#total_amount").text()) || 0;
-
-
+        let final_amount = parseFloat($("#total_amount_after_discount").val()) || 0;
+        let voucher_code = $('#voucher_code').val();
+        let voucher_amount  = $('#total_amount_discount').val();
         $(".payment-method-checkbox:checked").each(function () {
             let accountId = $(this).val();
             let amount = parseFloat($("#amount_" + accountId).val()) || 0;
@@ -452,6 +459,12 @@ $(document).ready(function () {
             '{{ trans('messages.Please_select_atleast_a_payment_method', [], session('locale')) }}');
             return;
         }
+        if(parseFloat(totalPaid) != final_amount)
+        {
+            show_notification('error',
+            '{{ trans('messages.paid_amount_less_greater_total_amount_lang', [], session('locale')) }}');
+            return;
+        }
 
         $.ajax({
             url: "/save_session_payment2", // Change URL if needed
@@ -461,7 +474,9 @@ $(document).ready(function () {
                 payment_methods: paymentData,
                 payment_status: paymentStatus, // Send payment_status to backend
                 session_id: $(".session_id2").val(),
-                totalAmount: totalAmount
+                totalAmount: totalAmount,
+                voucher_code: voucher_code,
+                voucher_amount: voucher_amount,
             },
             success: function (response) {
                 if (response.success) {
@@ -545,7 +560,88 @@ $(document).ready(function () {
 
         $("#gender_badge").html('<i class="' + genderIcon + '"></i> Gender: ' + genderText).show();
     });
+
+
+    $("#check_voucher").on("click", function () {
+        let code = $('#voucher_code').val();
+        $.ajax({
+            url: "{{ route('check_voucher') }}", // Your Laravel route
+            method: "POST",
+            data: {
+                _token: "{{ csrf_token() }}",
+                code: code, 
+            },
+            success: function (response) {
+                if (response.success == 1) {
+                    show_notification('success',
+                    '{{ trans('messages.success_voucher_amount_lang', [], session('locale')) }}');
+                  
+                    let discount = parseFloat(response.discount_price);
+                    let total_amount = parseFloat($('#total_amount_input').val());
+                    let after_discount = parseFloat(total_amount) - parseFloat(response.discount_price);
+                  
+                    $('#voucher_discount').text(response.discount_price);
+                    $('#after_discount').text(after_discount.toFixed(3));
+
+                    $('#total_amount_discount').val(discount.toFixed(3));
+                    $('#total_amount_after_discount').val(after_discount.toFixed(3));
+
+                    $('#voucher_code').attr('readonly', true);
+                    $('#check_voucher').attr('disabled', true);
+
+                }
+                else if (response.success == 2) {
+                    show_notification('error',
+                    '{{ trans('messages.failed_voucher_already_used_lang', [], session('locale')) }}');
+                    let discount = 0.000;
+                    let total_amount = $('#total_amount_input').val();
+                    let after_discount = total_amount;
+                    $('#voucher_discount').text(discount.toFixed(3));
+                    $('#after_discount').text(after_discount.toFixed(3));
+
+                    $('#total_amount_discount').val(discount.toFixed(3));
+                    $('#total_amount_after_discount').val(after_discount.toFixed(3));
+
+                }
+                else if (response.success == 2) {
+                    show_notification('error',
+                    '{{ trans('messages.failed_voucher_wrong_used_lang', [], session('locale')) }}');
+                    let discount = 0.000;
+                    let total_amount = $('#total_amount_input').val();
+                    let after_discount = total_amount;
+                    $('#voucher_discount').text(discount.toFixed(3));
+                    $('#after_discount').text(after_discount.toFixed(3));
+
+                    $('#total_amount_discount').val(discount.toFixed(3));
+                    $('#total_amount_after_discount').val(after_discount.toFixed(3));
+
+                }
+            },
+            error: function () {
+                show_notification('error',
+                    '{{ trans('messages.failed_process_lang', [], session('locale')) }}');
+            }
+        }); 
+    });
 });
+
+function toggleAmountInput(accountId) {
+    var checkbox = document.getElementById("account_" + accountId);
+    var amountInput = document.getElementById("amount_" + accountId);
+    var refNoInput = document.getElementById("ref_no_" + accountId);
+
+    if (checkbox.checked) {
+        amountInput.style.display = "block";
+        refNoInput.style.display = "block";
+        amountInput.required = true;
+    } else {
+        amountInput.style.display = "none";
+        refNoInput.style.display = "none";
+        amountInput.required = false;
+        amountInput.value = "";
+        refNoInput.value = "";
+    }
+}
 
 
 

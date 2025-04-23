@@ -65,15 +65,13 @@ class PurchaseController extends Controller
 
                 $invoice_no='<a  href="'.url('purchase_detail').'/'.$value->id.'">'.$value->invoice_no.'</a>';
 
-
-                    $modal='<a class="me-3 confirm-text text-success"
-                    onclick=approved_products("'.$value->invoice_no.'")><i class="fas fa-check"></i>
-                    </a>
+                // <a class="me-3 confirm-text text-primary" href="'.url('purchase_edit').'/'.$value->id.'"><i class="fas fa-edit"></i>
+                // </a>
+                    $modal='
                     <a class="me-3 confirm-text text-danger" onclick=del_purchase("'.$value->id.'")><i class="fas fa-trash"></i>
                     </a>
-                    <a class="me-3 confirm-text text-primary" href="'.url('purchase_edit').'/'.$value->id.'"><i class="fas fa-edit"></i>
-                    </a>
-                    <a class="me-3 confirm-text text-danger" onclick=get_purchase_payment("'.$value->id.'")><i class="fas fa-check-double" data-bs-toggle="modal" data-bs-target="#add_purchase_payment_modal"></i>
+                    
+                    <a class="me-3 confirm-text text-danger" onclick=get_purchase_payment("'.$value->id.'")><i class="fas fa-money-bill" data-bs-toggle="modal" data-bs-target="#add_purchase_payment_modal"></i>
                     </a>
                     ';
 
@@ -313,6 +311,7 @@ class PurchaseController extends Controller
         $history->save();
         $purchase_id = $purchase->id;
 
+        $final_total =0;
         $checkbox=0;
         for ($i=0; $i <count($barcode) ; $i++) {
             $purchase_detail = new Purchase_detail();
@@ -450,15 +449,18 @@ class PurchaseController extends Controller
             $productQtyHistory->added_by = $user;
             $productQtyHistory->save();
 
+            $final_total+=$purchase_price[$i] * $quantity[$i];
+
         }
 
         $purchase_bill = new Purchase_bill();
 
         $purchase_bill->purchase_id=$purchase_id;
         $purchase_bill->invoice_no=$invoice_no;
-        $purchase_bill->total_price=$total_price;
-        $purchase_bill->grand_total =  $total_price;
-        $purchase_bill->remaining_price =$total_price;
+        $purchase_bill->total_shipping=$total_shipping;
+        $purchase_bill->total_price=$final_total;
+        $purchase_bill->grand_total =  $final_total + $total_shipping;
+        $purchase_bill->remaining_price =$final_total + $total_shipping; 
         $purchase_bill->added_by = $user;
         $purchase_bill->user_id = $user_id;
         $purchase_bill->save();
@@ -1167,18 +1169,132 @@ class PurchaseController extends Controller
 
     // delete purchase
     public function delete_purchase(Request $request){
+        $user_id = Auth::id();
+        $data = User::where('id', $user_id)->first();
+        $user = $data->user_name;
+
         $purchase_id = $request->input('id');
         $purchase = purchase::where('id', $purchase_id)->first();
+        $purchase_detail = Purchase_detail::where('purchase_id', $purchase_id)->get();
         if (!$purchase) {
             return response()->json([
                 'error' => trans('messages.purchase_not_found_lang', [], session('locale'))
             ], 404);
         }
+        $branch_id ="";
+        foreach ($purchase_detail as $key => $detail) {
+
+             
+          
+
+           $product = Product::where('barcode', $detail->barcode)->first();  
+          
+           $branch_id = $product->store_id;
+
+           $history = new History();
+           $history->user_id = $user_id;
+           $history->table_name = 'products';
+           $history->function = 'delete';
+           $history->function_status = 3;
+           $history->branch_id = $product->store_id;
+           $history->record_id = $product->id;
+           $history->added_data = json_encode($product->only([
+               'purchase_id', 'invoice_no', 'product_id', 'store_id', 'category_id',
+               'supplier_id', 'barcode', 'purchase_price', 'total_purchase', 'product_name',
+               'sale_price', 'tax', 'quantity', 'product_type', 'description', 'stock_image',
+               'added_by', 'user_id'
+           ]));
+           $history->added_by = $user;
+           $history->save();
+
+            $productQtyHistory = new ProductQtyHistory();
+            $previousQty = $product->quantity;
+            $currentQty = $detail->quantity;
+            $productQtyHistory->product_id = $product->id;
+            $productQtyHistory->purchase_id=$purchase_id;
+            $productQtyHistory->branch_id = $product->store_id;
+            $productQtyHistory->barcode =$product->barcode;
+            $productQtyHistory->source = 'Product_delete';
+            $productQtyHistory->change_type = 2;
+            $productQtyHistory->previous_qty = $previousQty;
+            $productQtyHistory->new_qty = $currentQty;
+            $productQtyHistory->current_qty = $previousQty - $currentQty;
+            $productQtyHistory->status = 1;
+            $productQtyHistory->notes = 'quantity minus via delete products';
+            $productQtyHistory->user_id = $user_id;
+            $productQtyHistory->added_by = $user;
+            $productQtyHistory->save();
+
+            $product->quantity = $product->quantity - $detail->quantity;
+            $product->updated_by = $user; 
+            $product->save();
+
+
+            $history = new History();
+            $history->user_id = $user_id;
+            $history->table_name = 'purchase_details';
+            $history->function = 'delete';
+            $history->function_status = 3;
+            $history->branch_id = $branch_id;
+            $history->record_id = $detail->id;
+            $history->added_data = json_encode($detail->only([
+                'purchase_id', 'invoice_no', 'product_id', 'store_id', 'category_id',
+                'supplier_id', 'barcode', 'purchase_price', 'total_purchase', 'product_name',
+                'sale_price', 'tax', 'quantity', 'product_type', 'description', 'stock_image',
+                'added_by', 'user_id'
+            ]));
+            $history->added_by = $user;
+            $history->save();
+            $detail->delete();
+        }
+
+        $history = new History();
+        $history->user_id = $user_id;
+        $history->table_name = 'purchases';
+        $history->function = 'delete';
+        $history->function_status = 3;
+        $history->branch_id = $branch_id;
+        $history->record_id = $purchase_id;
+        $history->added_data = json_encode($purchase->only([
+            'id', 'invoice_no', 'purchase_date', 'supplier_id', 'invoice_price',
+            'receipt_file', 'total_price', 'total_tax', 'total_shipping', 'description',
+            'added_by', 'updated_by', 'user_id', 'created_at', 'updated_at'
+        ]));
+        $history->added_by = $user;
+        $history->save();
 
         $purchase->delete();
+
+        $purchase_bill = Purchase_bill::where('purchase_id', $purchase_id)->first();  
+        $history = new History();
+        $history->user_id = $user_id;
+        $history->table_name = 'purchases';
+        $history->function = 'delete';
+        $history->function_status = 3;
+        $history->branch_id = $branch_id;
+        $history->record_id = $purchase_bill->id;
+        $history->added_data = json_encode($purchase_bill->only([
+            'purchase_id', 'invoice_no', 'total_price', 'total_shipping', 'grand_total',
+            'remaining_price', 'added_by',  'user_id', 'created_at', 'updated_at'
+        ]));
+        $history->added_by = $user;
+        $history->save();
         DB::table('purchase_bills')->where('purchase_id', $purchase_id)->delete();
-        DB::table('purchase_details')->where('purchase_id', $purchase_id)->delete();
-        DB::table('purchase_imeis')->where('purchase_id', $purchase_id)->delete();
+
+        $purchase_payment = PurchasePayment::where('purchase_id', $purchase_id)->first();  
+        $history = new History();
+        $history->user_id = $user_id;
+        $history->table_name = 'purchase_payments';
+        $history->function = 'delete';
+        $history->function_status = 3;
+        $history->branch_id = $branch_id;
+        $history->record_id = $purchase_payment->id;
+        $history->added_data = json_encode($purchase_payment->only([
+            'purchase_id', 'invoice_no', 'supplier_name', 'total_amount', 'remaining_amount',
+            'paid_amount', 'account_id',  'payment_date', 'purchase_date', 'purchase_date', 'added_by',  'user_id', 'created_at', 'updated_at'
+        ]));
+        $history->added_by = $user;
+        $history->save();
         DB::table('purchase_payments')->where('purchase_id', $purchase_id)->delete();
         return response()->json([
             'success'=> trans('messages.purchase_deleted_lang', [], session('locale'))
@@ -1233,18 +1349,7 @@ class PurchaseController extends Controller
             {
                 $pro_image=asset('images/product_images/'.  $value->stock_image);
             }
-            if($value->warranty_type==1)
-            {
-                $warranty_type=trans('messages.shop_lang', [], session('locale')).' : '.$value->warranty_days;
-            }
-            else if($value->warranty_type==2)
-            {
-                $warranty_type=trans('messages.agent_lang', [], session('locale')).' : '.$value->warranty_days;
-            }
-            else if($value->warranty_type==3)
-            {
-                $warranty_type=trans('messages.none_lang', [], session('locale'));
-            }
+           
 
             $sub_total=$value->purchase_price*$value->quantity;
             $sub_total_all += $sub_total;
@@ -1256,16 +1361,7 @@ class PurchaseController extends Controller
 
 
 
-            $all_imei="";
-            if($value->check_imei==1)
-            {
-                $purchase_imei = Purchase_imei::where('barcode', $value->barcode)
-                                                ->where('purchase_id', $id)->get();
-                foreach ($purchase_imei as $imei) {
-
-                    $all_imei.=$imei->imei.",";
-                }
-            }
+             
             $pro_title=$value->product_name;
             if(empty($pro_title))
             {
@@ -1310,15 +1406,13 @@ class PurchaseController extends Controller
                                         <th >'.$sno.'</th>
                                         <td class="productimgname">
                                             <a class="product-img">
-                                                <img src="'.$pro_image.'" >
+                                                <img style="max-width:50px" src="'.$pro_image.'" >
                                             </a>
                                             <a href="javascript:void(0);">'.$pro_title.'</a>
                                         </td>
                                         <td> '.$value->purchase_price.'</td>
                                         <td> '.$value->quantity.'</td>
-                                        <td> '.$sumTax.'</td>
-                                        <td> '.$all_imei.'</td>
-                                        <td>'.$warranty_type.'</td>
+                                        <td> '.$sumTax.'</td> 
                                         <td>'.$item_total.'</td>
 
                                     </tr>';
@@ -1360,33 +1454,35 @@ class PurchaseController extends Controller
 
         // get payment_deatail
         $payment_paid=0;
-        $purchase_payment = Purchase_payment::where('purchase_id', $id)->get();
+        $purchase_payment = Purchasepayment::where('purchase_id', $id)->get();
         $purchase_payment_detail="";
         if($purchase_payment){
-            foreach ($purchase_payment as $key => $pay) {
-                $payment_paid += $pay->paid_amount;
-                $account = Account::where('id', $pay->payment_method)->first();
+            foreach ($purchase_payment as $key => $pay) { 
+                
+                $account = Account::where('id', $pay->account_id)->first();
                 $purchase_payment_detail.='<tr>
                                             <td>'.$pay->payment_date.'</td>
                                             <td>'.$account->account_name.'</td>
-                                            <td>'.$pay->total_price.'</td>
-                                            <td>'.$pay->paid_amount.'</td>
-                                            <td>'.$pay->remaining_price.'</td>
+                                            <td>'.$pay->total_amount.'</td>
+                                            <td>'.$pay->paid_amount.'</td>  
+                                            <td><a class="me-3 confirm-text text-danger" onclick=del_payment("'.$value->id.'")>
+                                                <i class="fas fa-trash"></i>
+                                            </a></td>
                                         </tr>';
             }
 
         }
 
-        if ($permit_array && in_array('2', $permit_array)) {
+        // if ($permit_array && in_array('2', $permit_array)) {
 
-            return view('stock.purchase_view', compact('purchase_payment', 'purchase_detail_table',
+            return view('purchase.purchase_view', compact('purchase_payment', 'purchase_detail_table',
          'supplier_name', 'supplier_phone', 'supplier_email', 'shipping_cost',
          'payment_paid','payment_remaining','total_invo_price', 'purchase_payment_detail','purchase_invoice',
             'sub_total','total_tax','grand_total','sub_invo', 'invo_ship', 'invo_tx', 'without_shipping_sub_total','sub_total_all', 'permit_array'));
-        } else {
+        // } else {
 
-            return redirect()->route('home');
-        }
+        //     return redirect()->route('home');
+        // }
 
 
 
@@ -1404,7 +1500,7 @@ class PurchaseController extends Controller
         // Update response to include all the necessary fields
         return response()->json([
             'invoice_no' => $purchase->invoice_no ?? '',
-            'supplier_name' => $supplier_name ?? '',
+            'supplier_name' => $purchase->supplier_id ?? '',
             'purchase_date' => $purchase->purchase_date ?? '',
             'purchase_id' => $purchase->id ?? '',
             'total_price' => $purchase_bill->grand_total ?? '', // Updated to match JS expectations
@@ -1444,7 +1540,7 @@ class PurchaseController extends Controller
         $purchasePayment->invoice_no = $request->invoice_no;
         $purchasePayment->purchase_date = $request->purchase_date;
         $purchasePayment->total_amount = $request->total_amount;
-        $purchasePayment->remaining_amount = $request->remaining_amount;
+        $purchasePayment->remaining_amount = $request->remaining_amount - $request->paid_amount;
         $purchasePayment->paid_amount = $request->paid_amount;
         $purchasePayment->account_id = $request->account_id;
         $purchasePayment->payment_date = $request->payment_date;
@@ -1478,7 +1574,7 @@ class PurchaseController extends Controller
 
         // Update account balance
         $account_data = Account::where('id', $request['account_id'])->first();
-        $account_data->opening_balance = $account_data['opening_balance'] - $request['paid_amount'];
+        $account_data->opening_balance = $account_data['opening_balance'] + $request['paid_amount'];
         $account_data->save();
         return response()->json([
             'status'=>1,
@@ -1486,6 +1582,63 @@ class PurchaseController extends Controller
 
         ]);
     }
+
+    // get_purchase_payment
+    public function delete_purchase_payment(Request $request){
+        $user_id = Auth::id();
+        $data = User::where('id', $user_id)->first();
+        $user = $data->user_name;
+
+        // Get invoice_no and purchase details
+        $purchase_payment_id = $request->input('id');
+        $purchase_payment_data = PurchasePayment::where('id', $purchase_payment_id)->first();
+        $purchase_data = Purchase::where('id', $purchase_payment_data->purchase_id)->first();
+        $purchase_store_id = Purchase_Detail::where('purchase_id', $purchase_payment_data->purchase_id)->first();
+
+         
+         // Log the update in the history table
+         $history = new History();
+         $history->user_id = $user_id;
+         $history->table_name = 'purchase_payments'; // Corrected table name to 'expenses'
+         $history->function = 'delete';
+         $history->function_status = 1;
+         $history->branch_id = $purchase_store_id->store_id;
+ 
+         $history->record_id = $purchase_payment_id; // Use expense id as the record_id
+         $history->previous_data = json_encode($purchase_payment_data->only([
+            'purchase_id', 'supplier_name', 'invoice_no', 
+            'total_amount', 'remaining_amount', 'paid_amount', 
+            'account_id', 'payment_date', 'purchase_date', 
+            'notes', 'user_id', 'added_by',
+            'created_at'
+        ])); // Store the previous data
+         $history->updated_data = null; // Store the updated data
+         $history->added_by = $user;
+         $history->save();
+
+         
+
+        // Update remaining bill
+        $purchase_bill = Purchase_bill::where('purchase_id', $purchase_payment_data->purchase_id)->first();
+        $purchase_bill->remaining_price = $purchase_bill['remaining_price'] + $purchase_payment_data->paid_amount;
+        $purchase_bill->save();
+
+        // Update account balance
+        $account_data = Account::where('id', $purchase_payment_data->account_id)->first();
+        $account_data->opening_balance = $account_data['opening_balance'] - $purchase_payment_data->paid_amount;
+        $account_data->save();
+
+        $purchase_payment_data->delete();
+
+        
+        return response()->json([
+            'status'=>1,
+            'message' => 'Payment added successfully.'
+
+        ]);
+    }
+
+    
 
 
     //purchase invoice

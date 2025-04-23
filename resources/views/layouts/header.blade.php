@@ -1087,6 +1087,7 @@
                         <span class="nav-text">Appointments</span>
                     </a>
                     <ul aria-expanded="false">
+                        <li><a href="{{ url('voucher') }}">Add vouchers</a></li>
                         <li><a href="{{ url('appointments') }}">Add Appointment</a></li>
                         <li><a href="{{ url('all_appointments') }}"> All appointments</a></li>
                         <li><a href="{{ url('all_sessions') }}">Direct Session Bookings</a></li>

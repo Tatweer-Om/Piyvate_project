@@ -185,7 +185,7 @@
                                             </label>
                                         </div>
 
-                                        <input type="number" class="form-control form-control-sm payment-amount-input mt-1" id="amount_{{ $account->id }}" name="payment_amounts[{{ $account->id }}]" value="{{ $setting->appointment_fee ?? '0.00' }}" placeholder="Enter amount" min="0" step="0.01" style="display: none;">
+                                        <input type="number" class="form-control form-control-sm payment-amount-input mt-1 payment_amounts" id="amount_{{ $account->id }}" name="payment_amounts[{{ $account->id }}]" value="{{ $setting->appointment_fee ?? '0.00' }}" placeholder="Enter amount" min="0" step="0.01" style="display: none;">
 
                                         @if($account->account_status != 1)
                                             <input type="text" class="form-control form-control-sm ref-no-input mt-1" id="ref_no_{{ $account->id }}" name="ref_nos[{{ $account->id }}]" placeholder="Enter Reference Number" style="display: none;">

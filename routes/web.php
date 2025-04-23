@@ -28,6 +28,8 @@ use App\Http\Controllers\SpecialityController;
 use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\ClinicalNotesController;
 use App\Http\Controllers\HrController;
+use App\Http\Controllers\VoucherController;
+ 
 
 Route::get('/', function () {
     return view('welcome');
@@ -166,6 +168,7 @@ Route::post('save_session_payment2', [SessionCONTROLLER::class, 'save_session_pa
 Route::get('session_detail/{id}', [SessionCONTROLLER::class, 'session_detail'])->name('session_detail');
 Route::get('/session_detail2/{id}', [SessionCONTROLLER::class, 'session_detail2'])->name('session_detail2');
 Route::get('/search_patient', [SessionCONTROLLER::class, 'search_patient'])->name('search_patient');
+Route::post('check_voucher', [SessionCONTROLLER::class, 'check_voucher'])->name('check_voucher');
 
 
 
@@ -262,6 +265,7 @@ Route::post('update_purchase', [PurchaseController::class, 'update_purchase'])->
 Route::post('complete_purchase', [PurchaseController::class, 'complete_purchase'])->name('complete_purchase');
 Route::post('check_tax_active', [PurchaseController::class, 'check_tax_active'])->name('check_tax_active');
 Route::get('download-receipt/{filename}', [PurchaseController::class, 'downloadReceipt']);
+Route::post('delete_purchase_payment', [PurchaseController::class, 'delete_purchase_payment'])->name('delete_purchase_payment');
 
 
 
@@ -328,16 +332,13 @@ Route::post('get_product_type', [PosController::class, 'get_product_type']);
 Route::post('add_pending_order', [PosController::class, 'add_pending_order']);
 Route::match(['get', 'post'],'hold_orders', [PosController::class, 'hold_orders']);
 Route::match(['get', 'post'],'get_hold_data', [PosController::class, 'get_hold_data']);
-Route::post('get_maintenance_payment_data', [PosController::class, 'get_maintenance_payment_data']);
-Route::post('get_maintenance_payment', [PosController::class, 'get_maintenance_payment']);
-Route::post('add_maintenance_payment', [PosController::class, 'add_maintenance_payment']);
+ 
 Route::get('pos_bill/{order_no}', [PosController::class, 'pos_bill'])->name('pos_bill');
 Route::post('get_customer_data', [PosController::class, 'get_customer_data'])->name('get_customer_data');
-Route::post('add_university', [PosController::class, 'add_university'])->name('add_university');
-Route::post('add_workplace', [PosController::class, 'add_workplace'])->name('add_workplace');
-Route::post('add_ministry', [PosController::class, 'add_ministry'])->name('add_ministry');
+ 
 Route::get('make_profit', [PosController::class, 'make_profit'])->name('make_profit');
 Route::get('bills/{order_no}', [PosController::class, 'bills'])->name('bills');
+Route::post('add_pos_patient', [PosController::class, 'add_pos_patient']);
 
 
 
@@ -425,6 +426,14 @@ Route::post('/update_soap_pt/{id}', [ClinicalNotesController::class, 'update_soa
 Route::post('/add_otatp_ortho', [ClinicalNotesController::class, 'add_otatp_ortho'])->name('add_otatp_ortho');
 
 
+//vouchercontroller
+
+Route::get('voucher', [VoucherController::class, 'index'])->name('voucher');
+Route::post('add_voucher', [VoucherController::class, 'add_voucher'])->name('add_voucher');
+Route::get('show_voucher', [VoucherController::class, 'show_voucher'])->name('show_voucher');
+Route::post('edit_voucher', [VoucherController::class, 'edit_voucher'])->name('edit_voucher');
+Route::post('update_voucher', [VoucherController::class, 'update_voucher'])->name('update_voucher');
+Route::post('delete_voucher', [VoucherController::class, 'delete_voucher'])->name('delete_voucher');
 
 
 
