@@ -195,8 +195,13 @@
                 wrapper.appendChild(clone);
 
                 // Initialize the new canvas for the appended section
-                const newCanvas = clone.querySelector('.body-canvas');
-                initializeCanvas(newCanvas); // Ensure the canvas is initialized after the section is appended
+                // const newCanvas = clone.querySelector('.body-canvas');
+                const canvases = document.querySelectorAll('.body-canvas');
+const lastCanvas = canvases[canvases.length - 1];
+if (lastCanvas) {
+    initializeCanvas(lastCanvas);
+}
+          
             }
 
 
