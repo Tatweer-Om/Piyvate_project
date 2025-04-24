@@ -28,6 +28,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use App\Models\AppointPaymentExpense;
 use App\Models\ClinicalNotes;
+use App\Models\Doctor;
 use App\Models\SessionPaymentExpense;
 use App\Models\SessionsonlyPayment;
 use App\Models\SessionsonlyPaymentExp;
@@ -74,8 +75,10 @@ class PatientController extends Controller
 
     $total_active_session = $active_sessions_apt + $active_sessions_dir;
 
+    $notes = ClinicalNotes::where('patient_id', $id)
+    ->whereNotIn('notes_status', [5, 6])
+    ->get();
 
-    $notes= ClinicalNotes::where('patient_id', $id)->get();
     $accounts= Account::where('branch_id',   $branch_id)->get();
         $patient = Patient::where('id', $id)->first();
         $country= $patient->country_id ?? '';
@@ -139,16 +142,12 @@ class PatientController extends Controller
             'total_price' => $firstAppSession->total_price,
         ];
     }
+    $doctors= Doctor::all();
+    $patients = Patient::all();
 
-    return view('patients.patient_profile', compact('patient', 'notes', 'patient_total_sessions', 'total_session_taken', 'total_active_session', 'total_apt', 'country_name', 'accounts', 'apt', 'apt_id', 'age', 'ministry_name', 'ministry_data'));
+    return view('patients.patient_profile', compact('patient', 'doctors', 'patients', 'notes', 'patient_total_sessions', 'total_session_taken', 'total_active_session', 'total_apt', 'country_name', 'accounts', 'apt', 'apt_id', 'age', 'ministry_name', 'ministry_data'));
 
     }
-
-
-
-
-
-
 
     public function show_patient()
     {
@@ -525,6 +524,15 @@ public function show_all_sessions_by_patient(Request $request)
             $statusText = 'Transferred';
         }
 
+        $modal = '
+        <a href="javascript:void(0);" class="me-3 edit-staff" data-bs-toggle="modal" data-bs-target="#editSessionModal" onclick="edit(' . $session->id . ', \'' . $session->source . '\')">
+            <i class="fa fa-pencil fs-18 text-success"></i>
+        </a>
+        <a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#transferModal" onclick="transfer(' . $session->id . ', \'' . $session->source . '\')">
+            <i class="fa fa-right-left fs-18 text-info"></i>
+        </a>';
+
+
         // Add session data to the response
         $json[] = [
             '<span class="text-muted">#' . $sno . '</span>',
@@ -532,10 +540,9 @@ public function show_all_sessions_by_patient(Request $request)
             '<span>' . Carbon::parse($session->session_date)->format('d-m-Y') . '</span>',
             '<span>' . ($doctor_name ?? 'Unknown') . '</span>',
             '<span>' . $session->session_time . '</span>',
-            '<span>' . $session->session_price . '</span>',
+            // '<span>' . $session->session_price . '</span>',
             '<span class="badge ' . $statusBadgeColor . '">' . $statusText . '</span>', // Add status badge
-            // '<span class="badge ' . $badgeColor . '">' . $sourceText . '</span>',
-
+           $modal,
         ];
     }
 
@@ -726,116 +733,7 @@ public function getAppointmentsAndSessions($id)
 
 
 
-// public function submit_contract_payment(Request $request)
-// {
 
-//     $user_id = Auth::id();
-//     $user = User::find($user_id);
-
-//     $patient_id     = $request->patient_id;
-//     $ministry_id    = $request->ministry_id;
-//     $type           = $request->type;
-//     $total_sessions = $request->total_sessions;
-//     $total_price    = $request->total_price;
-//     $apt_id         = $request->appointment_id;
-//     $session_id     = $request->session_id;
-
-//     $hasValidPayment = false;
-
-//     try {
-//         // 1. Update status (same as before)
-//         if ($type === 'session') {
-//             $session_list = SessionList::find($session_id);
-//             if ($session_list) {
-//                 $session_list->payment_status = 4;
-//                 $session_list->save();
-//             }
-
-//             AllSessioDetail::where('session_id', $session_id)->update(['contract_payment' => 2]);
-
-//             $session_detail = SessionDetail::where('session_id', $session_id)->first();
-//             if ($session_detail) {
-//                 $session_detail->contract_payment = 2;
-//                 $session_detail->save();
-//             }
-//         } elseif ($type === 'appointment') {
-//             $appointment = Appointment::find($apt_id);
-//             $session_payment = SessionsPayment::where('appointment_id', $apt_id)->first();
-
-//             if ($appointment) {
-//                 $appointment->payment_status = 4;
-//                 $appointment->save();
-//             }
-
-//             if ($session_payment) {
-//                 $session_payment->contract_payment = 2;
-//                 $session_payment->save();
-//             }
-
-//             AppointmentSession::where('appointment_id', $apt_id)->update(['contract_payment' => 2]);
-
-//             $detail = AppointmentDetail::where('appointment_id', $apt_id)->first();
-//             if ($detail) {
-//                 $detail->contract_payment = 2;
-//                 $detail->save();
-//             }
-//         }
-
-//         // 2. Handle multiple payment methods (with expense logic)
-//         if (is_array($request->payment_methods) && !empty($request->payment_methods)) {
-//             foreach ($request->payment_methods as $index => $paymentMethodId) {
-//                 // Use the $index to fetch amounts and ref_nos correctly
-//                 $paidAmount = $request->payment_amounts[$paymentMethodId] ?? 0;
-//                 $refNo = $request->ref_nos[$paymentMethodId] ?? null; // Get ref_no if it exists, or null if not
-
-//                 if ($paidAmount > 0) {
-//                     // Create a new payment record
-//                     $payment = new SessionsPayment();
-//                     $payment->appointment_id = $apt_id;
-//                     $payment->contract_payment = 2;
-//                     $payment->payment_status = 4;
-//                     $payment->account_id = $paymentMethodId;
-//                     $payment->ref_no = $refNo;
-//                     $payment->amount = $paidAmount;
-//                     $payment->user_id = $user_id;
-//                     $payment->branch_id = $user->branch_id;
-//                     $payment->added_by = $user->id;
-//                     $payment->save();
-
-//                     // Update the account balance
-//                     $account = Account::find($paymentMethodId);
-//                     if ($account) {
-//                         $account->opening_balance += $paidAmount;
-//                         $account->save();
-
-//                         // Handle commission if applicable
-//                         if ($account->account_status != 1 && !empty($account->commission) && $account->commission > 0) {
-//                             $commissionFee = ($paidAmount / 100) * $account->commission;
-
-//                             // Save payment expense
-//                             $paymentExpense = new SessionPaymentExpense();
-//                             $paymentExpense->total_amount = $paidAmount;
-//                             $paymentExpense->account_tax = $account->commission;
-//                             $paymentExpense->account_tax_fee = $commissionFee;
-//                             $paymentExpense->account_id = $paymentMethodId;
-//                             $paymentExpense->appointment_id = $apt_id;
-//                             $paymentExpense->user_id = $user_id;
-//                             $paymentExpense->branch_id = $user->branch_id;
-//                             $paymentExpense->added_by = $user->id;
-//                             $paymentExpense->save();
-//                         }
-//                     }
-
-//                     $hasValidPayment = true;
-//                 }
-//             }
-//         }
-
-//         return response()->json(['message' => 'Payment recorded successfully']);
-//     } catch (\Exception $e) {
-//         return response()->json(['error' => 'Something went wrong. Please try again later.']);
-//     }
-// }
 
 public function submit_contract_payment(Request $request)
 {
@@ -1069,7 +967,180 @@ public function lab_reports_upload(Request $request)
 }
 
 
+public function edit_ind_session(Request $request)
+{
+    $id = $request->input('id');
+    $source = $request->input('source');
 
+    $session = null;
+
+    // Check source and fetch session data accordingly
+    if ($source == 'appointment_sessions') {
+        // Fetch session details for appointment_sessions
+        $session = DB::table('appointment_sessions')
+                    ->where('id', $id)
+                    ->first();
+    } elseif ($source == 'all_sessio_details') {
+        // Fetch session details for all_sessio_details
+        $session = DB::table('all_sessio_details')
+                    ->where('id', $id)
+                    ->first();
+    }
+
+    if ($session) {
+
+        $doctor= Doctor::where('id', $session->doctor_id)->value('id');
+        $patient= Patient::where('id', $session->patient_id)->first();
+
+        // Return the session data as JSON
+        return response()->json([
+            'patient' => $patient->full_name,
+            'patient_id' => $patient->id,
+            'date' => $session->session_date,
+            'time' => $session->session_time,
+            'doctor' => $doctor,
+            'session_primary_id' => $session->id,
+            'source' => $source
+
+        ]);
+    } else {
+
+        return response()->json(null);
+    }
+}
+
+public function update_ind_session(Request $request)
+{
+    $id = $request->input('id');
+    $source = $request->input('source');
+    $session = null;
+
+    if ($source == 'appointment_sessions') {
+
+        $session = DB::table('appointment_sessions')->where('id', $id)->first();
+    } elseif ($source == 'all_sessio_details') {
+
+        $session = DB::table('all_sessio_details')->where('id', $id)->first();
+    }
+
+    if ($session) {
+
+        if ($source == 'appointment_sessions') {
+            DB::table('appointment_sessions')
+                ->where('id', $id)
+                ->update([
+                    'patient_id' => $request->input('patient_id'),
+                    'session_date' => $request->input('session_date'),
+                    'session_time' => $request->input('session_time'),
+                    'doctor_id' => $request->input('doctor')
+                ]);
+        } elseif ($source == 'all_sessio_details') {
+            DB::table('all_sessio_details')
+                ->where('id', $id)
+                ->update([
+                    'patient_id' => $request->input('patient_id'),
+                    'session_date' => $request->input('session_date'),
+                    'session_time' => $request->input('session_time'),
+                    'doctor_id' => $request->input('doctor')
+                ]);
+        }
+
+
+        return response()->json(['message' => 'Session updated successfully!']);
+    } else {
+
+        return response()->json(['message' => 'Session not found!'], 404);
+    }
+}
+
+public function transfer_ind_session(Request $request)
+{
+    $id = $request->input('id');
+    $source = $request->input('source');
+
+    $session = null;
+
+    // Check source and fetch session data accordingly
+    if ($source == 'appointment_sessions') {
+        // Fetch session details for appointment_sessions
+        $session = DB::table('appointment_sessions')
+                    ->where('id', $id)
+                    ->first();
+    } elseif ($source == 'all_sessio_details') {
+        // Fetch session details for all_sessio_details
+        $session = DB::table('all_sessio_details')
+                    ->where('id', $id)
+                    ->first();
+    }
+
+    if ($session) {
+
+        $doctor= Doctor::where('id', $session->doctor_id)->value('id');
+        $patient= Patient::where('id', $session->patient_id)->first();
+
+        // Return the session data as JSON
+        return response()->json([
+            'patient' => $patient->full_name,
+            'patient_id' => $patient->id,
+            'date' => $session->session_date,
+            'time' => $session->session_time,
+            'session_primary_id' => $session->id,
+            'source' => $source
+
+        ]);
+    } else {
+
+        return response()->json(null);
+    }
+}
+
+
+public function update_transfer_ind_session(Request $request)
+{
+    $id = $request->input('id');
+    $source = $request->input('source');
+    $old_patient_id = $request->input('old_patient_id');
+    $new_patient_id = $request->input('target_patient');
+    $notes = $request->input('notes');
+
+    $user = Auth::user();
+    $username = $user->user_name;
+    $branch = $user->branch_id;
+    $user_id = $user->id;
+
+    $session = null;
+
+    if ($source == 'appointment_sessions') {
+        $session = DB::table('appointment_sessions')->where('id', $id)->first();
+    } elseif ($source == 'all_sessio_details') {
+        $session = DB::table('all_sessio_details')->where('id', $id)->first();
+    }
+
+    if ($session) {
+        // Update patient_id
+        DB::table($source)
+        ->where('id', $id)
+        ->update([
+            'patient_id' => $new_patient_id,
+            'status' => 3
+        ]);
+
+
+        // Insert transfer log
+        DB::table('session_transfer_logs')->insert([
+            'session_id' => $id,
+            'source_table' => $source,
+            'old_patient_id' => $old_patient_id,
+            'new_patient_id' => $new_patient_id,
+            'transferred_by' => $username, // assuming user is authenticated
+            'user_id' =>   $user_id,
+        ]);
+
+        return response()->json(['message' => 'Session transferred and logged successfully!']);
+    } else {
+        return response()->json(['message' => 'Session not found!'], 404);
+    }
+}
 
 
 }

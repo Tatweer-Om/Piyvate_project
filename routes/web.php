@@ -29,7 +29,7 @@ use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\ClinicalNotesController;
 use App\Http\Controllers\HrController;
 use App\Http\Controllers\VoucherController;
- 
+
 
 Route::get('/', function () {
     return view('welcome');
@@ -51,6 +51,13 @@ Route::post('add_patient', [PatientController::class, 'add_patient'])->name('add
 Route::post('update_patient', [PatientController::class, 'update_patient'])->name('update_patient');
 Route::post('edit_patient', [PatientController::class, 'edit_patient'])->name('edit_patient');
 Route::post('delete_patient', [PatientController::class, 'delete_patient'])->name('delete_patient');
+Route::post('edit_ind_session', [PatientController::class, 'edit_ind_session'])->name('edit_ind_session');
+Route::post('update_ind_session', [PatientController::class, 'update_ind_session'])->name('update_ind_session');
+
+Route::post('transfer_ind_session', [PatientController::class, 'transfer_ind_session'])->name('transfer_ind_session');
+Route::post('update_transfer_ind_session', [PatientController::class, 'update_transfer_ind_session'])->name('update_transfer_ind_session');
+
+
 Route::get('/patient/{id}/appointments-and-sessions', [PatientController::class, 'getAppointmentsAndSessions']);
 
 // routes/web.php
@@ -332,10 +339,10 @@ Route::post('get_product_type', [PosController::class, 'get_product_type']);
 Route::post('add_pending_order', [PosController::class, 'add_pending_order']);
 Route::match(['get', 'post'],'hold_orders', [PosController::class, 'hold_orders']);
 Route::match(['get', 'post'],'get_hold_data', [PosController::class, 'get_hold_data']);
- 
+
 Route::get('pos_bill/{order_no}', [PosController::class, 'pos_bill'])->name('pos_bill');
 Route::post('get_customer_data', [PosController::class, 'get_customer_data'])->name('get_customer_data');
- 
+
 Route::get('make_profit', [PosController::class, 'make_profit'])->name('make_profit');
 Route::get('bills/{order_no}', [PosController::class, 'bills'])->name('bills');
 Route::post('add_pos_patient', [PosController::class, 'add_pos_patient']);

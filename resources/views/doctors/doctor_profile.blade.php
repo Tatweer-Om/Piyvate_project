@@ -8,9 +8,7 @@
 
     <div class="content-body">
 
-        <button class="btn btn-primary mt-3 ms-3" data-bs-toggle="offcanvas" data-bs-target="#rightPopup">
-            Open Right-Side Popup
-        </button>
+
         <!-- row -->
         <div class="container-fluid">
             <div class="page-titles">
@@ -158,16 +156,6 @@
         </div>
 
 
-        <div class="offcanvas offcanvas-end" tabindex="-1" id="rightPopup">
-            <div class="offcanvas-header">
-                <h5 class="offcanvas-title">Right-Side Popup</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
-            </div>
-            <div class="offcanvas-body">
-                <p>This is a Bootstrap popup that slides in from the right.</p>
-                <button class="btn btn-secondary" data-bs-dismiss="offcanvas">Close</button>
-            </div>
-        </div>
 
         @include('layouts.footer')
     @endsection

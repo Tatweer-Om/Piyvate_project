@@ -63,7 +63,7 @@
                             <div class="card-body p-3">
                                 <h6 class="text-primary fw-bold mb-3">
                                     <i class="bi bi-person-vcard-fill me-2"></i>Patient Overview
-                                    <i class="bi bi-person-vcard-fill me-5"></i>#{{ $patient->HN ?? '' }}
+                                    <i class=" me-5"></i>#{{ $patient->HN ?? '' }}
 
                                 </h6>
 
@@ -287,8 +287,10 @@
                                                         <th>Session Date</th>
                                                         <th>Doctor</th>
                                                         <th>Session Time</th>
-                                                        <th>Session Fee</th>
+                                                        {{-- <th>Session Fee</th> --}}
                                                         <th>Session Status</th>
+                                                        <th>Action</th>
+
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -695,6 +697,168 @@
 
         </div>
     </div>
+
+    <div class="modal fade" id="editSessionModal" tabindex="-1" aria-labelledby="editSessionModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content shadow rounded-4">
+                <div class="modal-header bg-primary text-white rounded-top-4">
+                    <h5 class="modal-title" id="editSessionModalLabel">Edit Session</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <form id="editSessionForm" autocomplete="off">
+                        <div class="row g-3">
+                            <!-- Input 1: Text -->
+                            <div class="col-lg-4">
+                                <label for="patient_name" class="form-label">Patient Name</label>
+                                <input type="text" class="form-control shadow-sm" id="patient_name" name="patient_name" placeholder="Enter session name" readonly>
+                            </div>
+
+                            <!-- Input 2: Date -->
+                            <div class="col-lg-4">
+                                <label for="inputDate" class="form-label">Date</label>
+                                <input type="date" class="form-control shadow-sm" id="inputDate" name="session_date">
+                            </div>
+
+                            <!-- Input 3: Time -->
+                            <div class="col-lg-4">
+                                <label for="inputTime" class="form-label">Time</label>
+                                <input type="time" class="form-control shadow-sm" id="inputTime" name="session_time" autocomplete="off">
+                            </div>
+
+                            <!-- Hidden Inputs -->
+                            <input type="hidden" name="session_primary_id" id="session_primary_id">
+                            <input type="hidden" name="patient_primary_id" id="patient_primary_id">
+
+                            <input type="hidden" name="source" id="source">
+
+                            <!-- Input 4: Select box -->
+                            <div class="col-lg-4">
+                                <label for="doctor" class="col-form-label">Doctor</label>
+                                <select class="form-control  shadow-sm" id="doctor" name="doctor">
+                                    <option value="">Choose...</option>
+                                    @foreach ($doctors as $doctor)
+                                        <option value="{{ $doctor->id }}">{{ $doctor->doctor_name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 text-end">
+                            <button type="submit" class="btn btn-primary px-4">Save</button>
+                            <button type="button" class="btn btn-outline-secondary ms-2" data-bs-dismiss="modal">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        /* Ensure proper z-index and visibility for inputs inside modal */
+        .modal {
+            z-index: 1050; /* Bootstrap default z-index for modals */
+        }
+
+        .modal-backdrop {
+            z-index: 1040; /* Behind modal but in front of other content */
+        }
+
+        /* Make sure the dropdown does not get overlapped by other content */
+        .modal-body select, .modal-body input {
+            z-index: 1060; /* Ensures form elements are on top of other content */
+        }
+
+        /* Specific margin fix for the time dropdown if it's causing issues */
+        .modal-body .form-control {
+            margin-top: 10px; /* Adds space around form controls to avoid overlap */
+        }
+    </style>
+<!-- Transfer Modal -->
+<div class="modal fade" id="transferModal" tabindex="-1" aria-labelledby="transferModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content shadow-lg rounded-4 border-0">
+            <div class="modal-header bg-info text-white rounded-top-4">
+                <h5 class="modal-title" id="transferModalLabel">Transfer Session</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form id="transferForm">
+                    <div class="row align-items-center g-3">
+                        <!-- Source Patient -->
+                        <div class="col-md-5">
+                            <label for="source_patient" class="form-label">Source Patient</label>
+                            <input type="text" class="form-control shadow-sm rounded" id="source_patient" name="source_patient" readonly>
+                        </div>
+
+                        <!-- Arrow Icon -->
+                        <div class="col-md-2 text-center">
+                            <div class="arrow-container">
+                                <i class="bi bi-arrow-right-circle-fill arrow-icon text-primary"></i>
+                            </div>
+                        </div>
+
+                        <div class="col-md-5">
+                            <label for="target_patient" class="form-label">New Patient</label>
+                            <select class="form-control  shadow-sm" id="target_patient" name="target_patient">
+                                <option value="">Choose...</option>
+                                @foreach ($patients as $pat)
+                                    <option value="{{ $pat->id }}">{{ $pat->full_name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mt-3">
+                        <!-- Date -->
+                        <div class="col-md-6">
+                            <label for="transfer_date" class="form-label">Session Date</label>
+                            <input type="date" class="form-control shadow-sm rounded" id="ses_date" name="ses_date" readonly>
+                        </div>
+
+                        <!-- Notes -->
+                        <div class="col-md-6">
+                            <label for="notes" class="form-label">Session Time</label>
+                            <input type="text" class="form-control shadow-sm rounded" id="ses_time" name="ses_time" readonly>
+                        </div>
+                    </div>
+                    <input type="hidden" name="session_primary_id2" id="session_primary_id2">
+                    <input type="hidden" name="patient_primary_id2" id="patient_primary_id2">
+
+                    <input type="hidden" name="source2" id="source2">
+
+                    <div class="text-end mt-4">
+                        <button type="submit" class="btn btn-info px-4 text-white">Transfer</button>
+                        <button type="button" class="btn btn-outline-secondary ms-2" data-bs-dismiss="modal">Cancel</button>
+                    </div>
+                </form>
+
+                <style>
+                    .arrow-container {
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        height: 100%;
+                    }
+
+                    .arrow-icon {
+                        font-size: 3rem;
+                        font-weight: bold;
+                        color: #0d6efd; /* Bootstrap primary */
+                        animation: arrow-pop 0.3s ease-in-out;
+                    }
+
+                    @keyframes arrow-pop {
+                        0% { transform: scale(0.8); opacity: 0; }
+                        100% { transform: scale(1); opacity: 1; }
+                    }
+                </style>
+
+
+            </div>
+        </div>
+    </div>
+</div>
 
 
     @include('layouts.footer')

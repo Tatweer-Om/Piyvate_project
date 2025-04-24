@@ -36,7 +36,16 @@ class ClinicalNotesController extends Controller
 
         $clinicalNotes = $notes ? json_decode($notes->form_data) : null;
 
-        $doctor = $apt ? Doctor::where('id', $apt->doctor_id)->value('doctor_name') : null;
+
+
+        if($apt){
+            $doctor = $apt ? Doctor::where('id', $apt->doctor_id)->value('doctor_name') : null;
+
+        }
+        if ($session) {
+            $doctor = Doctor::where('id', $session->doctor_id)->value('doctor_name');
+        }
+
 
         return view('clinical_notes.soap_ot', compact('patient', 'session', 'apt', 'doctor', 'clinicalNotes'));
     }
@@ -70,8 +79,16 @@ class ClinicalNotesController extends Controller
     {
         $patient = Patient::where('id', $id)->first();
         $apt = Appointment::where('patient_id', $id)->first();
-        $doctor = Doctor::where('id', $apt->doctor_id)->value('doctor_name');
-        return view('clinical_notes.otatp_pediatric', compact('patient', 'apt', 'doctor'));
+        $session = SessionList::where('patient_id', $id)->first();
+
+        if($apt){
+            $doctor = $apt ? Doctor::where('id', $apt->doctor_id)->value('doctor_name') : null;
+
+        }
+        if ($session) {
+            $doctor = Doctor::where('id', $session->doctor_id)->value('doctor_name');
+        }
+    return view('clinical_notes.otatp_pediatric', compact('patient', 'apt', 'doctor'));
     }
 
 
@@ -83,8 +100,17 @@ class ClinicalNotesController extends Controller
     {
         $patient = Patient::find($id);
         $apt = Appointment::where('patient_id', $id)->first();
-        $doctor = $apt ? Doctor::where('id', $apt->doctor_id)->value('doctor_name') : null;
         $note = ClinicalNotes::where('patient_id', $id)->first();
+
+        $session = SessionList::where('patient_id', $id)->first();
+
+        if($apt){
+            $doctor = $apt ? Doctor::where('id', $apt->doctor_id)->value('doctor_name') : null;
+
+        }
+        if ($session) {
+            $doctor = Doctor::where('id', $session->doctor_id)->value('doctor_name');
+        }
 
         return view('clinical_notes.otatp_neuro_pediatric', [
             'patient' => $patient ?? null,
@@ -101,8 +127,15 @@ class ClinicalNotesController extends Controller
         $patient = Patient::where('id', $id)->first();
 
         $apt = Appointment::where('patient_id', $id)->first();
-        $doctor = Doctor::where('id', $apt->doctor_id)->value('doctor_name');
+        $session = SessionList::where('patient_id', $id)->first();
 
+        if($apt){
+            $doctor = $apt ? Doctor::where('id', $apt->doctor_id)->value('doctor_name') : null;
+
+        }
+        if ($session) {
+            $doctor = Doctor::where('id', $session->doctor_id)->value('doctor_name');
+        }
         return view('clinical_notes.otatp_orthopedic', compact('patient', 'apt', 'doctor'));
     }
 
@@ -111,8 +144,15 @@ class ClinicalNotesController extends Controller
         $patient = Patient::where('id', $id)->first();
 
         $apt = Appointment::where('patient_id', $id)->first();
-        $doctor = Doctor::where('id', $apt->doctor_id)->value('doctor_name');
+        $session = SessionList::where('patient_id', $id)->first();
 
+        if($apt){
+            $doctor = $apt ? Doctor::where('id', $apt->doctor_id)->value('doctor_name') : null;
+
+        }
+        if ($session) {
+            $doctor = Doctor::where('id', $session->doctor_id)->value('doctor_name');
+        }
         return view('clinical_notes.otatp_physical_dysfunction', compact('patient', 'apt', 'doctor'));
     }
 
