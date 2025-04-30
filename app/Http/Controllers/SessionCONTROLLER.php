@@ -388,6 +388,8 @@ public function save_session_payment2(Request $request)
         $voucher_discount= $request->voucher_amount;
         $voucher_user_id= $user_id;
         $voucher_added= $user_name;
+        $voucher_data->status = 2;
+        $voucher_data->save();
     }
 
 
@@ -445,6 +447,9 @@ public function save_session_payment2(Request $request)
             }
         }
     }
+ 
+    
+ 
     // else {
 
     //     $payment = new SessionsonlyPayment();
@@ -551,7 +556,7 @@ public function show_sessions()
             $msg = 3;
         }
         $session_payment = SessionsonlyPayment::where('voucher_id',$voucher_data->id)->first();
-        if ($session_payment) {
+        if ($voucher_data->status == 2) {
             $msg = 2;
         }
         if ($voucher_data) {
