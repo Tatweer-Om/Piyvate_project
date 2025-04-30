@@ -17,7 +17,9 @@ return new class extends Migration
             $table->string('patient_id')->nullable();
             $table->string('appointment_id')->nullable();
             $table->string('prescription_type')->nullable();
-            $table->string('session_cat')->nullable()->comment('OT, PT, CT');
+            $table->string('ot_sessions')->nullable();
+            $table->string('pt_sessions')->nullable();
+            $table->string('session_cat')->nullable()->comment('OT, PT');
             $table->string('sessions_reccomended')->nullable();
             $table->string('sessions_taken')->nullable();
             $table->string('session_gap')->nullable();

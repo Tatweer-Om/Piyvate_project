@@ -17,8 +17,10 @@ $(document).ready(function () {
         let title = $("#title").val();
         let firstName = $("#first_name").val();
         let doctor = $("#doctor").val();
-        let sessionType = $("#session_select_box select").val(); // Ministry selection
-
+        let sessionType = [];
+$('#session_select_box .session-checkbox:checked').each(function() {
+    sessionType.push($(this).val());
+});
     // Validation check
     if (!title) {
         show_notification('error', '<?php echo trans('messages.title_required', [], session('locale')); ?>');
@@ -36,10 +38,12 @@ $(document).ready(function () {
         show_notification('error', '<?php echo trans('messages.session_date_required', [], session('locale')); ?>');
         return;
     }
-    if (!sessionType) {
-        show_notification('error', '<?php echo trans('messages.session_type_required', [], session('locale')); ?>');
-        return;
-    }
+
+
+    if (sessionType.length === 0) {
+    show_notification('error', '<?php echo trans('messages.session_type_required', [], session('locale')); ?>');
+    return;
+}
 
         let formData = $(this).serialize(); // Serialize form data
 
@@ -48,15 +52,19 @@ $(document).ready(function () {
             method: "POST",
             data: formData,
             success: function (response) {
-                if (response.success) {
-                    show_notification('success', '<?php echo trans('messages.data_add_success_lang', [], session('locale')); ?>');
-                    $(".add_session")[0].reset(); // Reset form fields
-                    $("#session_fee").html("OMR 0.00"); // Reset session fee display
-                    window.location.href = "/session_detail/" + response.session_id;
-                } else {
-                    show_notification('error', '<?php echo trans('messages.data_add_failed_lang', [], session('locale')); ?>');
-                }
-            },
+        if(response.status == 3){
+            show_notification('error', '<?php echo trans('messages.please_select_session_type', [], session('locale')); ?>');
+        }
+        if (response.success) {
+            show_notification('success', '<?php echo trans('messages.data_add_success_lang', [], session('locale')); ?>');
+            $(".add_session")[0].reset(); // Reset form fields
+            $("#session_fee").html("OMR 0.00"); // Reset session fee display
+            window.location.href = "/session_detail/" + response.session_id;
+        } else {
+            show_notification('error', '<?php echo trans('messages.data_add_failed_lang', [], session('locale')); ?>');
+        }
+    },
+
             error: function (xhr) {
                 show_notification('error', '<?php echo trans('messages.check_the_fields_lang', [], session('locale')); ?>');
                 console.log(xhr.responseText);
@@ -87,12 +95,12 @@ $(document).ready(function () {
             },
             success: function (response) {
                 if (response.success) {
-                    $("#session_fee").html("OMR " + response.session_price.toFixed(2));
+                    $("#session_fee").html("OMR " + parseFloat(response.session_price).toFixed(2));
 
                     // If response has predefined offer sessions, update input field
                     if (response.offer_sessions) {
-                        $("#no_of_sessions").val(response.offer_sessions);
-                    }
+                    $("#no_of_sessions").val(parseInt(response.offer_sessions));
+                            }
                 } else {
                     $("#session_fee").html("OMR 0.00"); // Reset if no data found
                 }
@@ -507,13 +515,18 @@ $(document).ready(function () {
         if (paymentStatus === 3) {
             $("#pendingPaymentAlert").removeClass("d-none").addClass("d-block");
             $("#accountss").hide();
+            $("#voucher_div").hide();
             $(".deta").hide();
-
-        } else {
+        }
+        else if (paymentStatus === 2) {
+            $("#voucher_div").hide();
+        }
+        else {
             $("#pendingPaymentAlert").removeClass("d-block").addClass("d-none");
         }
     });
 });
+
 
 
 $(document).ready(function () {
@@ -569,17 +582,17 @@ $(document).ready(function () {
             method: "POST",
             data: {
                 _token: "{{ csrf_token() }}",
-                code: code, 
+                code: code,
             },
             success: function (response) {
                 if (response.success == 1) {
                     show_notification('success',
                     '{{ trans('messages.success_voucher_amount_lang', [], session('locale')) }}');
-                  
+
                     let discount = parseFloat(response.discount_price);
                     let total_amount = parseFloat($('#total_amount_input').val());
                     let after_discount = parseFloat(total_amount) - parseFloat(response.discount_price);
-                  
+
                     $('#voucher_discount').text(response.discount_price);
                     $('#after_discount').text(after_discount.toFixed(3));
 
@@ -621,7 +634,7 @@ $(document).ready(function () {
                 show_notification('error',
                     '{{ trans('messages.failed_process_lang', [], session('locale')) }}');
             }
-        }); 
+        });
     });
 });
 
@@ -644,5 +657,45 @@ function toggleAmountInput(accountId) {
 }
 
 
+$(document).ready(function() {
+  // When checkbox is clicked
+$('.session-checkbox').on('change', function() {
+    // Show/hide session input boxes
+    if ($('#checkbox_ot').is(':checked')) {
+        $('#ot_sessions_box').show();
+    } else {
+        $('#ot_sessions_box').hide();
+        $('#ot_sessions').val(0); // Reset value if unchecked
+    }
+
+    if ($('#checkbox_pt').is(':checked')) {
+        $('#pt_sessions_box').show();
+    } else {
+        $('#pt_sessions_box').hide();
+        $('#pt_sessions').val(0); // Reset value if unchecked
+    }
+
+    // Update total sessions
+    updateNoOfSessions();
+    fetchSessionPrice();
+
+});
+
+// Update the total number of sessions automatically
+function updateNoOfSessions() {
+    let otSessions = parseInt($('#ot_sessions').val()) || 0;
+    let ptSessions = parseInt($('#pt_sessions').val()) || 0;
+    let totalSessions = otSessions + ptSessions;
+
+    $('#no_of_sessions').val(totalSessions);
+}
+
+// When user types in session number fields, update the total
+$('#ot_sessions, #pt_sessions').on('input', function() {
+    updateNoOfSessions();
+    fetchSessionPrice();
+});
+
+});
 
     </script>

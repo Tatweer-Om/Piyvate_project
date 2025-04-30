@@ -29,9 +29,13 @@ use Illuminate\Support\Facades\File;
 use App\Models\AppointPaymentExpense;
 use App\Models\ClinicalNotes;
 use App\Models\Doctor;
+use App\Models\SessionData;
 use App\Models\SessionPaymentExpense;
 use App\Models\SessionsonlyPayment;
 use App\Models\SessionsonlyPaymentExp;
+use Illuminate\Contracts\Session\Session;
+
+use function PHPUnit\Framework\returnValueMap;
 
 class PatientController extends Controller
 {
@@ -51,29 +55,9 @@ class PatientController extends Controller
     $user = $data->user_name;
     $branch_id = $data->branch_id;
 
-    $total_sessions_apt = AppointmentSession::where('patient_id', $id)->count();
-    $total_sessions_dir = AllSessioDetail::where('patient_id', $id)->count();
-
-    $total_sessions_apt = $total_sessions_apt ?: 0;
-    $total_sessions_dir = $total_sessions_dir ?: 0;
-
-    $patient_total_sessions = $total_sessions_apt + $total_sessions_dir;
-
-    $sessions_taken_apt = AppointmentDetail::where('patient_id', $id)->value('sessions_taken');
-    $sessions_taken_dir = AllSessioDetail::where('patient_id', $id)->where('status', 2)->count();
-
-    $sessions_taken_apt = $sessions_taken_apt ?: 0;
-    $sessions_taken_dir = $sessions_taken_dir ?: 0;
-
-    $total_session_taken = $sessions_taken_apt + $sessions_taken_dir;
-
-    $active_sessions_apt = AppointmentSession::where('patient_id', $id)->where('status', 1)->count();
-    $active_sessions_dir = AllSessioDetail::where('patient_id', $id)->where('status', 1)->count();
-
-    $active_sessions_apt = $active_sessions_apt ?: 0;
-    $active_sessions_dir = $active_sessions_dir ?: 0;
-
-    $total_active_session = $active_sessions_apt + $active_sessions_dir;
+    $patient_total_sessions = SessionData::where('patient_id', $id)->count();
+    $total_session_taken = SessionData::where('patient_id', $id)->where('status', 2)->count();
+    $total_active_session = SessionData::where('patient_id', $id)->where('status', 1)->count();
 
     $notes = ClinicalNotes::where('patient_id', $id)
     ->whereNotIn('notes_status', [5, 6])
@@ -145,7 +129,11 @@ class PatientController extends Controller
     $doctors= Doctor::all();
     $patients = Patient::all();
 
-    return view('patients.patient_profile', compact('patient', 'doctors', 'patients', 'notes', 'patient_total_sessions', 'total_session_taken', 'total_active_session', 'total_apt', 'country_name', 'accounts', 'apt', 'apt_id', 'age', 'ministry_name', 'ministry_data'));
+
+    $detail = AppointmentDetail::where('appointment_id', $apt_id)
+    ->where('ministry_id', null)
+    ->first();
+return view('patients.patient_profile', compact('patient', 'doctors', 'patients', 'notes', 'patient_total_sessions', 'total_session_taken', 'total_active_session', 'total_apt', 'country_name', 'accounts', 'apt', 'apt_id', 'age', 'ministry_name', 'ministry_data'));
 
     }
 
@@ -452,6 +440,47 @@ class PatientController extends Controller
         return response()->json($appointments);
     }
 
+    public function appointmentsdetail($id)
+    {
+        $appointments = Appointment::where('patient_id', $id)
+            ->with('doctor:id,doctor_name')
+            ->orderBy('appointment_date', 'desc')
+            ->get();
+
+        foreach ($appointments as $appointment) {
+            // Session data and counts
+            $data = SessionData::where('main_appointment_id', $appointment->id)->get();
+            $appointment->total_sessions = $data->count();
+            $appointment->pt_sessions = $data->where('session_cat', 'PT')->count();
+            $appointment->ot_sessions = $data->where('session_cat', 'OT')->count();
+            $appointment->session_taken = $data->where('status', 2)->count();
+            $appointment->session_remain = $data->where('status', 1)->count();
+
+            // File attachments (get all files for this appointment)
+            $files = Patientfiles::where('appointment_id', $appointment->id)->get();
+
+            // Build file data (simple view: icon + download URL)
+            $appointment->files = $files->map(function ($file) {
+                return [
+                    'file_name' => $file->file_name,
+                    'file_id' => $file->id,
+                    'file_path' => $file->file_path,
+                    // Adjust this path if needed
+                ];
+            });
+
+            // Test recommendations
+            $prescription = PatientPrescription::where('appointment_id', $appointment->id)->first();
+            $appointment->prescription_notes = $prescription->notes ?? '';
+            $appointment->notes = $appointment->notes ?? '';
+
+            $appointment->test_recommendations = $prescription ? json_decode($prescription->test_recommendations, true) : [];
+        }
+
+        return response()->json($appointments);
+    }
+
+
 
 public function show_all_sessions_by_patient(Request $request)
 {
@@ -459,38 +488,7 @@ public function show_all_sessions_by_patient(Request $request)
     $json = [];
     $sno = 0;
 
-    // Get appointment sessions
-    $appointmentSessions = DB::table('appointment_sessions')
-        ->where('patient_id', $patient_id)
-        ->select(
-            'id',
-            'session_time',
-            'doctor_id',
-            'session_date',
-            'session_time',
-            'session_price',
-            'status',
-            DB::raw("'appointment_sessions' as source")
-        )
-        ->get();
-
-    // Get all session details
-    $allSessions = DB::table('all_sessio_details')
-        ->where('patient_id', $patient_id)
-        ->select(
-            'id',
-            DB::raw("'' as session_time"),
-            'doctor_id',
-            'session_date',
-            'session_time',
-            'session_price',
-            'status',
-            DB::raw("'all_sessio_details' as source")
-        )
-        ->get();
-
-    // Merge both appointment and all sessions
-    $sessions = $appointmentSessions->merge($allSessions);
+    $sessions = SessionData::where('patient_id', $patient_id)->get();
 
     // Loop through the sessions to create the table data
     foreach ($sessions as $session) {
@@ -501,9 +499,9 @@ public function show_all_sessions_by_patient(Request $request)
 
         // Determine badge color based on the source
         $badgeColor = 'bg-warning'; // Default badge color for source
-        $sourceText = ucfirst(str_replace('_', ' ', $session->source)); // Default text for source
 
-        if ($session->source == 'all_sessio_details') {
+
+        if ($session->source == 1) {
             // For direct sessions, use a different badge color and text
             $badgeColor = 'bg-success';
             $sourceText = 'Direct Session';
@@ -523,14 +521,36 @@ public function show_all_sessions_by_patient(Request $request)
             $statusBadgeColor = 'bg-info'; // Transferred
             $statusText = 'Transferred';
         }
+        elseif ($session->status == 4) {
+            $statusBadgeColor = 'bg-danger'; // Transferred
+            $statusText = 'On-going';
+        }
 
         $modal = '
+        <a href="javascript:void(0);" class="me-3" data-bs-toggle="modal" data-bs-target="#transferModal" onclick="transfer(' . $session->id . ', \'' . $session->source . '\')">
+            <i class="fa fa-right-left fs-18 text-info"></i>
+        </a>
         <a href="javascript:void(0);" class="me-3 edit-staff" data-bs-toggle="modal" data-bs-target="#editSessionModal" onclick="edit(' . $session->id . ', \'' . $session->source . '\')">
             <i class="fa fa-pencil fs-18 text-success"></i>
-        </a>
-        <a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#transferModal" onclick="transfer(' . $session->id . ', \'' . $session->source . '\')">
-            <i class="fa fa-right-left fs-18 text-info"></i>
         </a>';
+
+    if ($session->session_cat === 'OT') {
+        $url = url('soap_ot/' . $session->id);
+        $img = asset('images/logo/1.png');
+    } elseif ($session->session_cat === 'PT') {
+        $url = url('soap_pt/' . $session->id);
+        $img = asset('images/logo/2.png');
+    } else {
+        $url = '#';
+        $img = asset('images/logo/default.png'); // Optional default image
+    }
+
+    $modal .= '
+        <a href="' . $url . '" class="me-3 text-decoration-none text-dark">
+            <img src="' . $img . '" class="rounded-circle shadow-sm mb-2" style="width: 30px; height: 30px; object-fit: cover;">
+        </a>';
+
+
 
 
         // Add session data to the response
@@ -540,6 +560,8 @@ public function show_all_sessions_by_patient(Request $request)
             '<span>' . Carbon::parse($session->session_date)->format('d-m-Y') . '</span>',
             '<span>' . ($doctor_name ?? 'Unknown') . '</span>',
             '<span>' . $session->session_time . '</span>',
+            '<span>' . $session->session_cat . '</span>',
+
             // '<span>' . $session->session_price . '</span>',
             '<span class="badge ' . $statusBadgeColor . '">' . $statusText . '</span>', // Add status badge
            $modal,
@@ -601,134 +623,6 @@ public function getAppointmentsAndSessions($id)
     return response()->json($appointmentsAndSessions);
 }
 
-
-// public function show_all_payment_by_patient(Request $request)
-// {
-//     $patient_id = $request->input('patient_id');
-//     $json = [];
-//     $sno = 0;
-
-//     $appointmentSessions = AppointmentSession::where('patient_id', $patient_id)
-//         ->with('doctor:id,doctor_name')
-//         ->orderBy('session_date', 'desc')
-//         ->get();
-
-//     $allSessions = AllSessioDetail::where('patient_id', $patient_id)
-//         ->with('doctor:id,doctor_name')
-//         ->orderBy('session_date', 'desc')
-//         ->get();
-
-//         foreach ($appointmentSessions as $appointment) {
-//             $sno++;
-//             $total_sessions = null;
-//             $apt_no = null;
-//             $paymen_status = null;
-//             $apt_detail = null; // ✅ initialize to avoid undefined variable
-
-//             if (!empty($appointment->appointment_id)) {
-//                 $apt = Appointment::find($appointment->appointment_id);
-
-//                 if ($apt) {
-//                     $apt_detail = AppointmentDetail::where('appointment_id', $apt->id)->first();
-
-//                     $total_sessions = $apt_detail->total_sessions ?? null;
-//                     $apt_no = $apt->appointment_no ?? null;
-//                     $paymen_status = $apt->payment_status ?? null;
-//                 }
-//             }
-
-//             if ($paymen_status == 0 || $paymen_status == 1) {
-//                 $paymen_status = 'Normal Session';
-//                 $paymentBadge = '<span class="badge bg-primary">Normal - Completed</span>';
-//             } elseif ($paymen_status == 2) {
-//                 $paymen_status = 'Offer';
-//                 $paymentBadge = $appointment->status == 2
-//                     ? '<span class="badge bg-success">Offer - Completed</span>'
-//                     : '<span class="badge bg-warning">Offer - Balance</span>';
-//             } elseif ($paymen_status == 3) {
-//                 $paymen_status = 'Contract';
-//                 $paymentBadge = $appointment->status == 4
-//                     ? '<span class="badge bg-success">Contract - Completed</span>'
-//                     : '<span class="badge bg-danger">Contract - Pending</span>';
-//             } else {
-//                 $paymen_status = 'Unknown';
-//                 $paymentBadge = '<span class="badge bg-secondary">Unknown Status</span>';
-//             }
-
-//             $dedtail_data= AppointmentDetail::where('appointment_id', $appointment->appointment_id)->first();
-//             $fee= $detail_data->single_session_price ?? '';
-
-//             $json[] = [
-//                 '<span class="text-muted">#' . $sno . '</span>',
-//                 '<span class="text-muted">#' . $apt_no . '</span>' . '<br>' .
-//                 '<span class="text-muted">#' . $total_sessions . '</span>' . '<br>' .
-//                 '<span class="text-muted">#' . ($apt_detail->total_price ?? '') . '</span>',
-
-//                 '<span class="badge bg-primary">Appointment</span>',
-//                 $appointment->doctor->doctor_name ?? 'Unknown',
-//                 Carbon::parse($appointment->session_date)->format('d-m-Y'),
-//                 $paymentBadge,
-//                 $fee, // No fee in appointment session
-//             ];
-//         }
-
-
-//         foreach ($allSessions as $session) {
-//             $sno++;
-
-//             // Initialize all needed variables
-//             $session_check = null;
-//             $session_no = null;
-//             $paymen_status = null;
-//             $paymentBadge = '<span class="badge bg-secondary">Unknown</span>'; // default badge
-//             $no_of_sessions = null;
-//             $session_fee = null;
-
-//             // Fetch session details safely
-//             $session_check = SessionList::where('id', $session->session_id)->first();
-
-//             if ($session_check) {
-//                 $session_no = $session_check->session_no ?? null;
-//                 $paymen_status = $session_check->payment_status ?? null;
-//                 $no_of_sessions = $session_check->no_of_sessions ?? null;
-//                 $session_fee = $session_check->session_fee ?? 0;
-
-//                 if ($paymen_status == 0 || $paymen_status == 1) {
-//                     $paymen_status = 'Normal Session';
-//                     $paymentBadge = '<span class="badge bg-success">Normal-Completed</span>';
-//                 } elseif ($paymen_status == 2) {
-//                     $paymen_status = 'Offer';
-//                     $paymentBadge = $session->status == 2
-//                         ? '<span class="badge bg-success">Offer-Completed</span>'
-//                         : '<span class="badge bg-warning">Offer-Balance</span>';
-//                 } elseif ($paymen_status == 3) {
-//                     $paymen_status = 'Contract';
-//                     $paymentBadge = $session->status == 4
-//                         ? '<span class="badge bg-success">Contract-Completed</span>'
-//                         : '<span class="badge bg-danger">Contract-Pending</span>';
-//                 } else {
-//                     $paymen_status = 'Unknown';
-//                     $paymentBadge = '<span class="badge bg-secondary">Unknown</span>';
-//                 }
-//             }
-
-//             $json[] = [
-//                 '<span class="text-muted">#' . $sno . '</span>',
-//                 '<span>Session No: ' . ($session_no ?? '-') . '</span><br>' .
-//                 '<span>Total Sessions: ' . ($no_of_sessions ?? '-') . '</span><br>' .
-//                 '<span>Total Fee: Rs. ' . number_format($session_fee ?? 0, 2) . '</span>',
-
-//                 '<span class="badge bg-success">Session</span>',
-//                 $session->doctor->doctor_name ?? 'Unknown',
-//                 Carbon::parse($session->session_date)->format('d-m-Y'),
-//                 $paymentBadge,
-//                 '<span class="text-dark">OMR. ' . number_format($session->total_fee ?? 0, 2) . '</span>',
-//             ];
-//         }
-
-
-//     return response()->json(['success' => true, 'aaData' => $json]);
-// }
 
 
 
@@ -861,6 +755,7 @@ public function submit_contract_payment(Request $request)
 
 
 
+
 public function save_prescription(Request $request)
 {
     $user_id = Auth::id();
@@ -875,38 +770,75 @@ public function save_prescription(Request $request)
             return response()->json(['success' => false, 'message' => 'Appointment not found.']);
         }
 
-        $appointment->session_status = $request->sessions_recommended == null ?  7: 1;
+        // Update appointment session status
+        if (!empty($request->session_types)) {
+            $appointment->session_status = 1; // Sessions Recommended
+        } else {
+            $appointment->session_status = 7; // Appointment Only
+        }
         $appointment->save();
 
-        $prescription_type = 'appointment';
+        $prescription_type = $request->prescription_type ?? 'appointment';
 
-        if (!is_null($request->session_cat) && !is_null($request->sessions_recommended)) {
-            $prescription_type = 'session';
+        // Check if a prescription already exists for this appointment
+        $prescription = PatientPrescription::where('appointment_id', $request->appointment_id)->first();
+
+        if (!$prescription) {
+            $prescription = new PatientPrescription();
+            $prescription->appointment_id = $request->appointment_id;
+            $prescription->patient_id = $request->patient_id;
+            $prescription->user_id = $user_id;
+            $prescription->added_by = $user_name;
+            $prescription->branch_id = $branch_id;
         }
 
-        // Save new prescription
-        $prescription = new PatientPrescription();
-        $prescription->appointment_id = $request->appointment_id;
-        $prescription->patient_id = $request->patient_id;
-        $prescription->prescription_type = $prescription_type; // Set the correct prescription type
-        $prescription->session_cat = $request->session_cat;
-        $prescription->sessions_reccomended = $request->sessions_recommended;
-        $prescription->session_gap = $request->session_gap;
+        $prescription->prescription_type = $prescription_type;
         $prescription->notes = $request->notes;
-        $prescription->user_id = $user_id;
-        $prescription->added_by = $user_name;
-        $prescription->branch_id = $branch_id;
 
-        // Save test recommendations as a JSON array if provided
-        if ($request->has('test_recommendations') && is_array($request->test_recommendations)) {
-            $prescription->test_recommendations = json_encode($request->test_recommendations);  // Store as JSON
+        if ($prescription_type === 'session') {
+            if (!empty($request->session_types)) {
+                $prescription->session_cat = implode(',', $request->session_types); // OT, PT
+            }
+
+            $prescription->ot_sessions = $request->ot_sessions ? (int)$request->ot_sessions : 0;
+            $prescription->pt_sessions = $request->pt_sessions ? (int)$request->pt_sessions : 0;
+            $prescription->sessions_reccomended = $prescription->ot_sessions + $prescription->pt_sessions;
+
+            $prescription->session_gap = $request->session_gap ?? null;
+
+            if ($prescription->session_gap == null) {
+                return response()->json([
+                    'status' => 2,
+                ]);
+            }
+        }
+
+        if ($prescription_type === 'test') {
+            if ($request->has('test_recommendation') && is_array($request->test_recommendation)) {
+                $existingTests = [];
+
+                // Decode existing recommendations if they exist
+                if (!empty($prescription->test_recommendations)) {
+                    $existingTests = json_decode($prescription->test_recommendations, true);
+                    if (!is_array($existingTests)) {
+                        $existingTests = [];
+                    }
+                }
+
+                // Merge and remove duplicates
+                $mergedTests = array_unique(array_merge($existingTests, $request->test_recommendation));
+
+                // Save the merged array
+                $prescription->test_recommendations = json_encode($mergedTests);
+            }
         }
 
         $prescription->save();
 
         return response()->json([
             'success' => true,
-            'message' => 'Prescription saved successfully!'
+            'message' => 'Prescription saved successfully!',
+            'updated' => isset($prescription->id) ? true : false
         ]);
     } catch (\Exception $e) {
         return response()->json([
@@ -920,6 +852,8 @@ public function save_prescription(Request $request)
 
 public function lab_reports_upload(Request $request)
 {
+
+
     // Validate the incoming files
     $user_id = Auth::id();
     $data = User::where('id', $user_id)->first();
@@ -939,6 +873,7 @@ public function lab_reports_upload(Request $request)
             $file->move($folderPath, $fileName);
             $patientFile = new PatientFiles();
             $patientFile->patient_id = $request->patient_id;
+            $patientFile->appointment_id = $request->appoint_id;
             $patientFile->file_name = $fileName;
             $patientFile->file_path = 'images/lab_reports/' . $fileName;
             $patientFile->file_type = $file->getClientOriginalExtension();
@@ -970,22 +905,10 @@ public function lab_reports_upload(Request $request)
 public function edit_ind_session(Request $request)
 {
     $id = $request->input('id');
-    $source = $request->input('source');
 
-    $session = null;
 
-    // Check source and fetch session data accordingly
-    if ($source == 'appointment_sessions') {
-        // Fetch session details for appointment_sessions
-        $session = DB::table('appointment_sessions')
-                    ->where('id', $id)
-                    ->first();
-    } elseif ($source == 'all_sessio_details') {
-        // Fetch session details for all_sessio_details
-        $session = DB::table('all_sessio_details')
-                    ->where('id', $id)
-                    ->first();
-    }
+$session= SessionData::where('id', $id)->first();
+
 
     if ($session) {
 
@@ -1000,7 +923,6 @@ public function edit_ind_session(Request $request)
             'time' => $session->session_time,
             'doctor' => $doctor,
             'session_primary_id' => $session->id,
-            'source' => $source
 
         ]);
     } else {
@@ -1009,69 +931,63 @@ public function edit_ind_session(Request $request)
     }
 }
 
+
 public function update_ind_session(Request $request)
 {
     $id = $request->input('id');
-    $source = $request->input('source');
-    $session = null;
-
-    if ($source == 'appointment_sessions') {
-
-        $session = DB::table('appointment_sessions')->where('id', $id)->first();
-    } elseif ($source == 'all_sessio_details') {
-
-        $session = DB::table('all_sessio_details')->where('id', $id)->first();
-    }
-
-    if ($session) {
-
-        if ($source == 'appointment_sessions') {
-            DB::table('appointment_sessions')
-                ->where('id', $id)
-                ->update([
-                    'patient_id' => $request->input('patient_id'),
-                    'session_date' => $request->input('session_date'),
-                    'session_time' => $request->input('session_time'),
-                    'doctor_id' => $request->input('doctor')
-                ]);
-        } elseif ($source == 'all_sessio_details') {
-            DB::table('all_sessio_details')
-                ->where('id', $id)
-                ->update([
-                    'patient_id' => $request->input('patient_id'),
-                    'session_date' => $request->input('session_date'),
-                    'session_time' => $request->input('session_time'),
-                    'doctor_id' => $request->input('doctor')
-                ]);
-        }
 
 
-        return response()->json(['message' => 'Session updated successfully!']);
-    } else {
+    $user = Auth::user();
+        $username = $user->user_name;
+        $branch = $user->branch_id;
+        $user_id = $user->id;
 
+
+
+    $session =SessionData::where('id', $id)->first();
+
+    if (!$session) {
         return response()->json(['message' => 'Session not found!'], 404);
     }
+
+    $fieldsToUpdate = [
+        'patient_id' => $request->input('patient_id'),
+        'session_date' => $request->input('session_date'),
+        'session_time' => $request->input('session_time'),
+        'doctor_id' => $request->input('doctor')
+    ];
+
+    $changes = [];
+
+    foreach ($fieldsToUpdate as $field => $newValue) {
+        $oldValue = $session->$field;
+        if ($oldValue != $newValue) {
+            $changes[] = [
+                'session_id' => $id,
+                'field_name' => $field,
+                'old_value' => $oldValue,
+                'new_value' => $newValue,
+                'updated_by' => $user_id, // Or use session()->get('user_id') if not using Auth
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+        }
+    }
+
+    if (!empty($changes)) {
+        DB::table('sessionupdatelogs')->insert($changes);
+    }
+
+    DB::table('session_data')->where('id', $id)->update($fieldsToUpdate);
+
+    return response()->json(['message' => 'Session updated successfully!']);
 }
+
 
 public function transfer_ind_session(Request $request)
 {
     $id = $request->input('id');
-    $source = $request->input('source');
-
-    $session = null;
-
-    // Check source and fetch session data accordingly
-    if ($source == 'appointment_sessions') {
-        // Fetch session details for appointment_sessions
-        $session = DB::table('appointment_sessions')
-                    ->where('id', $id)
-                    ->first();
-    } elseif ($source == 'all_sessio_details') {
-        // Fetch session details for all_sessio_details
-        $session = DB::table('all_sessio_details')
-                    ->where('id', $id)
-                    ->first();
-    }
+ $session= SessionData::where('id', $id)->first();
 
     if ($session) {
 
@@ -1085,7 +1001,6 @@ public function transfer_ind_session(Request $request)
             'date' => $session->session_date,
             'time' => $session->session_time,
             'session_primary_id' => $session->id,
-            'source' => $source
 
         ]);
     } else {
@@ -1098,7 +1013,6 @@ public function transfer_ind_session(Request $request)
 public function update_transfer_ind_session(Request $request)
 {
     $id = $request->input('id');
-    $source = $request->input('source');
     $old_patient_id = $request->input('old_patient_id');
     $new_patient_id = $request->input('target_patient');
     $notes = $request->input('notes');
@@ -1108,28 +1022,19 @@ public function update_transfer_ind_session(Request $request)
     $branch = $user->branch_id;
     $user_id = $user->id;
 
-    $session = null;
-
-    if ($source == 'appointment_sessions') {
-        $session = DB::table('appointment_sessions')->where('id', $id)->first();
-    } elseif ($source == 'all_sessio_details') {
-        $session = DB::table('all_sessio_details')->where('id', $id)->first();
-    }
-
+$session= SessionData::where('id', $id)->first();
     if ($session) {
         // Update patient_id
-        DB::table($source)
+        DB::table('session_data')
         ->where('id', $id)
         ->update([
             'patient_id' => $new_patient_id,
-            'status' => 3
+
         ]);
 
-
-        // Insert transfer log
         DB::table('session_transfer_logs')->insert([
             'session_id' => $id,
-            'source_table' => $source,
+
             'old_patient_id' => $old_patient_id,
             'new_patient_id' => $new_patient_id,
             'transferred_by' => $username, // assuming user is authenticated
@@ -1141,6 +1046,102 @@ public function update_transfer_ind_session(Request $request)
         return response()->json(['message' => 'Session not found!'], 404);
     }
 }
+
+
+
+public function patient_session($id, Request $request) {
+
+
+
+    $id = $request->id;
+
+    $user_id = Auth::id();
+    $data = User::where('id', $user_id)->first();
+    $user = $data->user_name;
+    $branch_id = $data->branch_id;
+
+
+    $session= SessionData::where('id', $id)->first();
+    $patient_id=$session->patient_id;
+
+
+        $patient = Patient::where('id', $patient_id)->first();
+        $country= $patient->country_id ?? '';
+        $country_name= Country::where('id', $country)->value('name');
+
+        if ($patient && $patient->dob) {
+            $dob = Carbon::parse($patient->dob);
+            $now = Carbon::now();
+
+            $ageInYears = $dob->diffInYears($now);
+            $ageInMonths = $dob->diffInMonths($now) % 12;
+            $ageInDays = $dob->diffInDays($now) % 30;
+
+            if ($ageInYears >= 1) {
+                $age = "$ageInYears years";
+            } elseif ($ageInMonths >= 1) {
+                $age = "$ageInMonths months";
+            } else {
+                $age = "$ageInDays days";
+            }
+        } else {
+            $age = 'N/A';
+        }
+
+
+
+$patient_total_sessions= SessionData::where('patient_id', $patient_id)->count();
+$total_session_taken= SessionData::where('patient_id', $patient_id)->where('status', 2)->count();
+
+$total_active_session=SessionData::where('patient_id', $patient_id)->where('status', 1)->count();
+$ot_sessions = SessionData::where('session_cat', 'OT')
+    ->where('patient_id', $patient_id)
+    ->count();
+
+$pt_sessions = SessionData::where('session_cat', 'PT')
+    ->where('patient_id', $patient_id)
+    ->count();
+
+$ot_sessions_taken = SessionData::where('session_cat', 'OT')
+    ->where('status', 2)
+    ->where('patient_id', $patient_id)
+    ->count();
+
+$pt_sessions_taken = SessionData::where('session_cat', 'PT')
+    ->where('status', 2)
+    ->where('patient_id', $patient_id)
+    ->count();
+
+// Calculate pending
+$ot_sessions_pending = $ot_sessions - $ot_sessions_taken;
+$pt_sessions_pending = $pt_sessions - $pt_sessions_taken;
+$doctors= Doctor::all();
+$patients= Patient::all();
+    return view('patients.patient_session', compact('patient', 'session', 'patients', 'doctors', 'ot_sessions_pending', 'pt_sessions_pending', 'ot_sessions_taken', 'pt_sessions_taken',  'ot_sessions', 'pt_sessions',  'patient_total_sessions', 'total_session_taken', 'total_active_session',  'country_name',  'age', ));
+
+    }
+
+
+
+    public function download($fileId)
+    {
+        // Retrieve the file record from the database
+        $file = Patientfiles::find($fileId);
+
+        if ($file) {
+            // Construct the full path to the file
+            $filePath = public_path('images/lab_reports/' . $file->file_path);
+
+            // Check if the file exists before attempting to download
+            if (file_exists($filePath)) {
+                return response()->download($filePath, $file->file_name);
+            } else {
+                return abort(404, 'File not found');
+            }
+        }
+
+        return abort(404, 'File not found');
+    }
 
 
 }

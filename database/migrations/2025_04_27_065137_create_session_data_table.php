@@ -11,13 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('all_sessio_details', function (Blueprint $table) {
+        Schema::create('session_data', function (Blueprint $table) {
             $table->id();
-            $table->integer('session_id');
+            $table->integer('main_session_id')->nullable();
+            $table->integer('main_appointment_id')->nullable();
+            $table->string('session_cat')->nullable();
             $table->string('patient_id');
             $table->string('doctor_id')->nullable();
-            $table->string('session_cat')->nullable();
-
             $table->string('contract_payment')->nullable()->comment('1 = Pending, 2 = Completed');
             $table->date('session_date')->nullable();
             $table->time('session_time')->nullable();
@@ -25,6 +25,9 @@ return new class extends Migration
             $table->string('status')
                   ->default('1')
                   ->comment('1 = Pending, 2 = Completed, 3 = Transferred');
+            $table->string('source')
+                  ->default('0')
+                  ->comment('1 = Direct, 2 = Appointment');
             $table->timestamps();
         });
     }
@@ -34,6 +37,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('all_sessio_details');
+        Schema::dropIfExists('session_data');
     }
 };

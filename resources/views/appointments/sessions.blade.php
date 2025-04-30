@@ -27,7 +27,7 @@
                             <div class="d-flex align-items-center gap-2">
                                 <label class="col-form-label mb-0">Session Type:</label>
                                 <div class="d-flex gap-2">
-                                    <input type="radio" name="session_type" value="normal" checked> Normal
+                                    <input type="radio" name="session_type" value="normal"> Normal
                                     <input type="radio" name="session_type" value="offer"> Offer
                                     <input type="radio" name="session_type" value="ministry"> Pact
                                 </div>
@@ -81,18 +81,35 @@
                                     @endforeach
                                 </select>
                             </div>
-                              <div class="col-md-2" id="session_select_box">
-                                <label class="col-form-label"> Session Type:</label>
-                                <select class="form-control form-control-sm session_cat" id="session_cat" name="session_cat">
-                                    <option value="">Choose...</option>
-                                    <option value="OT">OT</option>
-                                    <option value="PT">PT</option>
-                                    {{-- <option value="CT">CT</option> --}}
-                                </select>
+                            <div class="col-md-2" id="session_select_box">
+                                <label class="col-form-label">Session Type:</label>
+                                <div class="form-check">
+                                    <input class="form-check-input session-checkbox" type="checkbox" value="OT" id="checkbox_ot" name="session_types[]">
+                                    <label class="form-check-label" for="checkbox_ot">OT</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input session-checkbox" type="checkbox" value="PT" id="checkbox_pt" name="session_types[]">
+                                    <label class="form-check-label" for="checkbox_pt">PT</label>
+                                </div>
+
+                                <!-- Hidden initially -->
+                                <div id="ot_sessions_box" style="display: none; margin-top:10px;">
+                                    <label for="ot_sessions">OT Sessions:</label>
+                                    <input type="number" class="form-control form-control-sm" id="ot_sessions" name="ot_sessions" min="0" value="0">
+                                </div>
+
+                                <div id="pt_sessions_box" style="display: none; margin-top:10px;">
+                                    <label for="pt_sessions">PT Sessions:</label>
+                                    <input type="number" class="form-control form-control-sm" id="pt_sessions" name="pt_sessions" min="0" value="0">
+                                </div>
+
+
                             </div>
 
+
+
                             <!-- Offer Dropdown (Hidden Initially) -->
-                            <div class="col-md-3" id="offer_select_box" style="display: none;">
+                            <div class="col-md-2" id="offer_select_box" style="display: none;">
                                 <label class="col-form-label">Select Offer:</label>
                                 <select class="form-control form-control-sm" name="offer_id">
                                     <option value="">Choose...</option>
@@ -103,7 +120,7 @@
                             </div>
 
                             <!-- Ministry Dropdown (Hidden Initially) -->
-                            <div class="col-md-3" id="ministry_select_box" style="display: none;">
+                            <div class="col-md-2" id="ministry_select_box" style="display: none;">
                                 <label class="col-form-label">Select Ministry:</label>
                                 <select class="form-control form-control-sm" name="ministry_id">
                                     <option value="">Choose...</option>
@@ -113,13 +130,13 @@
                                 </select>
                             </div>
 
-                            <div class="col-md-2">
+                            <div class="col-md-1">
                                 <label class="col-form-label">Sessions:</label>
-                                <input type="number" class="form-control form-control-sm number" id="no_of_sessions" name="no_of_sessions">
+                                <input  class="form-control form-control-sm number" id="no_of_sessions" name="no_of_sessions" readonly>
                             </div>
-                            <div class="col-md-2">
+                            <div class="col-md-1">
                                 <label class="col-form-label">Interval:</label>
-                                <input type="number" class="form-control form-control-sm number" id="session_gap" name="session_gap">
+                                <input type="number" class="form-control form-control-sm " id="session_gap" name="session_gap">
                             </div>
                             <div class="col-md-2">
                                 <label class="col-form-label">First Session:</label>
@@ -131,28 +148,27 @@
                                 <div class="alert alert-info p-2" id="session_fee" style="font-weight: bold;">
                                     OMR 0.00
                                 </div>
-                                <input type="hidden" name="session_fee" id="session_fee_input" value="0.00">
+                                <input type="hidden" name="session_fee" id="session_fee_input" >
 
                             </div>
-                            <div class="col-md-2 mt-3">
+
+                            <div class="col-md-2 mt-3 ">
                                 <!-- Age Badge & Hidden Input -->
-                                <div class="col-md-3 d-flex align-items-center">
-                                    <span id="age_badge" class="badge bg-success" style="display: none; font-size: 14px;">
-                                         Age: <span id="age_value">--</span>
+                                <div class="d-flex align-items-center mb-2">
+                                    <span id="age_badge" class="badge bg-success" style="display: none; font-size: 8px;">
+                                        Age: <span id="age_value">--</span>
                                     </span>
                                     <input type="hidden" id="age_input" name="age">
                                 </div>
-                                <br>
 
                                 <!-- Gender Badge & Hidden Input -->
-                                <div class="col-md-3 d-flex align-items-center">
-                                    <span id="gender_badge" class="badge bg-info" style="display: none; font-size: 14px;">
+                                <div class="d-flex align-items-center">
+                                    <span id="gender_badge" class="badge bg-info" style="display: none; font-size: 8px;">
                                         <i class="fas fa-venus-mars"></i> Gender: <span id="gender_value">--</span>
                                     </span>
                                     <input type="hidden" class="gender" id="gender_input" name="gender">
                                 </div>
                             </div>
-
                             <div class="col-md-12">
                                 <label class="col-form-label">Notes:</label>
                                 <textarea class="form-control form-control-sm" id="notes" name="notes" rows="2"></textarea>
@@ -169,6 +185,7 @@
         </div>
     </div>
     </div>
+
 
 
 

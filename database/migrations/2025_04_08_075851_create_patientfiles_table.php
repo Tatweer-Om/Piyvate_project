@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('patientfiles', function (Blueprint $table) {
             $table->id();
             $table->string('patient_id')->nullable();
+            $table->string('appointment_id')->nullable();
             $table->string('file_name')->nullable();
             $table->string('file_path')->nullable();
             $table->string('file_type')->nullable();

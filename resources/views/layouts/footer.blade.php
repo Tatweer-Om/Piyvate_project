@@ -162,7 +162,7 @@
     $routeName = Route::currentRouteName();
     $segments = explode('.', $routeName);
     $route_name = isset($segments[0]) ? $segments[0] : null;
-  
+
 @endphp
 
     @if ($route_name == 'account')
@@ -173,7 +173,7 @@
         @include('custom_js.qty_audit_js')
         @elseif ($route_name == 'purchases')
         @include('custom_js.show_purchase_js')
-        
+
         @elseif ($route_name == 'products')
         @include('custom_js.product_js')
         @elseif ($route_name == 'category')
@@ -244,6 +244,10 @@
         @include('custom_js.show_purchase_js')
         @elseif ($route_name == 'voucher')
         @include('custom_js.add_voucher_js')
+        @elseif ($route_name == 'session_data')
+        @include('custom_js.session_data_js')
+        @elseif ($route_name == 'patient_session')
+        @include('custom_js.patient_profile_js')
     @endif
 
 </body>

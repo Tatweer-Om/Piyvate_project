@@ -6,7 +6,7 @@
             'pagingType': 'numbers',
             "ordering": true,
             "order": [
-                [7, "desc"]
+                [6, "desc"]
             ]
         });
 
@@ -47,6 +47,18 @@
                 success: function(response) {
                     hidePreloader();
                     after_submit();
+                    if(response.status == 9){
+                        show_notification('error',
+                            '{{ trans('messages.doctor_is_already_taking_appointment_lang', [], session('locale')) }}'
+                        );
+                        return;
+                    }
+                    if(response.status == 10){
+                        show_notification('error',
+                            '{{ trans('messages.doctor_is_already_taking_Session_lang', [], session('locale')) }}'
+                        );
+                        return;
+                    }
                     if (response.status == 7) {
                         show_notification('error',
                             '{{ trans('messages.patient_appointment_already_booked_lang', [], session('locale')) }}'
@@ -789,6 +801,38 @@
             } else {
                 $("#gender_badge").hide();
             }
+        });
+    });
+
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get the radio buttons
+        const offerRadio = document.querySelector('input[name="session_type"][value="offer"]');
+        const ministryRadio = document.querySelector('input[name="session_type"][value="ministry"]');
+        const normalRadio = document.querySelector('input[name="session_type"][value="normal"]');
+
+        // Show SweetAlert when "Offer" is selected
+        offerRadio.addEventListener('change', function() {
+            if (offerRadio.checked) {
+                // SweetAlert for "Offer" selection
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Check the session count as per the offer!',
+                    text: 'Please ensure the session count matches the details in the offer.',
+                    showCancelButton: true,
+                    confirmButtonText: 'Understood',
+                    cancelButtonText: 'Close',
+                    reverseButtons: true
+                });
+            }
+        });
+
+        normalRadio.addEventListener('change', function() {
+            Swal.close(); // Close SweetAlert if Normal is selected
+        });
+
+        ministryRadio.addEventListener('change', function() {
+            Swal.close(); // Close SweetAlert if Ministry is selected
         });
     });
 </script>

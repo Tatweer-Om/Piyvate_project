@@ -51,7 +51,9 @@
                         response.sessions.forEach(function(session) {
                             rowHTML += `
                     <div class="col-md-4">
-                        <a href="/patient_profile/${session.patient_id}" class="text-decoration-none">
+                       <a href="/patient_session/${session.patient_id}"
+                            class="text-decoration-none session-link"
+                           >
                             <div class="timeline-panel bg-light border-0 p-2 rounded text-center shadow-sm">
                                 <p class="mb-1 fs-10 text-dark fw-bold">Session</p>
                                 <p class="mb-1 fs-10 text-dark">${session.patient_name}</p>
@@ -142,4 +144,7 @@ $('#all_session_table').DataTable({
             console.log("Active tab:", activeTab);
         });
     });
+
+
+
 </script>

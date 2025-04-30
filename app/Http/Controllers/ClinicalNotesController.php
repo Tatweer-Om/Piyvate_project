@@ -2,17 +2,21 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\AllSessioDetail;
 use Carbon\Carbon;
 use App\Models\Doctor;
+use App\Models\SoapOT;
+use App\Models\SoapPT;
 use App\Models\Patient;
 use App\Models\Appointment;
+use App\Models\SessionData;
+use App\Models\SessionList;
 use App\Models\Otppediatric;
 use Illuminate\Http\Request;
 use App\Models\ClinicalNotes;
+use App\Models\AllSessioDetail;
 use App\Models\AppointmentDetail;
 use App\Models\AppointmentSession;
-use App\Models\SessionList;
+use App\Models\PatientPrescription;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
@@ -21,57 +25,113 @@ use Illuminate\Support\Facades\File;
 class ClinicalNotesController extends Controller
 {
     public function soap_ot($id)
+
     {
-        $patient = Patient::find($id);
-        $session = SessionList::where('patient_id', $id)->first();
-        $apt = Appointment::where('patient_id', $id)->first();
 
-        $notes = null;
+        $session_data = SessionData::where('id', $id)->where('session_cat', 'OT')->first();
 
-        if ($apt) {
-            $notes = ClinicalNotes::where('appointment_id', $apt->id)->first();
-        } elseif ($session) {
-            $notes = ClinicalNotes::where('session_id', $session->id)->first();
+        if (!$session_data) {
+            return redirect()->back()->with('error', 'Session not found.');
         }
 
-        $clinicalNotes = $notes ? json_decode($notes->form_data) : null;
+        $patient_id = $session_data->patient_id;
+        $patient = Patient::find($patient_id);
+        $session = SessionList::find($session_data->main_session_id);
+        $apt = Appointment::where('patient_id', $patient_id)
+            ->where('id', $session_data->main_appointment_id)
+            ->whereIn('session_status', [0, 2, 5])
+            ->first();
 
 
 
-        if($apt){
-            $doctor = $apt ? Doctor::where('id', $apt->doctor_id)->value('doctor_name') : null;
-
+        $doctor = null;
+        if ($apt && $session_data->doctor_id) {
+            $doctor = Doctor::where('id', $session_data->doctor_id)->value('doctor_name');
+        } elseif ($session && $session_data->doctor_id) {
+            $doctor = Doctor::where('id', $session_data->doctor_id)->value('doctor_name');
         }
-        if ($session) {
-            $doctor = Doctor::where('id', $session->doctor_id)->value('doctor_name');
-        }
 
-
-        return view('clinical_notes.soap_ot', compact('patient', 'session', 'apt', 'doctor', 'clinicalNotes'));
+        return view('clinical_notes.soap_ot', compact('patient', 'session_data', 'session', 'apt', 'doctor',));
     }
+
 
 
     public function soap_pt($id)
     {
-        $patient = Patient::where('id', $id)->first();
-        $session = SessionList::where('patient_id', $id)->first();
-        $apt = Appointment::where('patient_id', $id)->first();
 
-        $notes = null;
+        $session_data = SessionData::where('id', $id)->where('session_cat', 'PT')->first();
 
-        if ($apt) {
-            $notes = ClinicalNotes::where('appointment_id', $apt->id)->first();
-            $doctor = Doctor::where('id', $apt->doctor_id)->value('doctor_name');
-        } elseif ($session) {
-            $notes = ClinicalNotes::where('session_id', $session->id)->first();
-            $doctor = Doctor::where('id', $session->doctor_id)->value('doctor_name');
+        if (!$session_data) {
+            return redirect()->back()->with('error', 'Session not found.');
         }
 
-        $clinicalNotes = $notes ? json_decode($notes->form_data) : null;
+        $soap= SoapPT::WHERE('session_id', $id)->first();
 
 
-        return view('clinical_notes.soap_pt', compact('patient', 'session', 'clinicalNotes', 'apt', 'doctor'));
+        $patient_id = $session_data->patient_id;
+        $patient = Patient::find($patient_id);
+        $session = SessionList::find($session_data->main_session_id);
+
+
+        $apt = Appointment::where('patient_id', $patient_id)
+            ->where('id', $session_data->main_appointment_id)
+            ->whereIn('session_status', [0, 2, 5])
+            ->first();
+
+
+        $doctor = null;
+        if ($apt && $session_data->doctor_id) {
+            $doctor = Doctor::where('id', $session_data->doctor_id)->value('doctor_name');
+        } elseif ($session && $session_data->doctor_id) {
+            $doctor = Doctor::where('id', $session_data->doctor_id)->value('doctor_name');
+        }
+
+        return view('clinical_notes.soap_pt', compact('patient', 'session', 'soap',  'session_data',  'apt', 'doctor'));
     }
+
+    public function soap_pt_all($id)
+    {
+
+        $session_data = SoapOT::where('patient_id', $id)->get();
+
+        if ($session_data->isEmpty()) {
+            return redirect()->back()->with('error', 'Session not found.');
+        }
+
+        $patient = Patient::find($id);
+        $doctor = null;
+        $pt = null;
+
+        if ($session_data->first()->doctor_id) {
+            $doctor = Doctor::where('id', $session_data->first()->doctor_id)->value('doctor_name');
+        }
+
+        $pt = $session_data->first()->pt ?? null;
+
+        return view('clinical_notes.soap_pt_all', compact('patient', 'pt', 'session_data', 'doctor'));
+    }
+
+    public function soap_ot_all($id)
+    {
+        $session_data = SoapOT::where('patient_id', $id)->get();
+
+        if ($session_data->isEmpty()) {
+            return redirect()->back()->with('error', 'Session not found.');
+        }
+
+        $patient = Patient::find($id);
+        $doctor = null;
+        $pt = null;
+
+        if ($session_data->first()->doctor_id) {
+            $doctor = Doctor::where('id', $session_data->first()->doctor_id)->value('doctor_name');
+        }
+
+        $pt = $session_data->first()->pt ?? null;
+
+        return view('clinical_notes.soap_ot_all', compact('patient', 'pt', 'session_data', 'doctor'));
+    }
+
 
     //opt_pediatrics
 
@@ -81,14 +141,13 @@ class ClinicalNotesController extends Controller
         $apt = Appointment::where('patient_id', $id)->first();
         $session = SessionList::where('patient_id', $id)->first();
 
-        if($apt){
+        if ($apt) {
             $doctor = $apt ? Doctor::where('id', $apt->doctor_id)->value('doctor_name') : null;
-
         }
         if ($session) {
             $doctor = Doctor::where('id', $session->doctor_id)->value('doctor_name');
         }
-    return view('clinical_notes.otatp_pediatric', compact('patient', 'apt', 'doctor'));
+        return view('clinical_notes.otatp_pediatric', compact('patient',  'apt', 'doctor'));
     }
 
 
@@ -104,9 +163,8 @@ class ClinicalNotesController extends Controller
 
         $session = SessionList::where('patient_id', $id)->first();
 
-        if($apt){
+        if ($apt) {
             $doctor = $apt ? Doctor::where('id', $apt->doctor_id)->value('doctor_name') : null;
-
         }
         if ($session) {
             $doctor = Doctor::where('id', $session->doctor_id)->value('doctor_name');
@@ -129,9 +187,8 @@ class ClinicalNotesController extends Controller
         $apt = Appointment::where('patient_id', $id)->first();
         $session = SessionList::where('patient_id', $id)->first();
 
-        if($apt){
+        if ($apt) {
             $doctor = $apt ? Doctor::where('id', $apt->doctor_id)->value('doctor_name') : null;
-
         }
         if ($session) {
             $doctor = Doctor::where('id', $session->doctor_id)->value('doctor_name');
@@ -146,9 +203,8 @@ class ClinicalNotesController extends Controller
         $apt = Appointment::where('patient_id', $id)->first();
         $session = SessionList::where('patient_id', $id)->first();
 
-        if($apt){
+        if ($apt) {
             $doctor = $apt ? Doctor::where('id', $apt->doctor_id)->value('doctor_name') : null;
-
         }
         if ($session) {
             $doctor = Doctor::where('id', $session->doctor_id)->value('doctor_name');
@@ -211,7 +267,7 @@ class ClinicalNotesController extends Controller
         $appointment->session_status = 7;
         $appointment->save();
 
-        return redirect()->back()->with('success', 'Data saved successfully.');
+        return redirect()->to('patient_profile/' . $neuroPediatric->patient_id)->with('success', 'Data saved successfully.');
     }
 
 
@@ -338,7 +394,7 @@ class ClinicalNotesController extends Controller
         $appointment->session_status = 7;
         $appointment->save();
 
-        return redirect()->back()->with('success', 'Data saved successfully.');
+        return redirect()->to('patient_profile/' . $neuroPediatric->patient_id)->with('success', 'Data saved successfully.');
     }
 
 
@@ -438,7 +494,7 @@ class ClinicalNotesController extends Controller
         $appointment->session_status = 7;
         $appointment->save();
 
-        return redirect()->back()->with('success', 'Data saved successfully.');
+        return redirect()->to('patient_profile/' . $neuroPediatric->patient_id)->with('success', 'Data saved successfully.');
     }
 
     public function edit_otp_pediatric($id)
@@ -517,7 +573,7 @@ class ClinicalNotesController extends Controller
         $appointment->session_status = 7;
         $appointment->save();
 
-        return redirect()->back()->with('success', 'Data saved successfully.');
+        return redirect()->to('patient_profile/' . $neuroPediatric->patient_id)->with('success', 'Data saved successfully.');
     }
 
 
@@ -569,304 +625,238 @@ class ClinicalNotesController extends Controller
 
     public function add_soap_ot(Request $request)
     {
+        if (empty($request->date) || empty($request->time)) {
+            return redirect()->back()->with('error', 'Date and Time are required.');
+        }
+
         $user = Auth::user();
         $user_id = $user->id;
         $branch_id = $user->branch_id;
+        $id = $request->session_id;
 
-        // Prepare SOAP data
-        $soapData = [
-            'pt' => $request->pt,
-            'soap_sections' => [],
-        ];
+        $soap = SoapOT::where('session_id', $id)->first();
 
-        if (is_array($request->date)) {
-            $count = count($request->date);
-            for ($i = 0; $i < $count; $i++) {
-                $soapData['soap_sections'][] = [
-                    'date' => $request->date[$i],
-                    'time' => $request->time[$i],
-                    'bp' => $request->bp[$i],
-                    'pulse' => $request->pulse[$i],
-                    'o2sat' => $request->o2sat[$i],
-                    'temp' => $request->temp[$i],
-                    'ps' => $request->ps[$i],
-                    's' => $request->s[$i],
-                    'o' => $request->o[$i],
-                    'a' => $request->a[$i],
-                    'p' => $request->p[$i],
-                    'number' => $request->number[$i],
-                    'signature' => $request->signature[$i],
-                ];
-            }
-        }
+        if ($soap) {
+            $soap->main_session_id = $request->main_session_id;
+            $soap->main_appointment_id = $request->main_appointment_id;
+            $soap->patient_id = $request->patient_id;
+            $soap->doctor_id = $request->doctor_id;
+            $soap->pt = $request->pt;
+            $soap->date = $request->date;
+            $soap->time = $request->time;
+            $soap->bp = $request->bp;
+            $soap->pulse = $request->pulse;
+            $soap->o2sat = $request->o2sat;
+            $soap->temp = $request->temp;
+            $soap->ps = $request->ps;
+            $soap->s = $request->s;
+            $soap->o = $request->o;
+            $soap->a = $request->a;
+            $soap->p = $request->p;
+            $soap->branch_id = $branch_id;
+            $soap->user_id = $user_id;
+            $soap->number = $request->number;
+            $soap->signature = $request->signature;
+            $soap->save();
 
-        $neuroPediatric = null;
-
-        // Update if appointment_id is provided
-        if ($request->appointment_id) {
-            $neuroPediatric = ClinicalNotes::where('appointment_id', $request->appointment_id)->first();
-        }
-
-        // Or update if session_id is provided
-        if (!$neuroPediatric && $request->session_id) {
-            $neuroPediatric = ClinicalNotes::where('session_id', $request->session_id)->first();
-        }
-
-        // If existing record found, update it
-        if ($neuroPediatric) {
-            $neuroPediatric->form_data = json_encode($soapData);
-            $neuroPediatric->notes_status = 5;
-            $neuroPediatric->doctor_id = $request->doctor_id;
-            $neuroPediatric->added_by = $user_id;
-            $neuroPediatric->user_id = $user_id;
-            $neuroPediatric->branch_id = $branch_id;
-            $neuroPediatric->patient_id = $request->patient_id;
-            $neuroPediatric->save();
+            $message = 'Data updated successfully.';
         } else {
-            // Create a new ClinicalNotes record
-            $neuroPediatric = new ClinicalNotes();
-            $neuroPediatric->form_data = json_encode($soapData);
-            $neuroPediatric->form_type = 'SOAP_OT';
-            $neuroPediatric->notes_status = 5;
-            $neuroPediatric->doctor_id = $request->doctor_id;
-            $neuroPediatric->appointment_id = $request->appointment_id;
-            $neuroPediatric->session_id = $request->session_id;
-            $neuroPediatric->added_by = $user_id;
-            $neuroPediatric->user_id = $user_id;
-            $neuroPediatric->branch_id = $branch_id;
-            $neuroPediatric->patient_id = $request->patient_id;
-            $neuroPediatric->save();
+            $soap = new SoapOT;
+            $soap->main_session_id = $request->main_session_id;
+            $soap->main_appointment_id = $request->main_appointment_id;
+            $soap->session_id = $id;
+            $soap->patient_id = $request->patient_id;
+            $soap->doctor_id = $request->doctor_id;
+            $soap->pt = $request->pt;
+            $soap->date = $request->date;
+            $soap->time = $request->time;
+            $soap->bp = $request->bp;
+            $soap->pulse = $request->pulse;
+            $soap->o2sat = $request->o2sat;
+            $soap->temp = $request->temp;
+            $soap->ps = $request->ps;
+            $soap->s = $request->s;
+            $soap->o = $request->o;
+            $soap->a = $request->a;
+            $soap->p = $request->p;
+            $soap->branch_id = $branch_id;
+            $soap->user_id = $user_id;
+            $soap->number = $request->number;
+            $soap->signature = $request->signature;
+            $soap->save();
+
+            $message = 'Data saved successfully.';
         }
 
-        // Decode saved data to count sessions
-        $formArray = json_decode($neuroPediatric->form_data, true);
-        $sessionCount = count($formArray['soap_sections'] ?? []);
-
-        // Update sessions_taken
-        if (!is_null($neuroPediatric->appointment_id)) {
-            $session_apt = AppointmentDetail::where('appointment_id', $neuroPediatric->appointment_id)->first();
-            if ($session_apt) {
-                $session_apt->sessions_taken += $sessionCount;
-                $session_apt->save();
-            }
-        }
-
-        // Update AllSessioDetail and AppointmentSession statuses
-        foreach ($formArray['soap_sections'] ?? [] as $entry) {
-            $date = $entry['date'] ?? null;
-
-            if ($date) {
-                if (!is_null($neuroPediatric->session_id)) {
-                    $nearestSession = AllSessioDetail::where('session_id', $neuroPediatric->session_id)
-                        ->whereDate('session_date', $date)
-                        ->orderBy('id', 'asc')
-                        ->first();
-
-                    if ($nearestSession) {
-                        $nearestSession->status = 2;
-                        $nearestSession->save();
-                    }
-                }
-
-                if (!is_null($neuroPediatric->appointment_id)) {
-                    $nearestAppSession = AppointmentSession::where('appointment_id', $neuroPediatric->appointment_id)
-                        ->whereDate('session_date', $date)
-                        ->orderBy('id', 'asc')
-                        ->first();
-
-                    if ($nearestAppSession) {
-                        $nearestAppSession->status = 2;
-                        $nearestAppSession->save();
-                    }
-                }
-            }
-        }
-
-        // Update today's session if not already done
-        $today = Carbon::today()->toDateString();
-
-        if (!is_null($neuroPediatric->session_id)) {
-            $apt_session = AllSessioDetail::where('session_id', $neuroPediatric->session_id)
-                ->whereDate('session_date', $today)
-                ->orderBy('id', 'asc')
+        if (!is_null($soap->main_session_id)) {
+            $nextSession = AllSessioDetail::where('session_id', $soap->main_session_id)->where('id', $id)->first();
+            $session_data = SessionData::where('source', 1)
+                ->where('main_session_id', $soap->main_session_id)->where('id', $id)
                 ->first();
 
-            if ($apt_session) {
-                $apt_session->status = 2;
-                $apt_session->save();
+            if (!$nextSession || !$session_data) {
+                return redirect()->back()->with('error', 'You do not have a session on the selected date.');
             }
+
+            $nextSession->status = 2;
+            $session_data->status = 2;
+            $nextSession->save();
+            $session_data->save();
         }
 
-        return redirect('patient_profile/' . $neuroPediatric->patient_id)->with('success', 'Data saved successfully.');
+        if (!is_null($soap->main_appointment_id)) {
+            $nextAppSession = AppointmentSession::where('appointment_id', $soap->main_appointment_id)->where('id', $id)->first();
+            $sessiondata = SessionData::where('main_appointment_id', $soap->main_appointment_id)->where('id', $id)
+                ->where('session_cat', 'OT')
+                ->where('source', 2)
+                ->first();
+
+            if (!$nextAppSession || !$sessiondata) {
+                return redirect()->back()->with('error', 'You do not have session on the selected date.');
+            }
+
+            $nextAppSession->status = 2;
+            $sessiondata->status = 2;
+            $nextAppSession->save();
+            $sessiondata->save();
+        }
+
+        return redirect('patient_session/' . $soap->patient_id)->with('success', $message);
     }
 
 
     public function add_soap_pt(Request $request)
     {
-        // Logging any issues if there's an error in the code execution
-        Log::info('Add SOAP PT Function Started.');
 
-        $user_id = Auth::id();
-        $user = Auth::user();
-        $branch_id = $user->branch_id;
-
-        if ($request->appointment_id) {
-            $note = ClinicalNotes::where('form_type', 'SOAP_PT')
-                ->where('appointment_id', $request->appointment_id)
-                ->where('patient_id', $request->patient_id)
-                ->first();
-        } elseif ($request->session_id) {
-            $note = ClinicalNotes::where('form_type', 'SOAP_PT')
-                ->where('session_id', $request->session_id)
-                ->where('patient_id', $request->patient_id)
-                ->first();
-        } else {
-            // Handle case when neither appointment_id nor session_id is provided
-            $note = null;
+        if (empty($request->date) || empty($request->time)) {
+            return redirect()->back()->with('error', 'Date and Time are required.');
         }
+
+        $user = Auth::user();
+        $user_id = $user->id;
+        $branch_id = $user->branch_id;
+        $id = $request->session_id;
+
 
         $imagePath = null;
-
-
         $base64Image = $request->input('canvas_image');
 
-        // If it's an array (e.g., multiple canvas images), get the first one
-        if (is_array($base64Image)) {
-            $base64Image = $base64Image[0];
-        }
-
+        // Handle base64 image if it exists
         if ($base64Image) {
             $folderPath = public_path('images/notes_images');
 
+            // Create directory if it doesn't exist
             if (!File::isDirectory($folderPath)) {
                 File::makeDirectory($folderPath, 0777, true, true);
             }
 
+            // Generate unique image name
             $imageName = 'marked_image_' . time() . '.png';
             $imagePath = 'images/notes_images/' . $imageName;
 
+            // If the base64 string contains a data URL prefix, remove it
             if (strpos($base64Image, ',') !== false) {
                 $base64Image = explode(',', $base64Image)[1];
             }
 
+            // Decode the base64 string and save the image
             file_put_contents($folderPath . '/' . $imageName, base64_decode($base64Image));
-
             Log::info('Canvas image saved at: ' . $imagePath);
         }
 
 
-        $soapData = [
-            'pt' => $request->pt,
-            'soap_sections' => [],
-        ];
 
-        // If existing note, decode old data
-        if ($note) {
-            $existingData = json_decode($note->form_data, true);
-            $soapData['soap_sections'] = $existingData['soap_sections'] ?? [];
+        $soap = SoapPT::where('session_id', $id)->first();
+
+        if ($soap) {
+            $soap->main_session_id = $request->main_session_id;
+            $soap->main_appointment_id = $request->main_appointment_id;
+            $soap->patient_id = $request->patient_id;
+            $soap->doctor_id = $request->doctor_id;
+            $soap->pt = $request->pt;
+            $soap->date = $request->date;
+            $soap->time = $request->time;
+            $soap->bp = $request->bp;
+            $soap->pulse = $request->pulse;
+            $soap->o2sat = $request->o2sat;
+            $soap->temp = $request->temp;
+            $soap->ps = $request->ps;
+            $soap->s = $request->s;
+            $soap->o = $request->o;
+            $soap->a = $request->a;
+            $soap->p = $request->p;
+            $soap->soap_image = $imagePath;
+            $soap->ticked_points = $request->input('ticked_points');
+            $soap->branch_id = $branch_id;
+            $soap->user_id = $user_id;
+            $soap->number = $request->number;
+            $soap->signature = $request->signature;
+            $soap->save();
+
+            $message = 'Data updated successfully.';
         } else {
-            $note = new ClinicalNotes();
+            $soap = new SoapPT;
+            $soap->main_session_id = $request->main_session_id;
+            $soap->main_appointment_id = $request->main_appointment_id;
+            $soap->session_id = $id;
+            $soap->patient_id = $request->patient_id;
+            $soap->doctor_id = $request->doctor_id;
+            $soap->pt = $request->pt;
+            $soap->date = $request->date;
+            $soap->soap_image = $imagePath;
+            $soap->ticked_points = $request->input('ticked_points');
+            $soap->time = $request->time;
+            $soap->bp = $request->bp;
+            $soap->pulse = $request->pulse;
+            $soap->o2sat = $request->o2sat;
+            $soap->temp = $request->temp;
+            $soap->ps = $request->ps;
+            $soap->s = $request->s;
+            $soap->o = $request->o;
+            $soap->a = $request->a;
+            $soap->p = $request->p;
+            $soap->branch_id = $branch_id;
+            $soap->user_id = $user_id;
+            $soap->number = $request->number;
+            $soap->signature = $request->signature;
+            $soap->save();
+
+            $message = 'Data saved successfully.';
         }
 
-        // Append new entries from the form
-        if (is_array($request->date)) {
-            $count = count($request->date);
-            for ($i = 0; $i < $count; $i++) {
-                $soapData['soap_sections'][] = [
-                    'date' => $request->date[$i] ?? '',
-                    'time' => $request->time[$i] ?? '',
-                    'bp' => $request->bp[$i] ?? '',
-                    'pulse' => $request->pulse[$i] ?? '',
-                    'o2sat' => $request->o2sat[$i] ?? '',
-                    'temp' => $request->temp[$i] ?? '',
-                    'ps' => $request->ps[$i] ?? '',
-                    's' => $request->s[$i] ?? '',
-                    'o' => $request->o[$i] ?? '',
-                    'a' => $request->a[$i] ?? '',
-                    'p' => $request->p[$i] ?? '',
-                    'number' => $request->number[$i] ?? '',
-                    'signature' => $request->signature[$i] ?? '',
-                    'image_path' => $imagePath ?? null,
-                ];
-            }
-        }
-
-        $note->form_data = json_encode($soapData);
-        $note->form_type = 'SOAP_PT';
-        $note->notes_status = 6;
-        $note->doctor_id = $request->doctor_id;
-        $note->appointment_id = $request->appointment_id;
-        $note->session_id = $request->session_id;
-
-        $note->added_by = $user_id;
-        $note->user_id = $user_id;
-        $note->branch_id = $branch_id;
-        $note->patient_id = $request->patient_id;
-
-        $note->save();
-
-        // Update session status (unchanged logic)
-        $formArray = json_decode($note->form_data, true);
-        $sessionCount = count($formArray['soap_sections'] ?? []);
-
-        // Update sessions_taken
-        if (!is_null($note->appointment_id)) {
-            $session_apt = AppointmentDetail::where('appointment_id', $note->appointment_id)->first();
-            if ($session_apt) {
-                $session_apt->sessions_taken += $sessionCount;
-                $session_apt->save();
-            }
-        }
-
-        // Update AllSessioDetail and AppointmentSession statuses
-        foreach ($formArray['soap_sections'] ?? [] as $entry) {
-            $date = $entry['date'] ?? null;
-
-            if ($date) {
-                if (!is_null($note->session_id)) {
-                    $nearestSession = AllSessioDetail::where('session_id', $note->session_id)
-                        ->whereDate('session_date', $date)
-                        ->orderBy('id', 'asc')
-                        ->first();
-
-                    if ($nearestSession) {
-                        $nearestSession->status = 2;
-                        $nearestSession->save();
-                    }
-                }
-
-                if (!is_null($note->appointment_id)) {
-                    $nearestAppSession = AppointmentSession::where('appointment_id', $note->appointment_id)
-                        ->whereDate('session_date', $date)
-                        ->orderBy('id', 'asc')
-                        ->first();
-
-                    if ($nearestAppSession) {
-                        $nearestAppSession->status = 2;
-                        $nearestAppSession->save();
-                    }
-                }
-            }
-        }
-
-        // Update today's session if not already done
-        $today = Carbon::today()->toDateString();
-
-        if (!is_null($note->session_id)) {
-            $apt_session = AllSessioDetail::where('session_id', $note->session_id)
-                ->whereDate('session_date', $today)
-                ->orderBy('id', 'asc')
+        if (!is_null($soap->main_session_id)) {
+            $nextSession = AllSessioDetail::where('session_id', $soap->main_session_id)->where('id', $id)->first();
+            $session_data = SessionData::where('source', 1)
+                ->where('main_session_id', $soap->main_session_id)->where('id', $id)
                 ->first();
 
-            if ($apt_session) {
-                $apt_session->status = 2;
-                $apt_session->save();
+            if (!$nextSession || !$session_data) {
+                return redirect()->back()->with('error', 'You do not have a session on the selected date.');
             }
+
+            $nextSession->status = 2;
+            $session_data->status = 2;
+            $nextSession->save();
+            $session_data->save();
         }
 
-        // Log success
-        Log::info('SOAP PT note saved successfully.');
+        if (!is_null($soap->main_appointment_id)) {
+            $nextAppSession = AppointmentSession::where('appointment_id', $soap->main_appointment_id)->where('id', $id)->first();
+            $sessiondata = SessionData::where('main_appointment_id', $soap->main_appointment_id)->where('id', $id)
+                ->where('session_cat', 'PT')
+                ->where('source', 2)
+                ->first();
 
-        return redirect('patient_profile/' . $note->patient_id)->with('success', 'Data saved successfully.');
+            if (!$nextAppSession || !$sessiondata) {
+                return redirect()->back()->with('error', 'You do not have session on the selected date.');
+            }
+
+            $nextAppSession->status = 2;
+            $sessiondata->status = 2;
+            $nextAppSession->save();
+            $sessiondata->save();
+        }
+
+        return redirect('patient_session/' . $soap->patient_id)->with('success', $message);
     }
 }

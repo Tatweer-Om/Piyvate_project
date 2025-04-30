@@ -27,6 +27,8 @@ return new class extends Migration
             $table->longText('notes')->nullable();
             $table->string('session_cat')->nullable()->comment('OT, PT, CT');
             $table->string('sessions_reccomended')->nullable();
+            $table->integer('ot_sessions')->default(0);
+            $table->integer('pt_sessions')->default(0);
             $table->string('sessions_taken')->nullable();
             $table->string('session_gap')->nullable();
             $table->decimal('total_price', 10, 2)->nullable();

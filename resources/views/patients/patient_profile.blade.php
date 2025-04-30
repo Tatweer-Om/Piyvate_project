@@ -52,6 +52,29 @@
     </style>
 
     <div class="content-body">
+
+        @if (session('success'))
+    <div class="alert alert-info alert-dismissible fade show" role="alert" id="flash-alert">
+        {{ session('success') }}
+    </div>
+@endif
+
+@if (session('error'))
+    <div class="alert alert-danger alert-dismissible fade show" role="alert" id="flash-alert">
+        {{ session('error') }}
+    </div>
+@endif
+<script>
+    setTimeout(function () {
+        let alert = document.getElementById('flash-alert');
+        if (alert) {
+            alert.style.transition = 'opacity 0.5s ease';
+            alert.style.opacity = '0';
+            setTimeout(() => alert.remove(), 500); // Remove from DOM
+        }
+    }, 4000); // 2 seconds
+</script>
+
         <!-- row -->
         <div class="container-fluid">
 
@@ -66,7 +89,6 @@
                                     <i class=" me-5"></i>#{{ $patient->HN ?? '' }}
 
                                 </h6>
-
                                 <div class="row gy-2 small">
                                     <div class="col-6 d-flex align-items-center">
                                         <i class="bi bi-person-fill text-info me-2 fs-6"></i>
@@ -152,8 +174,15 @@
                         </div>
                     </div>
                     <!-- Compact Button Panel Card -->
+                    @if(!empty($apt))
                     <div class="col-lg-6 mb-3">
-                        <div class="card shadow-sm rounded-3">
+                        <div class="card shadow-sm rounded-3 position-relative">
+                            <!-- Display appointment number at top-right corner -->
+                            <div class="position-absolute top-0 end-0 p-3">
+                                <span class="fw-bold text-primary" style="font-size: 0.6rem;">#{{ $apt->appointment_no }}</span>
+                            </div>
+
+
                             <div class="card-body p-3 text-center">
                                 <h6 class="text-primary mb-3">
                                     <i class="bi bi-ui-checks-grid me-2"></i> Actions
@@ -161,27 +190,29 @@
 
                                 <!-- Existing buttons -->
                                 <div class="d-grid gap-2 mb-3">
-                                    <button class="btn btn-info btn-sm rounded-pill" data-bs-toggle="modal"
-                                        data-bs-target="#paymentModal">Contract Payment</button>
+                                    @if(!empty($detail))
+                                    <button class="btn btn-info btn-sm rounded-pill" data-bs-toggle="modal" data-bs-target="#paymentModal">
+                                        Contract Payment
+                                    </button>
+                                    @endif
+
                                     <button class="btn btn-success btn-sm rounded-pill" data-bs-toggle="offcanvas"
                                         data-bs-target="#rightPopup" aria-controls="rightPopup">Add Prescription</button>
                                     <button class="btn btn-warning btn-sm rounded-pill" data-bs-toggle="offcanvas"
                                         data-bs-target="#leftPopup" aria-controls="leftPopup">Lab Reports</button>
                                 </div>
 
-                                <!-- Grid of 6 clickable images -->
+                                <!-- Other content -->
                                 <div class="row g-3">
-                                    <div class="col-4">
-                                        <a href="{{ url("soap_pt/$patient->id") }}"
-                                            class="text-decoration-none text-dark">
+                                    <div class="col-4 d-none">
+                                        <a href="{{ url("soap_pt/$patient->id") }}" class="text-decoration-none text-dark">
                                             <img src="{{ asset('images/logo/1.png') }}" class="img-fluid rounded shadow-sm"
                                                 style="width: 45px; height: 45px; object-fit: cover;">
                                             <div class="small mt-1">SOAP-PT</div>
                                         </a>
                                     </div>
-                                    <div class="col-4">
-                                        <a href="{{ url("soap_ot/$patient->id") }}"
-                                            class="text-decoration-none text-dark">
+                                    <div class="col-4 d-none">
+                                        <a href="{{ url("soap_ot/$patient->id") }}" class="text-decoration-none text-dark">
                                             <img src="{{ asset('images/logo/2.png') }}" class="img-fluid rounded shadow-sm"
                                                 style="width: 45px; height: 45px; object-fit: cover;">
                                             <div class="small mt-1">SOAP-OT</div>
@@ -189,34 +220,29 @@
 
                                     </div>
                                     <div class="col-4">
-                                        <a href="{{ url("physical_dysfunction/$patient->id") }}"
-                                            class="text-decoration-none text-dark">
+                                        <a href="{{ url("physical_dysfunction/$patient->id") }}" class="text-decoration-none text-dark">
                                             <img src="{{ asset('images/logo/3.png') }}" class="img-fluid rounded shadow-sm"
                                                 style="width: 45px; height: 45px; object-fit: cover;">
                                             <div class="small mt-1">OTP-PHY.DF</div>
                                         </a>
                                     </div>
                                     <div class="col-4">
-                                        <a href="{{ url("otatp_ortho/$patient->id") }}"
-                                            class="text-decoration-none text-dark">
+                                        <a href="{{ url("otatp_ortho/$patient->id") }}" class="text-decoration-none text-dark">
                                             <img src="{{ asset('images/logo/4.png') }}" class="img-fluid rounded shadow-sm"
                                                 style="width: 45px; height: 45px; object-fit: cover;">
                                             <div class="small mt-1">PT-ORTHO</div>
                                         </a>
                                     </div>
                                     <div class="col-4">
-                                        <a href="{{ url("otatp_pedriatic/$patient->id") }}"
-                                            class="text-decoration-none text-dark">
+                                        <a href="{{ url("otatp_pedriatic/$patient->id") }}" class="text-decoration-none text-dark">
                                             <img src="{{ asset('images/logo/5.png') }}" class="img-fluid rounded shadow-sm"
                                                 style="width: 45px; height: 45px; object-fit: cover;">
                                             <div class="small mt-1">OTP-PEDIATRICS</div>
                                         </a>
                                     </div>
                                     <div class="col-4">
-                                        <a href="{{ url("neuro_pedriatic/$patient->id") }}"
-                                            class="text-decoration-none text-dark">
-                                            <img src="{{ asset('images/logo/6.png') }}"
-                                                class="img-fluid rounded shadow-sm"
+                                        <a href="{{ url("neuro_pedriatic/$patient->id") }}" class="text-decoration-none text-dark">
+                                            <img src="{{ asset('images/logo/6.png') }}" class="img-fluid rounded shadow-sm"
                                                 style="width: 45px; height: 45px; object-fit: cover;">
                                             <div class="small mt-1">PT-NEURO-PED</div>
                                         </a>
@@ -226,10 +252,12 @@
                         </div>
                     </div>
 
+                    @endif
+
 
                 </div>
 
-
+                @if(!empty($apt))
                 <div class="row">
                     <div class="col-lg-12">
                         <div class="card shadow-sm rounded-4 border-0">
@@ -241,15 +269,11 @@
                                         </a>
                                     </li>
                                     <li class="nav-item">
-                                        <a href="#sessionsBody" data-bs-toggle="tab" class="nav-link">
-                                            <i class="bi bi-person-video2 me-1"></i>Sessions
+                                        <a href="#appointmentsdetailtable" data-bs-toggle="tab" class="nav-link ">
+                                            <i class="bi bi-file-check-fill me-1"></i>Appointments Detail
                                         </a>
                                     </li>
-                                    <li class="nav-item">
-                                        <a href="#total_appt_session" data-bs-toggle="tab" class="nav-link">
-                                            <i class="bi bi-globe-americas me-1"></i>Sessions Detail
-                                        </a>
-                                    </li>
+
 
                                 </ul>
 
@@ -265,7 +289,6 @@
                                                         <th>Appt Date</th>
                                                         <th>Doctor</th>
                                                         <th>Status</th>
-                                                        <th>Action</th>
 
                                                     </tr>
                                                 </thead>
@@ -276,43 +299,17 @@
                                         </div>
                                     </div>
 
-                                    <!-- Sessions Tab -->
-                                    <div class="tab-pane fade" id="sessionsBody">
-                                        <div class="table-responsive">
-                                            <table id="all_patient_session_table"
-                                                class="table table-striped table-bordered" style="width:100%">
-                                                <thead>
-                                                    <tr>
-                                                        <th>S.No</th>
-                                                        <th>Session Date</th>
-                                                        <th>Doctor</th>
-                                                        <th>Session Time</th>
-                                                        {{-- <th>Session Fee</th> --}}
-                                                        <th>Session Status</th>
-                                                        <th>Action</th>
-
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <!-- Data will be populated dynamically here -->
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-
-                                    <!-- Visits Tab -->
-                                    <div class="tab-pane fade" id="total_appt_session">
+                                    <div class="tab-pane fade " id="appointmentsdetailtable">
                                         <div class="table-responsive">
                                             <table class="table table-striped table-bordered align-middle text-center">
-                                                <thead class="table-danger">
+                                                <thead class="table-primary">
                                                     <tr>
-                                                        <th>#</th>
-                                                        <th>Appt/Session No.</th>
-                                                        <th>Source</th>
-                                                        <th>Fee</th>
+                                                        <th>Apointment</th>
                                                         <th>Sessions</th>
-                                                        <th>Fee/Session</th>
-
+                                                        <th>Status</th>
+                                                        <th>Tests</th>
+                                                        <th>Reports</th>
+                                                        <th>Notes</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -321,27 +318,6 @@
                                             </table>
                                         </div>
                                     </div>
-                                    {{-- <div class="tab-pane fade" id="payment_history">
-                                        <div class="table-responsive">
-                                            <table id="payment_table" class="table table-striped table-bordered align-middle text-center">
-                                                <thead class="table-danger">
-                                                    <tr>
-                                                        <th>#</th>
-                                                        <th>Appt/Session </th>
-                                                        <th>Status</th>
-                                                        <th>Doctor Name</th>
-                                                        <th>Session Date</th>
-                                                        <th>Session-Payment</th>
-                                                        <th>Fee</th>
-
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <!-- Data will be dynamically loaded here -->
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div> --}}
 
 
                                 </div> <!-- end tab-content -->
@@ -349,108 +325,84 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-xl-6 col-xxl-6">
-                    <div class="card">
-                        <div class="card-header border-0 pb-0">
-                            <h4 class="fs-20 font-w600">Assigned Doctor</h4>
-                        </div>
-                        <div class="card-body">
-                            <div class="media d-sm-flex text-sm-start d-block text-center">
-                                <img alt="image" class="rounded me-sm-4 me-0 mb-2 mb-sm-0" width="130"
-                                    src="images/avatar/2.jpg">
-                                <div class="media-body">
-                                    <h3 class="fs-22 text-black font-w600 mb-0">Dr. Samantha</h3>
-                                    <p class="text-primary">Physical Therapy</p>
-                                    <div class="social-media mb-sm-0 mb-3 justify-content-sm-start justify-content-center">
-                                        <a href="javascript:void(0);"><i class="lab la-instagram ms-0"></i></a>
-                                        <a href="javascript:void(0);"><i class="lab la-facebook-f"></i></a>
-                                        <a href="javascript:void(0);"><i class="lab la-twitter"></i></a>
-                                    </div>
+                @endif
+
+                <div class="row">
+                    @if (!empty($notes) && !empty($apt))
+                        <div class="col-xl-6 col-xxl-6">
+                            <div class="card patient-detail">
+                                <div class="card-header border-0 pb-0">
+                                    <h4 class="fs-20 font-w600 text-white">Clinical Notes</h4>
                                 </div>
-                                <div class="text-center">
-                                    <span class="num">4.0</span>
-                                    <div class="star-icons">
-                                        <i class="las la-star"></i>
-                                        <i class="las la-star"></i>
-                                        <i class="las la-star"></i>
-                                        <i class="las la-star"></i>
-                                        <i class="las la-star"></i>
-                                    </div>
+                                <div class="card-body fs-14 font-w300">
+                                    <table class="table table-borderless align-middle mb-0">
+                                        <tbody>
+                                            @foreach ($notes as $note)
+                                            @php
+                                                if ($note->notes_status == 1) {
+                                                    $img = asset('images/logo/6.png');
+                                                    $view = route('neuro_pedriatic_view', $note->id);
+                                                    $edit = route('neuro_pedriatic_view', $note->id);
+                                                } elseif ($note->notes_status == 2) {
+                                                    $img = asset('images/logo/4.png');
+                                                    $view = route('edit_otatp_ortho', $note->id);
+                                                    $edit = route('edit_otatp_ortho', $note->id);
+                                                } elseif ($note->notes_status == 3) {
+                                                    $img = asset('images/logo/5.png');
+                                                    $view = route('edit_otp_pediatric', $note->id);
+                                                    $edit = route('edit_otp_pediatric', $note->id);
+                                                } elseif ($note->notes_status == 4) {
+                                                    $img = asset('images/logo/3.png');
+                                                    $view = route('edit_physical_dysfunction', $note->id);
+                                                    $edit = route('edit_physical_dysfunction', $note->id);
+                                                } elseif ($note->notes_status == 5) {
+                                                    $img = asset('images/logo/2.png');
+
+                                                    $view = route('edit_soap_ot', $note->id);
+                                                    $edit = route('edit_soap_ot', $note->id);
+                                                } elseif ($note->notes_status == 6) {
+                                                    $img = asset('images/logo/1.png');
+                                                    $view = route('edit_soap_pt', $note->id);
+                                                    $edit = route('edit_soap_pt', $note->id);
+                                                } else {
+                                                    $img = asset('images/dummy_images/no_image.jpg');
+
+                                                    $view = '#';
+                                                    $edit = '#';
+                                                }
+                                            @endphp
+
+                                            <tr>
+                                                <td style="width: 60px;">
+                                                    <img src="{{ $img }}" alt="Patient Image"
+                                                        style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;">
+                                                </td>
+                                                <td>
+                                                    <strong>{{ $note->form_type ?? '' }}</strong>
+                                                </td>
+                                                <td style="text-align: right;">
+
+                                                    <a href="{{ $view }}" target="_blank" title="View" class="me-2">
+                                                        <i class="fas fa-eye text-primary"></i>
+                                                    </a>
+                                                    <a href="{{ $edit }}" title="Edit">
+                                                        <i class="fas fa-edit text-warning"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    @endif
+
                 </div>
-                @if (!empty($notes))
-                <div class="col-xl-6 col-xxl-6">
-                    <div class="card patient-detail">
-                        <div class="card-header border-0 pb-0">
-                            <h4 class="fs-20 font-w600 text-white">Clinical Notes</h4>
-                        </div>
-                        <div class="card-body fs-14 font-w300">
-                            <table class="table table-borderless align-middle mb-0">
-                                <tbody>
-                                    @foreach ($notes as $note)
-                                    @php
-                                        if ($note->notes_status == 1) {
-                                            $img = asset('images/logo/6.png');
-                                            $view = route('neuro_pedriatic_view', $note->id);
-                                            $edit = route('neuro_pedriatic_view', $note->id);
-                                        } elseif ($note->notes_status == 2) {
-                                            $img = asset('images/logo/4.png');
-                                            $view = route('edit_otatp_ortho', $note->id);
-                                            $edit = route('edit_otatp_ortho', $note->id);
-                                        } elseif ($note->notes_status == 3) {
-                                            $img = asset('images/logo/5.png');
-                                            $view = route('edit_otp_pediatric', $note->id);
-                                            $edit = route('edit_otp_pediatric', $note->id);
-                                        } elseif ($note->notes_status == 4) {
-                                            $img = asset('images/logo/3.png');
-                                            $view = route('edit_physical_dysfunction', $note->id);
-                                            $edit = route('edit_physical_dysfunction', $note->id);
-                                        } elseif ($note->notes_status == 5) {
-                                            $img = asset('images/logo/2.png');
 
-                                            $view = route('edit_soap_ot', $note->id);
-                                            $edit = route('edit_soap_ot', $note->id);
-                                        } elseif ($note->notes_status == 6) {
-                                            $img = asset('images/logo/1.png');
-                                            $view = route('edit_soap_pt', $note->id);
-                                            $edit = route('edit_soap_pt', $note->id);
-                                        } else {
-                                            $img = asset('images/dummy_images/no_image.jpg');
 
-                                            $view = '#';
-                                            $edit = '#';
-                                        }
-                                    @endphp
 
-                                    <tr>
-                                        <td style="width: 60px;">
-                                            <img src="{{ $img }}" alt="Patient Image"
-                                                 style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;">
-                                        </td>
-                                        <td>
-                                            <strong>{{ $note->form_type ?? '' }}</strong>
-                                        </td>
-                                        <td style="text-align: right;">
-
-                                            <a href="{{ $view }}" target="_blank" title="View" class="me-2">
-                                                <i class="fas fa-eye text-primary"></i>
-                                            </a>
-                                            <a href="{{ $edit }}" title="Edit">
-                                                <i class="fas fa-edit text-warning"></i>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                @endforeach
-
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-                @endif
 
             </div>
         </div>
@@ -606,32 +558,41 @@
                     <input type="hidden" name="appointment_id" value="{{ $apt_id ?? '' }}">
 
                     <div class="col-md-4">
-                        <div class="form-group">
-                            <label for="session_cat" class="col-form-label">Session Category</label>
-                            <select class="form-control" id="session_cat" name="session_cat">
-                                <option value="">Choose...</option>
-                                <option value="OT">OT</option>
-                                <option value="PT">PT</option>
-                            </select>
+                        <label class="col-form-label">Session Category</label>
+                        <div class="form-check">
+                            <input class="form-check-input session-checkbox" type="checkbox" value="OT" id="checkbox_ot" name="session_types[]">
+                            <label class="form-check-label" for="checkbox_ot">OT</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input session-checkbox" type="checkbox" value="PT" id="checkbox_pt" name="session_types[]">
+                            <label class="form-check-label" for="checkbox_pt">PT</label>
                         </div>
                     </div>
 
-                    <div class="col-md-4">
+                    <div class="col-md-2" id="ot_sessions_box" style="display: none;">
                         <div class="form-group">
-                            <label for="sessions_recommended" class="col-form-label">Sessions Recommended</label>
-                            <input type="number" class="form-control" id="sessions_recommended"
-                                name="sessions_recommended" placeholder="Enter number of sessions">
+                            <label for="ot_sessions" class="col-form-label">OT Sessions</label>
+                            <input type="number" class="form-control" id="ot_sessions" name="ot_sessions"  min="0">
                         </div>
                     </div>
 
-                    <div class="col-md-4">
+                    <div class="col-md-2" id="pt_sessions_box" style="display: none;">
+                        <div class="form-group">
+                            <label for="pt_sessions" class="col-form-label">PT Sessions</label>
+                            <input type="number" class="form-control" id="pt_sessions" name="pt_sessions"  min="0">
+                        </div>
+                    </div>
+
+                    <div class="col-md-2">
                         <div class="form-group">
                             <label for="session_gap" class="col-form-label">Session Gap</label>
-                            <input type="text" class="form-control" id="session_gap" name="session_gap"
-                                placeholder="Enter Session Gap">
+                            <input type="number" class="form-control" id="session_gap" name="session_gap" placeholder="Enter Session Gap" min="0">
                         </div>
                     </div>
                 </div>
+
+
+
 
                 <!-- Test Inputs (hidden initially) -->
                 <!-- Test Recommendations -->
@@ -674,6 +635,8 @@
             <form id="labReportForm" enctype="multipart/form-data">
                 @csrf
                 <input type="hidden" name="patient_id" value="{{ $patient->id ?? '' }}">
+                <input type="hidden" name="appoint_id" value="{{ $apt_id ?? '' }}">
+
 
                 <div class="mb-3">
                     <label class="form-label">Select Lab Report Files</label>
@@ -698,167 +661,36 @@
         </div>
     </div>
 
-    <div class="modal fade" id="editSessionModal" tabindex="-1" aria-labelledby="editSessionModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content shadow rounded-4">
-                <div class="modal-header bg-primary text-white rounded-top-4">
-                    <h5 class="modal-title" id="editSessionModalLabel">Edit Session</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body p-4">
-                    <form id="editSessionForm" autocomplete="off">
-                        <div class="row g-3">
-                            <!-- Input 1: Text -->
-                            <div class="col-lg-4">
-                                <label for="patient_name" class="form-label">Patient Name</label>
-                                <input type="text" class="form-control shadow-sm" id="patient_name" name="patient_name" placeholder="Enter session name" readonly>
-                            </div>
 
-                            <!-- Input 2: Date -->
-                            <div class="col-lg-4">
-                                <label for="inputDate" class="form-label">Date</label>
-                                <input type="date" class="form-control shadow-sm" id="inputDate" name="session_date">
-                            </div>
-
-                            <!-- Input 3: Time -->
-                            <div class="col-lg-4">
-                                <label for="inputTime" class="form-label">Time</label>
-                                <input type="time" class="form-control shadow-sm" id="inputTime" name="session_time" autocomplete="off">
-                            </div>
-
-                            <!-- Hidden Inputs -->
-                            <input type="hidden" name="session_primary_id" id="session_primary_id">
-                            <input type="hidden" name="patient_primary_id" id="patient_primary_id">
-
-                            <input type="hidden" name="source" id="source">
-
-                            <!-- Input 4: Select box -->
-                            <div class="col-lg-4">
-                                <label for="doctor" class="col-form-label">Doctor</label>
-                                <select class="form-control  shadow-sm" id="doctor" name="doctor">
-                                    <option value="">Choose...</option>
-                                    @foreach ($doctors as $doctor)
-                                        <option value="{{ $doctor->id }}">{{ $doctor->doctor_name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="mt-4 text-end">
-                            <button type="submit" class="btn btn-primary px-4">Save</button>
-                            <button type="button" class="btn btn-outline-secondary ms-2" data-bs-dismiss="modal">Cancel</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
+ <!-- Modal for Prescription Notes -->
+<div class="modal fade" id="notesModal" tabindex="-1" aria-labelledby="notesModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="notesModalLabel">Prescription Notes</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-    </div>
-
-    <style>
-        /* Ensure proper z-index and visibility for inputs inside modal */
-        .modal {
-            z-index: 1050; /* Bootstrap default z-index for modals */
-        }
-
-        .modal-backdrop {
-            z-index: 1040; /* Behind modal but in front of other content */
-        }
-
-        /* Make sure the dropdown does not get overlapped by other content */
-        .modal-body select, .modal-body input {
-            z-index: 1060; /* Ensures form elements are on top of other content */
-        }
-
-        /* Specific margin fix for the time dropdown if it's causing issues */
-        .modal-body .form-control {
-            margin-top: 10px; /* Adds space around form controls to avoid overlap */
-        }
-    </style>
-<!-- Transfer Modal -->
-<div class="modal fade" id="transferModal" tabindex="-1" aria-labelledby="transferModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content shadow-lg rounded-4 border-0">
-            <div class="modal-header bg-info text-white rounded-top-4">
-                <h5 class="modal-title" id="transferModalLabel">Transfer Session</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body p-4">
-                <form id="transferForm">
-                    <div class="row align-items-center g-3">
-                        <!-- Source Patient -->
-                        <div class="col-md-5">
-                            <label for="source_patient" class="form-label">Source Patient</label>
-                            <input type="text" class="form-control shadow-sm rounded" id="source_patient" name="source_patient" readonly>
-                        </div>
-
-                        <!-- Arrow Icon -->
-                        <div class="col-md-2 text-center">
-                            <div class="arrow-container">
-                                <i class="bi bi-arrow-right-circle-fill arrow-icon text-primary"></i>
-                            </div>
-                        </div>
-
-                        <div class="col-md-5">
-                            <label for="target_patient" class="form-label">New Patient</label>
-                            <select class="form-control  shadow-sm" id="target_patient" name="target_patient">
-                                <option value="">Choose...</option>
-                                @foreach ($patients as $pat)
-                                    <option value="{{ $pat->id }}">{{ $pat->full_name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="row g-3 mt-3">
-                        <!-- Date -->
-                        <div class="col-md-6">
-                            <label for="transfer_date" class="form-label">Session Date</label>
-                            <input type="date" class="form-control shadow-sm rounded" id="ses_date" name="ses_date" readonly>
-                        </div>
-
-                        <!-- Notes -->
-                        <div class="col-md-6">
-                            <label for="notes" class="form-label">Session Time</label>
-                            <input type="text" class="form-control shadow-sm rounded" id="ses_time" name="ses_time" readonly>
-                        </div>
-                    </div>
-                    <input type="hidden" name="session_primary_id2" id="session_primary_id2">
-                    <input type="hidden" name="patient_primary_id2" id="patient_primary_id2">
-
-                    <input type="hidden" name="source2" id="source2">
-
-                    <div class="text-end mt-4">
-                        <button type="submit" class="btn btn-info px-4 text-white">Transfer</button>
-                        <button type="button" class="btn btn-outline-secondary ms-2" data-bs-dismiss="modal">Cancel</button>
-                    </div>
-                </form>
-
-                <style>
-                    .arrow-container {
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                        height: 100%;
-                    }
-
-                    .arrow-icon {
-                        font-size: 3rem;
-                        font-weight: bold;
-                        color: #0d6efd; /* Bootstrap primary */
-                        animation: arrow-pop 0.3s ease-in-out;
-                    }
-
-                    @keyframes arrow-pop {
-                        0% { transform: scale(0.8); opacity: 0; }
-                        100% { transform: scale(1); opacity: 1; }
-                    }
-                </style>
-
-
-            </div>
+        <div class="modal-body" id="notesContent">
+          <!-- Prescription notes will be loaded here -->
         </div>
+      </div>
     </div>
-</div>
+  </div>
+
+  <!-- Modal for Appointment Notes -->
+  <div class="modal fade" id="appointmentNotesModal" tabindex="-1" aria-labelledby="appointmentNotesModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="appointmentNotesModalLabel">Appointment Notes</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body" id="appointmentNotesContent">
+          <!-- Appointment notes will be loaded here -->
+        </div>
+      </div>
+    </div>
+  </div>
 
 
     @include('layouts.footer')
