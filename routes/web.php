@@ -29,7 +29,7 @@ use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\ClinicalNotesController;
 use App\Http\Controllers\HrController;
 use App\Http\Controllers\VoucherController;
- 
+
 
 Route::get('/', function () {
     return view('welcome');
@@ -46,15 +46,29 @@ Route::get('/switch-language/{locale}', [HomeController::class, 'switchLanguage'
 
 Route::get('patient_list', [PatientController::class, 'patient_list'])->name('patient_list');
 Route::get('patient_profile/{id}', [PatientController::class, 'patient_profile'])->name('patient_profile');
+Route::get('patient_session/{id}', [PatientController::class, 'patient_session'])->name('patient_session');
+
 Route::get('show_patient', [PatientController::class, 'show_patient'])->name('show_patient');
 Route::post('add_patient', [PatientController::class, 'add_patient'])->name('add_patient');
 Route::post('update_patient', [PatientController::class, 'update_patient'])->name('update_patient');
 Route::post('edit_patient', [PatientController::class, 'edit_patient'])->name('edit_patient');
 Route::post('delete_patient', [PatientController::class, 'delete_patient'])->name('delete_patient');
+Route::post('edit_ind_session', [PatientController::class, 'edit_ind_session'])->name('edit_ind_session');
+Route::post('update_ind_session', [PatientController::class, 'update_ind_session'])->name('update_ind_session');
+
+Route::post('transfer_ind_session', [PatientController::class, 'transfer_ind_session'])->name('transfer_ind_session');
+Route::post('update_transfer_ind_session', [PatientController::class, 'update_transfer_ind_session'])->name('update_transfer_ind_session');
+
+
 Route::get('/patient/{id}/appointments-and-sessions', [PatientController::class, 'getAppointmentsAndSessions']);
+// routes/web.php
+Route::get('download-file/{file_id}', [PatientController::class, 'download'])->name('file.download');
+
 
 // routes/web.php
 Route::get('/patient/{id}/appointments', [PatientController::class, 'getAppointments']);
+Route::get('/patient/{id}/appointmentsdetail', [PatientController::class, 'appointmentsdetail']);
+
 Route::get('/patient/{id}/sessions', [PatientController::class, 'getSessions']);
 Route::get('/patient/{id}/payments', [PatientController::class, 'getPayments']);
 Route::get('show_all_sessions_by_patient', [PatientController::class, 'show_all_sessions_by_patient'])->name('show_all_sessions_by_patient');
@@ -169,7 +183,10 @@ Route::get('session_detail/{id}', [SessionCONTROLLER::class, 'session_detail'])-
 Route::get('/session_detail2/{id}', [SessionCONTROLLER::class, 'session_detail2'])->name('session_detail2');
 Route::get('/search_patient', [SessionCONTROLLER::class, 'search_patient'])->name('search_patient');
 Route::post('check_voucher', [SessionCONTROLLER::class, 'check_voucher'])->name('check_voucher');
-
+Route::get('session_data', [SessionCONTROLLER::class, 'session_data'])->name('session_data');
+Route::get('show_session_data', [SessionCONTROLLER::class, 'show_session_data'])->name('show_session_data');
+Route::post('edit_ind_session2', [SessionCONTROLLER::class, 'edit_ind_session2'])->name('edit_ind_session2');
+Route::post('update_ind_session2', [SessionCONTROLLER::class, 'update_ind_session2'])->name('update_ind_session2');
 
 
 Route::get('sation', [SationController::class, 'index'])->name('sation');
@@ -332,10 +349,10 @@ Route::post('get_product_type', [PosController::class, 'get_product_type']);
 Route::post('add_pending_order', [PosController::class, 'add_pending_order']);
 Route::match(['get', 'post'],'hold_orders', [PosController::class, 'hold_orders']);
 Route::match(['get', 'post'],'get_hold_data', [PosController::class, 'get_hold_data']);
- 
+
 Route::get('pos_bill/{order_no}', [PosController::class, 'pos_bill'])->name('pos_bill');
 Route::post('get_customer_data', [PosController::class, 'get_customer_data'])->name('get_customer_data');
- 
+
 Route::get('make_profit', [PosController::class, 'make_profit'])->name('make_profit');
 Route::get('bills/{order_no}', [PosController::class, 'bills'])->name('bills');
 Route::post('add_pos_patient', [PosController::class, 'add_pos_patient']);
@@ -416,11 +433,11 @@ Route::get('/edit_otp_pediatric/{id}', [ClinicalNotesController::class, 'edit_ot
 Route::post('/update_otp_pediatric/{id}', [ClinicalNotesController::class, 'update_otp_pediatric'])->name('update_otp_pediatric');
 
 Route::post('/add_soap_ot', [ClinicalNotesController::class, 'add_soap_ot'])->name('add_soap_ot');
-Route::get('edit_soap_ot/{id}', [ClinicalNotesController::class, 'edit_soap_ot'])->name('edit_soap_ot');
+Route::get('soap_ot_all/{id}', [ClinicalNotesController::class, 'soap_ot_all'])->name('soap_ot_all');
 Route::post('update_soap_ot/{id}', [ClinicalNotesController::class, 'update_soap_ot'])->name('update_soap_ot');
 
 Route::post('/add_soap_pt', [ClinicalNotesController::class, 'add_soap_pt'])->name('add_soap_pt');
-Route::get('/edit_soap_pt/{id}', [ClinicalNotesController::class, 'edit_soap_pt'])->name('edit_soap_pt');
+Route::get('/soap_pt_all/{id}', [ClinicalNotesController::class, 'soap_pt_all'])->name('soap_pt_all');
 Route::post('/update_soap_pt/{id}', [ClinicalNotesController::class, 'update_soap_pt'])->name('update_soap_pt');
 
 Route::post('/add_otatp_ortho', [ClinicalNotesController::class, 'add_otatp_ortho'])->name('add_otatp_ortho');

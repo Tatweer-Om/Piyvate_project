@@ -1,15 +1,15 @@
 <?php
 	$locale = session('locale');
-    
+
 	if($locale=="ar")
 	{
-		 
-		$class='rtl'; 
+
+		$class='rtl';
 	}
 	else
 	{
 		$class='ltr';
-         
+
 	}
 ?>
 <!DOCTYPE html>
@@ -53,6 +53,8 @@
     <link href="{{ asset('vendor/bootstrap-material-datetimepicker/css/bootstrap-material-datetimepicker.css') }}" rel="stylesheet">
     <link href="{{ url('css/style.css') }}" rel="stylesheet">
     <link class="main-css" href="{{ asset('css/style-rtl.css') }}" rel="stylesheet">
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
 
 
 
@@ -935,11 +937,11 @@
                             <li class="nav-item dropdown notification_dropdown">
                                 @if($locale == 'ar')
                                     <a class="nav-link" href="{{ route('switch_language', ['locale' => 'en']) }}">
-                                        <img src="{{ asset('flags/us.png') }}" class="me-1" height="12"> 
+                                        <img src="{{ asset('flags/us.png') }}" class="me-1" height="12">
                                     </a>
                                 @else
                                     <a class="nav-link" href="{{ route('switch_language', ['locale' => 'ar']) }}">
-                                        <img src="{{ asset('flags/om.png') }}" class="me-1" height="12"> 
+                                        <img src="{{ asset('flags/om.png') }}" class="me-1" height="12">
                                     </a>
                                 @endif
                             </li>

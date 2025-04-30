@@ -26,6 +26,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use App\Models\AppointPaymentExpense;
 use App\Models\PatientPrescription;
+use App\Models\SessionData;
 use App\Models\SessionPaymentExpense;
 
 class AppointmentController extends Controller
@@ -107,12 +108,11 @@ public function show_appointment()
                 $modal2 = '<span class="badge ' . $statusClass . ' px-2 py-1">' . $statusIcon . $statusText . '</span>';
                 $modal = '<a href="edit_appointment/' . $appointment->id . '" class="me-3"><i class="fa fa-pencil fs-18 text-success"></i></a><a href="javascript:void(0);" onclick=cancel("' . $appointment->id . '")><i class="fa fa-ban fs-18 text-danger"></i></a>';
             }
-            elseif ($appointment->session_status == 7) {  // New condition for Appointment Done
+            elseif ($appointment->session_status == 7) {
                 $statusClass = 'badge-success';
                 $statusText = 'Appointment Done';
                 $statusIcon = '<i class="fa fa-check-circle"></i> ';
                 $modal2 = '<span class="badge ' . $statusClass . ' px-2 py-1">' . $statusIcon . $statusText . '</span>';
-                // No modal buttons for status 7
                 $modal = '';  // Remove edit and cancel icons
             }
              else {
@@ -176,6 +176,47 @@ public function show_appointment()
 
 public function add_appointment(Request $request)
 {
+
+
+    $doctor_id = $request->doctor;
+    $appointment_date = $request->appointment_date;
+    $time_from = $request->time_from;
+    $time_to = $request->time_to;
+
+    // 1. Check for overlapping appointment
+    if ($doctor_id) {
+        $existingAppointment = Appointment::where('doctor_id', $doctor_id)
+            ->where('appointment_date', $appointment_date)
+            ->where(function ($query) use ($time_from, $time_to) {
+                $query->where(function ($q) use ($time_from, $time_to) {
+                    $q->where('time_from', '<', $time_to)
+                      ->where('time_to', '>', $time_from);
+                });
+            })
+            ->first();
+
+        if ($existingAppointment) {
+            return response()->json([
+                'status' => 9,
+                'message' => 'Doctor already has an appointment during this time.',
+            ], 409);
+        }
+    }
+
+    // 2. Check for session with status = 4 that overlaps
+    $existingSession = SessionData::where('session_date', $appointment_date)
+        ->where('status', 4)
+        ->whereTime('session_time', '>=', $time_from)
+        ->whereTime('session_time', '<=', $time_to)
+        ->first();
+
+    if ($existingSession) {
+        return response()->json([
+            'status' => 10,
+            'message' => 'A session with status 4 already exists during this time.',
+        ], 409);
+    }
+
 
 
     $user_id = Auth::id();
@@ -557,10 +598,9 @@ public function sessions_list(){
 public function getSessionPrice(Request $request)
 {
     $sessionType = $request->session_type;
-    $noOfSessions = $request->no_of_sessions; // Default to 1
+    $noOfSessions = $request->no_of_sessions ?? 1; // Default to 1
     $ministryId = (int) $request->ministry_id; // Convert to integer
     $offerId = (int) $request->offer_id; // Convert to integer
-
     // If session type is "offer", get price from the "offers" table
     if ($sessionType == 'offer' && $offerId) {
         $offer = Offer::where('id', $offerId)->first();
@@ -570,7 +610,7 @@ public function getSessionPrice(Request $request)
             return response()->json(['success' => false, 'message' => 'Offer not found']);
         }
 
-        $totalPrice = $offer->offer_price * $offer->sessions;
+        $totalPrice = $offer->offer_price;
         return response()->json(['success' => true, 'session_price' => $totalPrice, 'offer_sessions'=>$offer->sessions]);
     }
 
@@ -590,7 +630,7 @@ public function getSessionPrice(Request $request)
     }
 
     // Calculate total price
-    $totalPrice = $session->session_price * $noOfSessions;
+    $totalPrice = $session->session_price;
 
     return response()->json(['success' => true, 'session_price' => $totalPrice]);
 }
@@ -664,13 +704,7 @@ public function getSessionPrice(Request $request)
             ? json_decode($request->sessions, true)
             : $request->sessions;
 
-
-
-
-
             $appoint = Appointment::find($request->appointment_id);
-
-
 
             if ($appoint) {
                 if ($request->session_type == 'ministry') {
@@ -688,15 +722,13 @@ public function getSessionPrice(Request $request)
                 dd('Appointment not found');
             }
 
-
-
-
             $single_session_price = ($request->total_sessions > 0)
                 ? $request->total_price / $request->total_sessions
                 : 0;
 
-            // Creating a new appointment record
             $appointment = new AppointmentDetail();
+            $prescription= PatientPrescription::where('appointment_id', $request->appointment_id)->first();
+
             $appointment->appointment_id = $request->appointment_id;
             $appointment->session_type = $request->session_type;
             $appointment->ministry_id = $request->ministry_id;
@@ -704,37 +736,58 @@ public function getSessionPrice(Request $request)
             $appointment->patient_id = $request->patient_id;
             $appointment->doctor_id = $request->doctor_id;
             $appointment->total_price = $request->total_price;
-            $appointment->total_sessions = $request->total_sessions;
+            $appointment->ot_sessions = $prescription->ot_sessions;
+            $appointment->pt_sessions = $prescription->pt_sessions;
+            $appointment->session_gap = $prescription->session_gap;
+            $appointment->session_cat = $prescription->session_cat;
+            $appointment->total_sessions = $prescription->sessions_reccomended;;
             $appointment->single_session_price = $single_session_price;
             $appointment->session_data = json_encode($sessions);
-
             $appointment->user_id = $user->id;
             $appointment->contract_payment = 1;
             $appointment->added_by = $user->id;
             $appointment->branch_id = $user->branch_id;
             $appointment->save();
 
+
+            $ot_sessions_left =  $appointment->ot_sessions ?? 0;
+                $pt_sessions_left =  $appointment->pt_sessions ?? 0;
             if (!empty($sessions)) {
                 foreach ($sessions as $session) {
-                    // Check if session already exists to avoid duplication
-                    $existingSession = AppointmentSession::where('appointment_id', $appointment->id)
-                                                         ->where('session_date', $session['session_date'])
-                                                         ->where('session_time', $session['session_time'])
-                                                         ->first();
 
-                    // Only create a new session if it doesn't exist
-                    if (!$existingSession) {
+                    if ($ot_sessions_left > 0) {
+                        $session_cat = 'OT'; // First $ot_sessions_left sessions will be OT
+                        $ot_sessions_left--; // Decrease the count of remaining OT sessions
+                    } else {
+                        $session_cat = 'PT'; // If no OT sessions left, assign PT
+                    }
+
                         $sessiondetail = new AppointmentSession();
+
                         $sessiondetail->appointment_id = $appointment->id;
                         $sessiondetail->patient_id = $appointment->patient_id;
                         $sessiondetail->doctor_id = $appointment->doctor_id;
+                        $sessiondetail->session_cat = $session_cat;
                         $sessiondetail->contract_payment = 1;
                         $sessiondetail->session_date = $session['session_date'];
                         $sessiondetail->session_time = $session['session_time'];
                         $sessiondetail->session_price = $single_session_price;
                         $sessiondetail->status = '1';
                         $sessiondetail->save();
-                    }
+                        $session_data = new SessionData();
+                        $session_data->main_appointment_id = $appointment->id;
+                        $session_data->patient_id = $appointment->patient_id;
+                        $session_data->doctor_id = $appointment->doctor_id;
+                        $session_data->session_cat = $session_cat;
+                        $session_data->contract_payment = 1;
+                        $session_data->session_date = $session['session_date'];
+                        $session_data->session_time = $session['session_time'];
+                        $session_data->session_price = $single_session_price;
+                        $session_data->source = 2;
+                        $session_data->status = 1;
+
+                        $session_data->save();
+
                 }
             }
 
@@ -771,7 +824,7 @@ public function getSessionPrice(Request $request)
         if (is_array($request->payment_methods) && !empty($request->payment_methods)) {
             foreach ($request->payment_methods as $paymentData) {
                 if (!isset($paymentData['account_id'], $paymentData['amount'])) {
-                    continue; // Skip incomplete entry
+                    continue;
                 }
 
                 $paymentMethodId = $paymentData['account_id'];
@@ -822,13 +875,11 @@ public function getSessionPrice(Request $request)
             }
         }
 
-        // If none of the payment methods were valid or had amounts
         if (!$hasValidPayment) {
             $payment = new SessionsPayment();
             $payment->appointment_id = $request->appointment_id2;
             $payment->account_id = null;
             $payment->contract_payment = ($request->payment_status == 3) ? 1 : null;
-
             $payment->payment_status = $request->payment_status;
             $payment->amount = $request->input('totalAmount');
             $payment->user_id = $user_id;
@@ -836,8 +887,6 @@ public function getSessionPrice(Request $request)
             $payment->added_by = $user->id;
             $payment->save();
         }
-
-
         return response()->json([
             'success' => true,
             'message' => 'Payment saved successfully',

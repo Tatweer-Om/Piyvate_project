@@ -16,6 +16,7 @@ return new class extends Migration
             $table->integer('appointment_id');
             $table->string('patient_id');
             $table->string('doctor_id')->nullable();
+            $table->string('session_cat')->nullable();
             $table->string('contract_payment')->nullable()->comment('1 = Pending, 2 = Completed');
             $table->date('session_date')->nullable();
             $table->time('session_time')->nullable();

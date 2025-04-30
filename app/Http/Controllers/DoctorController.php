@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use App\Models\AllSessioDetail;
 use App\Models\AppointmentDetail;
 use App\Models\AppointmentSession;
+use App\Models\SessionData;
 use Illuminate\Support\Facades\DB;
 use App\Models\SessionsonlyPayment;
 use Illuminate\Support\Facades\Auth;
@@ -310,57 +311,11 @@ class DoctorController extends Controller
                 ];
             });
 
-        $appointmentSessions = DB::table('appointment_sessions')
-            ->join('patients', 'appointment_sessions.patient_id', '=', 'patients.id') // Join with patients table
-            ->where('appointment_sessions.doctor_id', $doctorId)
-            ->whereDate('appointment_sessions.session_date', now()->toDateString()) // Fetch only today's sessions
-            ->select(
-                'appointment_sessions.id',
-                'appointment_sessions.session_time',
-                'appointment_sessions.patient_id',
-                'appointment_sessions.session_date',
-                'appointment_sessions.status',
-                'patients.full_name as patient_name', // Fetch the patient_name from the patients table
-                DB::raw("'appointment_sessions' as source")
-            )
-            ->orderByDesc('appointment_sessions.session_time') // Order by session time, most recent first
-            ->take(6) // Limit to the latest 6 sessions
+            $sessions = SessionData::select('session_data.*', 'patients.full_name as patient_name')
+            ->join('patients', 'session_data.patient_id', '=', 'patients.id')
+            ->where('session_data.doctor_id', $doctorId)
+            ->where('session_data.status', 4)
             ->get();
-
-        // Fetch today's all session details with patient names, ordered by session time (most recent first)
-        $allSessions = DB::table('all_sessio_details')
-            ->join('patients', 'all_sessio_details.patient_id', '=', 'patients.id') // Join with patients table
-            ->where('all_sessio_details.doctor_id', $doctorId)
-            ->whereDate('all_sessio_details.session_date', now()->toDateString()) // Fetch only today's sessions
-            ->select(
-                'all_sessio_details.session_id',
-                DB::raw("'' as session_time"),
-                'all_sessio_details.patient_id',
-                'all_sessio_details.session_date',
-                'all_sessio_details.session_time',
-                'all_sessio_details.status',
-                'patients.full_name as patient_name', // Fetch the patient_name from the patients table
-                DB::raw("'all_sessio_details' as source")
-            )
-            ->orderByDesc('all_sessio_details.session_time') // Order by session time, most recent first
-            ->take(6) // Limit to the latest 6 sessions
-            ->get();
-
-
-            $matchingSessions = collect();
-
-
-            foreach ($allSessions as $session) {
-                // Check if the session_id exists in the SessionsonlyPayment table
-                $paymentExists = SessionsonlyPayment::where('session_id', $session->session_id)->exists();
-
-                if ($paymentExists) {
-                    $matchingSessions->push($session);
-                }
-            }
-
-        $sessions = $appointmentSessions->merge($matchingSessions)->take(6);
-
 
 
         return response()->json([

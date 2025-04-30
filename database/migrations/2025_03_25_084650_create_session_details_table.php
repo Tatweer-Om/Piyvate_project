@@ -21,6 +21,9 @@ return new class extends Migration
             $table->integer('doctor_id');
             $table->decimal('total_fee', 10, 2);
             $table->integer('total_sessions');
+            $table->string('session_cat')->nullable();
+            $table->integer('ot_sessions')->default(0);
+            $table->integer('pt_sessions')->default(0);
             $table->string('contract_payment')->nullable()->comment('1 = Pending, 2 = Completed');
 
             $table->decimal('single_session_price', 10, 2);

@@ -33,12 +33,16 @@
                                     @endif
 
                                     <h5>Total Sessions: <span id="total_sessions" class="fw-normal">{{ $session->no_of_sessions ?? '' }}</span></h5>
-                                    <h5>Total Fee: <span id="total_fee" class="fw-normal">{{ $session->session_fee ?? '' }}</span></h5>
+                                    <h5>Total Fee:
+                                        <span id="total_fee" class="fw-normal">
+                                            {{ ($session_price ?? '') }}
+                                        </span>
+                                    </h5>
 
                                     <!-- Hidden Inputs for Submission -->
                                     <input type="hidden" name="session_id" value="{{ $session->id ?? '' }}">
                                     <input type="hidden" name="session_type" value="{{ $session->session_type ?? '' }}">
-                                    
+
                                     <input type="hidden" name="patient_id" value="{{ $session->patient_id ?? '' }}">
                                     <input type="hidden" name="doctor_id" value="{{ $session->doctor_id ?? '' }}">
                                     <input type="hidden" name="mini_id" value="{{ $session->ministry_id ?? '' }}">
@@ -94,14 +98,14 @@
 
                     <!-- Total Amount -->
                     <div class="mb-3 text-center">
-                        <h4 class="fw-bold text-danger">Total Amount: OMR <span id="total_amount">{{ $session->session_fee ?? '0.000' }}</span></h4>
+                        <h4 class="fw-bold text-danger">Total Amount: OMR <span id="total_amount">{{ ($session_price ?? '') }}</span></h4>
                         <h4 class="fw-bold text-danger" style="disply:none" id="voucher_discount_div">Discount: OMR <span id="voucher_discount">0.000</span></h4>
-                        <h4 class="fw-bold text-danger" style="disply:none" id="after_discount_div">After Discount: OMR <span id="after_discount">{{ $session->session_fee ?? '0.000' }}</span></h4>
-                        
+                        <h4 class="fw-bold text-danger" style="disply:none" id="after_discount_div">After Discount: OMR <span id="after_discount">{{ ($session_price ?? '') }}</span></h4>
+
                     </div>
-                    <input type="hidden" id="total_amount_input" value="{{ $session->session_fee ?? 0.000 }}">
+                    <input type="hidden" id="total_amount_input" value=" {{ ($session_price ?? '') }}">
                     <input type="hidden" id="total_amount_discount" name="total_amount_discount" value="0.000">
-                    <input type="hidden" id="total_amount_after_discount" value="{{ $session->session_fee ?? 0.000 }}">
+                    <input type="hidden" id="total_amount_after_discount" value=" {{ ($session_price ?? '') }}">
 
                     <hr>
 
@@ -169,6 +173,6 @@
 
 
 
- 
+
 @include('layouts.footer')
 @endsection
