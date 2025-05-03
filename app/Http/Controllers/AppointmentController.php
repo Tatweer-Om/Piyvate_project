@@ -74,7 +74,7 @@ public function show_appointment()
 
     if ($appointments->count() > 0) {
         foreach ($appointments as $appointment) {
-            $total_sessions = (int) AppointmentDetail::where('appointment_id', $appointment->id)->value('total_sessions');
+            $total_sessions = (int) SessionData::where('main_appointment_id', $appointment->id)->count();
             $statusClass = '';
             $statusText = '';
             $statusIcon = '';
@@ -199,7 +199,7 @@ public function add_appointment(Request $request)
             return response()->json([
                 'status' => 9,
                 'message' => 'Doctor already has an appointment during this time.',
-            ], 409);
+            ]);
         }
     }
 
@@ -214,7 +214,7 @@ public function add_appointment(Request $request)
         return response()->json([
             'status' => 10,
             'message' => 'A session with status 4 already exists during this time.',
-        ], 409);
+        ]);
     }
 
 

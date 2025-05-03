@@ -188,16 +188,50 @@
 
                             // Append data to the table
                             tableBody.append(`
-                        <tr>
-                            <td>${index + 1}</td>
-                            <td>${item.appointment_no}</td>
-                            <td>${sessionInfo}</td>
+                                <tr>
+                                    <td>${index + 1}</td>
+                                    <td>${item.appointment_no}</td>
+                                    <td>${sessionInfo}</td>
+                                    <td>
+                                        <span>Fee: ${item.fee}</span> <br><br>
+                                        <span> Payment: ${item.paid_amount/2}</span> <br><br>
 
-                            <td>${item.fee}</td>
-                            <td>${sessionCount}</td>
-                            <td>${singleSessionFee}</td>
-                        </tr>
-                    `);
+                                        ${
+                                            (item.account_amounts && Object.keys(item.account_amounts).length > 0)
+                                            ? `<span> ${
+                                                Object.entries(item.account_amounts)
+                                                    .map(([name, amount]) => `${name}: ${amount}`)
+                                                    .join('<br>')
+                                            }</span> <br><br>`
+                                            : ''
+                                        }
+
+                                        ${
+                                            (item.voucher_codes && item.voucher_codes.length > 0)
+                                            ? `<span>Vouchers: ${item.voucher_codes.join(', ')}</span> <br>`
+                                            : ''
+                                        }
+
+                                        ${
+                                            (item.voucher_amounts && item.voucher_amounts.length > 0)
+                                            ? `<span>Voucher Amount: ${
+                                                item.voucher_amounts.reduce((sum, val) => sum + val, 0)
+                                            }</span> `
+                                            : (item.total_voucher_amount
+                                                ? `<span>Voucher Amount: ${item.total_voucher_amount}</span> `
+                                                : ''
+                                            )
+                                        }
+                                    </td>
+                                    <td>
+                                    sessions:    ${item.session_count} <br>
+                                    Payment Type:    ${item.payment_type} <br>
+                                        ${item.name}
+                                    </td>
+                                    <td>${item.single_session_fee}</td>
+                                </tr>
+                            `);
+
                         });
                     } else {
                         tableBody.append(
@@ -248,7 +282,7 @@
             "pagingType": "numbers",
             "ordering": true,
             "order": [
-                [2, "desc"]
+                [1, "desc"]
             ] // Default order by Session Date
         });
 

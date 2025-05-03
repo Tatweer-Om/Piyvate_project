@@ -1093,6 +1093,7 @@
                         <li><a href="{{ url('appointments') }}">Add Appointment</a></li>
                         <li><a href="{{ url('all_appointments') }}"> All appointments</a></li>
                         <li><a href="{{ url('all_sessions') }}">Direct Session Bookings</a></li>
+                        <li><a href="{{ url('session_data') }}">All Sessions Data</a></li>
                         <li><a href="{{ url('sessions_list') }}">Add Sessions</a></li>
                         <li><a href="{{ url('session') }}">Session Setting</a></li>
 
