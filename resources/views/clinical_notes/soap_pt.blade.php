@@ -27,21 +27,16 @@
                 <img src="{{ asset('images/logo/piyalogo-1.png') }}" alt="Center Logo" height="50">
                 <div>
                     HN: <input type="text" style="width:150px;" class="input-line" name="hn" value="{{ $patient->HN ?? '' }}">
-                    PT: <input type="text" class="input-line" name="pt" value="{{ old('pt', $session_data->pt ?? '') }}"><br>
-                    Name: <input type="text"  style="width:150px; class="input-line" name="full_name"
-                        value="{{ $patient->full_name ?? '' }}">
-                    Age: <input type="text" class="input-short input-line" style="width:150px; name="age"
-                        value="{{ $patient->age ?? '' }}"> <br>
+                    PT: <input type="text" class="input-line" name="pt" value="{{ old('pt', $soap->pt ?? '') }}"><br>
+                    Name: <input type="text" style="width:150px;" class="input-line" name="full_name" value="{{ $patient->full_name ?? '' }}">
+                    Age: <input type="text" class="input-short input-line" style="width:150px;" name="age" value="{{ $patient->age ?? '' }}"><br>
                     Gender:
                     <label>
-                        <input type="radio" name="gender" value="Male"
-                            {{ ($patient->gender ?? '') == 'Male' ? 'checked' : '' }}> M
+                        <input type="radio" name="gender" value="Male" {{ ($patient->gender ?? '') == 'Male' ? 'checked' : '' }}> M
                     </label>
                     <label>
-                        <input type="radio" name="gender" value="Female"
-                            {{ ($patient->gender ?? '') == 'Female' ? 'checked' : '' }}> F
-                    </label>
-                    <br>
+                        <input type="radio" name="gender" value="Female" {{ ($patient->gender ?? '') == 'Female' ? 'checked' : '' }}> F
+                    </label><br>
                     Therapist: <input type="text" class="input-line" name="therapist" value="{{ $doctor ?? '' }}">
                 </div>
             </div>
@@ -55,30 +50,26 @@
             <div class="section" id="section-template">
                 <div class="section-header" style="position: relative;">
                     Physical Therapy Follow up and Re-assessment
-
                 </div>
 
                 <div class="soap-wrapper">
                     <div class="soap-content">
                         <div class="row">
                             Date
+                            <!-- Use session_data date or soap date depending on the mode -->
                             <input type="date" class="input-line" style="width:120px; border:none; border-bottom:1px solid #000;" name="date"
-                                value="{{ old('date', $soap->date ?? '') }}">
+                                value="{{ old('date', isset($soap->date) ? \Carbon\Carbon::parse($soap->date)->format('Y-m-d') : \Carbon\Carbon::parse($session_data->session_date)->format('Y-m-d')) }}">
 
                             Time
+                            <!-- Use session_data time or soap time depending on the mode -->
                             <input type="time" class="input-line" style="width:100px; border:none; border-bottom:1px solid #000;" name="time"
-                                value="{{ old('time', $soap->time ?? '') }}">
+                                value="{{ old('time', isset($soap->time) ? \Carbon\Carbon::parse($soap->time)->format('H:i') : \Carbon\Carbon::parse($session_data->session_time)->format('H:i')) }}">
 
-                            V/S BP <input type="text" class="input-line" style="width:30px;" name="bp"
-                                value="{{ old('bp', $soap->bp ?? '') }}">
-                            P <input type="text" class="input-line" style="width:40px;" name="pulse"
-                                value="{{ old('pulse', $soap->pulse ?? '') }}">
-                            O2sat <input type="text" class="input-line" style="width:30px;" name="o2sat"
-                                value="{{ old('o2sat', $soap->o2sat ?? '') }}">
-                            % T <input type="text" class="input-line" style="width:40px;" name="temp"
-                                value="{{ old('temp', $soap->temp ?? '') }}">
-                            PS: <input type="text" class="input-line" style="width:30px;" name="ps"
-                                value="{{ old('ps', $soap->ps ?? '') }}"> /10
+                            V/S BP <input type="text" class="input-line" style="width:30px;" name="bp" value="{{ old('bp', $soap->bp ?? '') }}">
+                            P <input type="text" class="input-line" style="width:40px;" name="pulse" value="{{ old('pulse', $soap->pulse ?? '') }}">
+                            O2sat <input type="text" class="input-line" style="width:30px;" name="o2sat" value="{{ old('o2sat', $soap->o2sat ?? '') }}">
+                            % T <input type="text" class="input-line" style="width:40px;" name="temp" value="{{ old('temp', $soap->temp ?? '') }}">
+                            PS: <input type="text" class="input-line" style="width:30px;" name="ps" value="{{ old('ps', $soap->ps ?? '') }}"> /10
                         </div>
 
                         <div class="row">S:<br>
@@ -95,10 +86,8 @@
                         </div>
 
                         <div class="signature-line">
-                            #<input type="text" class="input-line" name="number"
-                                value="{{ old('number', $soap->number ?? '') }}">
-                            PT Signature <input type="text" class="input-line" name="signature"
-                                value="{{ old('signature', $soap->signature ?? '') }}">
+                            #<input type="text" class="input-line" name="number" value="{{ old('number', $soap->number ?? '') }}">
+                            PT Signature <input type="text" class="input-line" name="signature" value="{{ old('signature', $soap->signature ?? '') }}">
                         </div>
                     </div>
 
@@ -116,10 +105,11 @@
 
             <div class="col-lg-12">
                 <button type="submit" class="custom-grey-button">
-                    {{ isset($session_data) ? 'Update' : 'Save' }} Prescription
+                    {{ isset($soap) ? 'Update' : 'Save' }} Prescription
                 </button>
             </div>
         </form>
+
 
 
         <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.0/fabric.min.js"></script>

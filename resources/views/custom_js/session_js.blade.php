@@ -467,7 +467,7 @@ $(document).ready(function () {
             '{{ trans('messages.Please_select_atleast_a_payment_method', [], session('locale')) }}');
             return;
         }
-        if(parseFloat(totalPaid) != final_amount)
+        if(parseFloat(totalPaid) != final_amount && paymentStatus !== 3)
         {
             show_notification('error',
             '{{ trans('messages.paid_amount_less_greater_total_amount_lang', [], session('locale')) }}');

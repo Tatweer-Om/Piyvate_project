@@ -7,11 +7,28 @@
 
 
     <div class="content-body">
-        @if (session('error'))
-        <div class="alert alert-danger">
+        @if (session('success'))
+        <div class="alert alert-info alert-dismissible fade show" role="alert" id="flash-alert">
+            {{ session('success') }}
+        </div>
+    @endif
+
+    @if (session('error'))
+        <div class="alert alert-danger alert-dismissible fade show" role="alert" id="flash-alert">
             {{ session('error') }}
         </div>
-    @endif        <div class="container-fluid">
+    @endif
+    <script>
+        setTimeout(function () {
+            let alert = document.getElementById('flash-alert');
+            if (alert) {
+                alert.style.transition = 'opacity 0.5s ease';
+                alert.style.opacity = '0';
+                setTimeout(() => alert.remove(), 500); // Remove from DOM
+            }
+        }, 4000); // 2 seconds
+    </script>
+    <div class="container-fluid">
 
 
             <div class="row">
@@ -82,8 +99,14 @@
                                     </div>
                                     <div class="progress" style="height: 8px; background-color: #f9ad08;">
                                         <div class="progress-bar" role="progressbar"
-                                            style="width: {{ ($total_session_taken / $patient_total_sessions) * 100 }}%;
-                                                background-color: {{ $total_session_taken > 0 ? '#28a745' : '#f9ad08' }};"
+                                        @php
+                                        $percentage = $patient_total_sessions > 0
+                                            ? ($total_session_taken / $patient_total_sessions) * 100
+                                            : 0;
+                                    @endphp
+
+                                    style="width: {{ $percentage }}%;"
+                                                                                    background-color: {{ $total_session_taken > 0 ? '#28a745' : '#f9ad08' }};"
                                             aria-valuenow="{{ $total_session_taken }}"
                                             aria-valuemin="0"
                                             aria-valuemax="{{ $patient_total_sessions }}">
@@ -145,21 +168,32 @@
 
                             <!-- SOAP Links -->
                             <div class="d-flex justify-content-around mt-auto">
+                                @if ($session && $session->patient_id)
                                 <a href="{{ url('soap_pt_all/' . $session->patient_id) }}" class="text-decoration-none text-dark">
-                                    <div class="d-flex flex-column align-items-center">
-                                        <img src="{{ asset('images/logo/1.png') }}" class="rounded-circle shadow-sm mb-2"
-                                             style="width: 60px; height: 60px; object-fit: cover;">
-                                        <div class="fw-bold small">SOAP-PT</div>
-                                    </div>
+                            @endif
+                                <div class="d-flex flex-column align-items-center">
+                                    <img src="{{ asset('images/logo/1.png') }}" class="rounded-circle shadow-sm mb-2"
+                                         style="width: 60px; height: 60px; object-fit: cover;">
+                                    <div class="fw-bold small">SOAP-PT</div>
+                                </div>
+                            @if ($session && $session->patient_id)
                                 </a>
+                            @endif
 
-                                <a href="{{ url('soap_ot_all/' . $session->patient_id ) }}" class="text-decoration-none text-dark">
-                                    <div class="d-flex flex-column align-items-center">
-                                        <img src="{{ asset('images/logo/2.png') }}" class="rounded-circle shadow-sm mb-2"
-                                             style="width: 60px; height: 60px; object-fit: cover;">
-                                        <div class="fw-bold small">SOAP-OT</div>
-                                    </div>
-                                </a>
+
+
+                            @if ($session && $session->patient_id)
+                            <a href="{{ url('soap_ot_all/' . $session->patient_id ) }}" class="text-decoration-none text-dark">
+                        @endif
+                            <div class="d-flex flex-column align-items-center">
+                                <img src="{{ asset('images/logo/2.png') }}" class="rounded-circle shadow-sm mb-2"
+                                     style="width: 60px; height: 60px; object-fit: cover;">
+                                <div class="fw-bold small">SOAP-OT</div>
+                            </div>
+                        @if ($session && $session->patient_id)
+                            </a>
+                        @endif
+
                             </div>
 
 
@@ -225,7 +259,7 @@
                                                     <th>#</th>
                                                     <th>Appt/Session No.</th>
                                                     <th>Source</th>
-                                                    <th>Fee</th>
+                                                    <th>Pay-Status</th>
                                                     <th>Sessions</th>
                                                     <th>Fee/Session</th>
 

@@ -91,7 +91,7 @@
 
 
 
-                    <canvas class="body-canvas" id="canvas-{{ $index }}"></canvas>
+                    <canvas class="body-canvas" style="margin-top: 50px;" id="canvas-{{ $index }}"  height="200"></canvas>
                     <input type="hidden" class="canvas-image" id="canvas-image-{{ $index }}" value="{{ asset($data->soap_image) }}">
                     <input type="hidden" class="ticked-points" id="ticked-points-{{ $index }}" value="{{ $data->ticked_points }}">
 

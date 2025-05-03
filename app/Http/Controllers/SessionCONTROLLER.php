@@ -178,6 +178,7 @@ class SessionCONTROLLER extends Controller
             } else {
                 $session_price = ($session->no_of_sessions ?? 0) * ($session->session_fee ?? 0);
             }
+            $payment= SessionsonlyPayment::where('session_id', $session->id)->first();
 
             return view('appointments.session_detail', [
                 'patient_name' => Patient::find($session->patient_id)->full_name ?? 'Unknown',
@@ -188,7 +189,8 @@ class SessionCONTROLLER extends Controller
                 'session'=>$session,
                 'offer_name'   => $offer_name,
                 'mini_name'    => $mini_name,
-                'accounts'=>$accounts
+                'accounts'=>$accounts,
+                'payment'=>$payment,
             ]);
         }
 
@@ -234,6 +236,7 @@ class SessionCONTROLLER extends Controller
                 $session_data = SessionList::find($request->session_id);
                 $appointment->session_id = $request->session_id;
                 $appointment->session_type = $request->session_type;
+
                 $appointment->ministry_id = $request->mini_id;
                 $appointment->offer_id = $request->offer_id;
                 $appointment->patient_id = $request->patient_id;
@@ -241,8 +244,14 @@ class SessionCONTROLLER extends Controller
                 $appointment->ot_sessions = $session_data->ot_sessions;
                 $appointment->pt_sessions = $session_data->pt_sessions;
                 $appointment->doctor_id = $request->doctor_id;
-                $appointment->total_fee = $request->session_fee;
+                $appointment->contract_payment = 1;
                 $appointment->total_sessions = $request->no_of_sessions;
+                if($appointment->session_type=='ministry'){
+                    $appointment->total_fee = $request->session_fee *  $appointment->total_sessions;
+                }
+                else{
+                    $appointment->total_fee = $request->session_fee;
+                }
                 $appointment->single_session_price = $single_session_price;
                 $appointment->session_data = $request->sessions;
                 $appointment->user_id = $user->id;
@@ -393,7 +402,6 @@ public function save_session_payment2(Request $request)
     }
 
 
-
     if (is_array($request->payment_methods) && !empty($request->payment_methods)) {
 
 
@@ -412,6 +420,7 @@ public function save_session_payment2(Request $request)
                 $payment->voucher_code = $voucher_code;
                 $payment->voucher_amount = $voucher_discount;
                 $payment->voucher_added = $voucher_added;
+                $payment->contract_payment = 1;
                 $payment->voucher_user_id = $voucher_user_id;
                 $payment->voucher_id = $voucher_id;
                 $payment->user_id = $user_id;
@@ -447,21 +456,21 @@ public function save_session_payment2(Request $request)
             }
         }
     }
- 
-    
- 
-    // else {
 
-    //     $payment = new SessionsonlyPayment();
-    //     $payment->session_id = $request->session_id;
-    //     $payment->account_id = null; // No account since no payment method
-    //     $payment->payment_status = $request->payment_status;
-    //     $payment->amount = $request->input('totalAmount'); // No amount since no payment made
-    //     $payment->user_id = $user_id;
-    //     $payment->branch_id = $user->branch_id;
-    //     $payment->added_by = $user->id;
-    //     $payment->save();
-    // }
+
+
+    else {
+
+        $payment = new SessionsonlyPayment();
+        $payment->session_id = $request->session_id;
+        $payment->account_id = null; // No account since no payment method
+        $payment->payment_status = $request->payment_status;
+        $payment->amount = $request->input('totalAmount'); // No amount since no payment made
+        $payment->user_id = $user_id;
+        $payment->branch_id = $user->branch_id;
+        $payment->added_by = $user->id;
+        $payment->save();
+    }
 
     return response()->json([
         'success' => true,
@@ -478,9 +487,7 @@ return view('appointments.all_sessions');
 public function show_sessions()
 {
     $sno = 0;
-    $sessions = SessionList::whereHas('payment', function ($query) {
-        $query->whereNotNull('session_id');
-    })->get();
+    $sessions = SessionList::get();
     if ($sessions->count() > 0) {
         foreach ($sessions as $appointment) {
             $total_sessions = AllSessioDetail::where('session_id', $appointment->id)->count();
@@ -580,22 +587,37 @@ public function show_sessions()
     public function show_session_data()
     {
         $sno = 0;
-        $currentDate = Carbon::now();
-
-        $nextWeek = Carbon::now()->addDays(7);
-
-        $twoDaysAgo = Carbon::now()->subDays(2);
+        $currentDate = Carbon::now()->toDateString();
+        $nextday = Carbon::now()->addDays(1)->toDateString();
 
         $sessions = SessionData::
-            whereBetween('session_date', [$twoDaysAgo, $nextWeek])
+            whereBetween('session_date', [$currentDate, $nextday])
             ->get();
 
         if ($sessions->count() > 0) {
             foreach ($sessions as $appointment) {
-                $modal = '
-                <a href="javascript:void(0);" class="me-3 edit-staff" data-bs-toggle="modal" data-bs-target="#editSessionModal2" onclick="edit('. $appointment->id.' )">
-                    <i class="fa fa-pencil fs-18 text-success"></i>
-                </a>';
+                $modal = '';
+
+                if ($appointment->status == 1) {
+                    // Pending → edit pencil with tooltip
+                    $modal = '
+                    <a href="javascript:void(0);" class="me-3 edit-staff" data-bs-toggle="modal" data-bs-target="#editSessionModal2" onclick="edit('. $appointment->id.' )" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit Appointment">
+                        <i class="fa fa-pencil fs-18 text-success"></i>
+                    </a>';
+                } elseif ($appointment->status == 2) {
+                    // Done → double green check with tooltip
+                    $modal = '
+                    <a href="javascript:void(0);" class="me-3" data-bs-toggle="tooltip" data-bs-placement="top" title="Session Done">
+                        <i class="fa fa-check-double fs-18 text-secondary"></i>
+                    </a>';
+                } elseif ($appointment->status == 4) {
+                    $modal = '
+                    <a href="javascript:void(0);" class="me-3" data-bs-toggle="tooltip" data-bs-placement="top" title="On-going Session">
+                        <i class="fa fa-check fs-18 text-info"></i>
+                    </a>';
+                }
+
+
 
                 // Get patient and doctor names
                 $patient_name = Patient::where('id', $appointment->patient_id)->value('full_name');
@@ -618,7 +640,7 @@ public function show_sessions()
                 // Add the session data to the response
                 $json[] = array(
                     $modal,
-                    '<span class="patient-info ps-0"><a href="' . url('patient_session/' . $appointment->patient_id . '-' . 1) . '">' . $patient_name . '</a></span>',
+                    '<span class="patient-info ps-0"><a href="' . url('patient_session/' . $appointment->patient_id) . '">' . $patient_name . '</a></span>',
                     '<span class="text-nowrap ms-2">' . $doctor_name . '</span>',
                     $appointment->session_date,
                     $appointment->session_time,

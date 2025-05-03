@@ -30,10 +30,11 @@ class ClinicalNotesController extends Controller
 
         $session_data = SessionData::where('id', $id)->where('session_cat', 'OT')->first();
 
+        $soap= SoapOT::where('session_id', $id)->first();
+
         if (!$session_data) {
             return redirect()->back()->with('error', 'Session not found.');
         }
-
         $patient_id = $session_data->patient_id;
         $patient = Patient::find($patient_id);
         $session = SessionList::find($session_data->main_session_id);
@@ -42,16 +43,10 @@ class ClinicalNotesController extends Controller
             ->whereIn('session_status', [0, 2, 5])
             ->first();
 
-
-
-        $doctor = null;
-        if ($apt && $session_data->doctor_id) {
             $doctor = Doctor::where('id', $session_data->doctor_id)->value('doctor_name');
-        } elseif ($session && $session_data->doctor_id) {
-            $doctor = Doctor::where('id', $session_data->doctor_id)->value('doctor_name');
-        }
 
-        return view('clinical_notes.soap_ot', compact('patient', 'session_data', 'session', 'apt', 'doctor',));
+
+        return view('clinical_notes.soap_ot', compact('patient', 'soap', 'session_data', 'session', 'apt', 'doctor',));
     }
 
 
@@ -65,7 +60,7 @@ class ClinicalNotesController extends Controller
             return redirect()->back()->with('error', 'Session not found.');
         }
 
-        $soap= SoapPT::WHERE('session_id', $id)->first();
+        $soap= SoapPT::where('session_id', $id)->first();
 
 
         $patient_id = $session_data->patient_id;
@@ -92,7 +87,7 @@ class ClinicalNotesController extends Controller
     public function soap_pt_all($id)
     {
 
-        $session_data = SoapOT::where('patient_id', $id)->get();
+        $session_data = SoapPT::where('patient_id', $id)->get();
 
         if ($session_data->isEmpty()) {
             return redirect()->back()->with('error', 'Session not found.');

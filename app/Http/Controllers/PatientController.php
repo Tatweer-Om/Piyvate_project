@@ -29,10 +29,12 @@ use Illuminate\Support\Facades\File;
 use App\Models\AppointPaymentExpense;
 use App\Models\ClinicalNotes;
 use App\Models\Doctor;
+use App\Models\Offer;
 use App\Models\SessionData;
 use App\Models\SessionPaymentExpense;
 use App\Models\SessionsonlyPayment;
 use App\Models\SessionsonlyPaymentExp;
+use App\Models\Voucher;
 use Illuminate\Contracts\Session\Session;
 
 use function PHPUnit\Framework\returnValueMap;
@@ -91,12 +93,14 @@ class PatientController extends Controller
         }
 
 
-        $sessions = SessionList::where('patient_id', $id)
+        $sessions = SessionDetail::where('patient_id', $id)
         ->whereNotNull('ministry_id')
-        ->get(['ministry_id', 'no_of_sessions', 'session_fee', 'id']);
+        ->where('contract_payment', 1)
+        ->get(['ministry_id', 'total_sessions', 'total_fee', 'id']);
 
     $app_sessions = AppointmentDetail::where('patient_id', $id)
         ->whereNotNull('ministry_id')
+        ->where('contract_payment', 1)
         ->get(['ministry_id', 'total_sessions', 'total_price', 'appointment_id']);
 
     $ministry_name = null;
@@ -105,14 +109,15 @@ class PatientController extends Controller
     // Check which one has data
     if ($sessions->isNotEmpty()) {
         $firstSession = $sessions->first();
+        $payment= SessionsonlyPayment::where('session_id', $firstSession->session_id)->value('amount');
         $ministry_name = GovtDept::where('id', $firstSession->ministry_id)->value('govt_name');
 
         $ministry_data = [
             'type' => 'session',
             'id'=>$firstSession->id,
             'ministry_id' => $firstSession->ministry_id,
-            'no_of_sessions' => $firstSession->no_of_sessions,
-            'session_fee' => $firstSession->session_fee,
+            'no_of_sessions' => $firstSession->total_sessions,
+            'session_fee' => $firstSession->total_fee,
         ];
     } elseif ($app_sessions->isNotEmpty()) {
         $firstAppSession = $app_sessions->first();
@@ -130,10 +135,19 @@ class PatientController extends Controller
     $patients = Patient::all();
 
 
-    $detail = AppointmentDetail::where('appointment_id', $apt_id)
-    ->where('ministry_id', null)
-    ->first();
-return view('patients.patient_profile', compact('patient', 'doctors', 'patients', 'notes', 'patient_total_sessions', 'total_session_taken', 'total_active_session', 'total_apt', 'country_name', 'accounts', 'apt', 'apt_id', 'age', 'ministry_name', 'ministry_data'));
+    $check1 = AppointmentDetail::where('patient_id', $id)
+    ->whereNotNull('ministry_id')->where('contract_payment', 1)->first();
+
+
+
+$check2 = SessionDetail::where('patient_id', $id)
+    ->whereNotNull('ministry_id')->where('contract_payment', 1)->first();
+
+
+// Merge both filtered sets
+
+
+return view('patients.patient_profile', compact('patient', 'check1', 'check2', 'doctors', 'patients', 'notes', 'patient_total_sessions', 'total_session_taken', 'total_active_session', 'total_apt', 'country_name', 'accounts', 'apt', 'apt_id', 'age', 'ministry_name', 'ministry_data'));
 
     }
 
@@ -406,7 +420,7 @@ return view('patients.patient_profile', compact('patient', 'doctors', 'patients'
                 $statusIcon = '<i class="fa fa-calendar"></i> ';
                 $badge = '<span class="badge ' . $statusClass . ' px-2 py-1">' . $statusIcon . $statusText . '</span>';
             } elseif ($appointment->session_status == 3) {
-                $total_sessions = (int) AppointmentDetail::where('appointment_id', $appointment->id)->value('total_sessions');
+                $total_sessions = (int) SessionData::where('main_appointment_id', $appointment->id)->count();
 
                 $statusText = 'Sessions: ';
                 $statusIcon = '<i class="fa fa-list"></i> ';
@@ -526,31 +540,58 @@ public function show_all_sessions_by_patient(Request $request)
             $statusText = 'On-going';
         }
 
-        $modal = '
-        <a href="javascript:void(0);" class="me-3" data-bs-toggle="modal" data-bs-target="#transferModal" onclick="transfer(' . $session->id . ', \'' . $session->source . '\')">
-            <i class="fa fa-right-left fs-18 text-info"></i>
-        </a>
-        <a href="javascript:void(0);" class="me-3 edit-staff" data-bs-toggle="modal" data-bs-target="#editSessionModal" onclick="edit(' . $session->id . ', \'' . $session->source . '\')">
-            <i class="fa fa-pencil fs-18 text-success"></i>
-        </a>';
+        $modal = '';
+        $sessionDate = Carbon::parse($session->session_date)->format('Y-m-d');
+        $today = Carbon::now()->format('Y-m-d');
 
-    if ($session->session_cat === 'OT') {
-        $url = url('soap_ot/' . $session->id);
-        $img = asset('images/logo/1.png');
-    } elseif ($session->session_cat === 'PT') {
-        $url = url('soap_pt/' . $session->id);
-        $img = asset('images/logo/2.png');
-    } else {
-        $url = '#';
-        $img = asset('images/logo/default.png'); // Optional default image
-    }
+        // Check if status is Pending (1)
+        if ($session->status == 1) {
+            // Show edit + transfer icons with tooltips
+            $modal .= '
+                <a href="javascript:void(0);" class="me-3" data-bs-toggle="modal" data-bs-target="#transferModal" onclick="transfer(' . $session->id . ', \'' . $session->source . '\')" title="Transfer Sessions from one patient to other" data-bs-toggle="tooltip">
+                    <i class="fa fa-right-left fs-18 text-info"></i>
+                </a>
+                <a href="javascript:void(0);" class="me-3 edit-staff" data-bs-toggle="modal" data-bs-target="#editSessionModal" onclick="edit(' . $session->id . ', \'' . $session->source . '\')" title="Edit Session" data-bs-toggle="tooltip">
+                    <i class="fa fa-pencil fs-18 text-success"></i>
+                </a>';
 
-    $modal .= '
-        <a href="' . $url . '" class="me-3 text-decoration-none text-dark">
-            <img src="' . $img . '" class="rounded-circle shadow-sm mb-2" style="width: 30px; height: 30px; object-fit: cover;">
-        </a>';
+            // Only show image if session date IS today
+            if ($sessionDate == $today) {
+                if ($session->session_cat === 'OT') {
+                    $url = url('soap_ot/' . $session->id);
+                    $img = asset('images/logo/1.png');
+                } elseif ($session->session_cat === 'PT') {
+                    $url = url('soap_pt/' . $session->id);
+                    $img = asset('images/logo/2.png');
+                } else {
+                    $url = '#';
+                    $img = asset('images/logo/default.png');
+                }
 
+                $modal .= '
+                    <a href="' . $url . '" class="me-3 text-decoration-none text-dark" title="Edit Session" data-bs-toggle="tooltip">
+                        <img src="' . $img . '" class="rounded-circle shadow-sm mb-2" style="width: 30px; height: 30px; object-fit: cover;">
+                    </a>';
+            }
 
+        } elseif ($session->status != 1) {
+            // For all other statuses except On-going (4), show only the image
+            if ($session->session_cat === 'OT') {
+                $url = url('soap_ot/' . $session->id);
+                $img = asset('images/logo/1.png');
+            } elseif ($session->session_cat === 'PT') {
+                $url = url('soap_pt/' . $session->id);
+                $img = asset('images/logo/2.png');
+            } else {
+                $url = '#';
+                $img = asset('images/logo/default.png');
+            }
+
+            $modal .= '
+                <a href="' . $url . '" class="me-3 text-decoration-none text-dark" >
+                    <img src="' . $img . '" class="rounded-circle shadow-sm mb-2" style="width: 30px; height: 30px; object-fit: cover;">
+                </a>';
+        }
 
 
         // Add session data to the response
@@ -572,56 +613,170 @@ public function show_all_sessions_by_patient(Request $request)
 }
 
 
+
+
+
 public function getAppointmentsAndSessions($id)
 {
-    // Get appointments for the given patient_id
     $appointments = AppointmentDetail::where('patient_id', $id)
         ->with('doctor:id,doctor_name')
         ->orderBy('created_at', 'desc')
         ->get();
 
-    // Get sessions for the same patient_id
     $sessions = SessionDetail::where('patient_id', $id)
-        ->with('doctor:id,doctor_name') // You can add more relationships if necessary
+        ->with('doctor:id,doctor_name')
         ->orderBy('created_at', 'desc')
         ->get();
 
-    // Merge both appointments and sessions into one array
     $appointmentsAndSessions = [];
 
     foreach ($appointments as $appointment) {
-        $apt_no= Appointment::where('id', $appointment->appointment_id)->value('appointment_no');
+        $payments = SessionsPayment::where('appointment_id', $appointment->appointment_id)->get();
+        $detail = AppointmentDetail::where('appointment_id', $appointment->appointment_id)->first();
+
+        $name = '';
+        if ($detail->offer_id) {
+            $name = Offer::where('id', $detail->offer_id)->value('offer_name');
+        }
+        if ($detail->ministry_id) {
+            $name = GovtDept::where('id', $detail->ministry_id)->value('govt_name');
+        }
+
+        $isContractPayment = $detail->ministry_id ? true : false;
+        $contractPaymentStatus = $detail->contract_payment;
+
+        $total_paid_amount = 0;
+        $account_amounts = [];
+        $voucher_codes = [];
+        $voucher_amounts = [];
+
+        foreach ($payments as $payment) {
+            $total_paid_amount += $payment->amount ?? 0;
+
+            if ($payment->account_id) {
+                $account_name = Account::where('id', $payment->account_id)->value('account_name');
+                if ($account_name) {
+                    if (!isset($account_amounts[$account_name])) {
+                        $account_amounts[$account_name] = 0;
+                    }
+                    $account_amounts[$account_name] += $payment->amount ?? 0;
+                }
+            }
+
+            if ($payment->voucher_code) {
+                $voucher_codes[] = $payment->voucher_code;
+            }
+
+            if ($payment->voucher_amount) {
+                $voucher_amounts[] = $payment->voucher_amount;
+            }
+        }
+
+        // === APPLY CONTRACT PAYMENT RULES ===
+        if ($isContractPayment && $contractPaymentStatus == 1) {
+            $total_paid_amount = 'Pending';
+            $account_amounts = [];
+        }
+
+        $apt_no = Appointment::where('id', $appointment->appointment_id)->value('appointment_no') ?? '';
+        $total_sessions = SessionData::where('main_appointment_id', $appointment->appointment_id)->count();
 
         $appointmentsAndSessions[] = [
-            'type' => 'appointment', // Mark as appointment
+            'type' => 'appointment',
             'appointment_no' => $apt_no,
-            'fee' => $appointment->total_price,
-            'session_count' => $appointment->total_sessions, // Assuming a relationship exists
-            'single_session_fee' => ($appointment->total_sessions > 0)
-                ? $appointment->total_price / $appointment->total_sessions
+            'fee' => $appointment->total_price ?? 0,
+            'paid_amount' => $total_paid_amount,
+            'account_amounts' => $account_amounts,
+            'payment_type' => $detail->session_type,
+            'name' => $name,
+            'voucher_codes' => array_unique($voucher_codes),
+            'voucher_amounts' => $voucher_amounts,
+            'session_count' => $total_sessions,
+            'single_session_fee' => ($total_sessions > 0)
+                ? $appointment->total_price / $total_sessions
                 : 0,
+            'contract_payment_check' => [
+                'is_contract' => $isContractPayment,
+                'status' => $contractPaymentStatus,
+            ],
         ];
-
     }
 
     foreach ($sessions as $session) {
-        // Get the session number for the current session
-        $session_no = SessionList::where('id', $session->session_id)->value('session_no');
+        $payments = SessionsonlyPayment::where('session_id', $session->session_id)->get();
+        $detail = SessionDetail::where('session_id', $session->session_id)->first();
+
+        $name = '';
+        if ($detail->offer_id) {
+            $name = Offer::where('id', $detail->offer_id)->value('offer_name');
+        }
+        if ($detail->ministry_id) {
+            $name = GovtDept::where('id', $detail->ministry_id)->value('govt_name');
+        }
+
+        $isContractPayment = $detail->ministry_id ? true : false;
+        $contractPaymentStatus = $detail->contract_payment;
+
+        $total_paid_amount = 0;
+        $account_amounts = [];
+        $voucher_codes = [];
+        $voucher_amounts_sum = 0;
+
+        foreach ($payments as $payment) {
+            $total_paid_amount += $payment->amount ?? 0;
+
+            if ($payment->account_id) {
+                $account_name = Account::where('id', $payment->account_id)->value('account_name');
+                if ($account_name) {
+                    if (!isset($account_amounts[$account_name])) {
+                        $account_amounts[$account_name] = 0;
+                    }
+                    $account_amounts[$account_name] += $payment->amount ?? 0;
+                }
+            }
+
+            if ($payment->voucher_code) {
+                $voucher_codes[] = $payment->voucher_code;
+            }
+
+            if ($payment->voucher_amount) {
+                $voucher_amounts_sum += $payment->voucher_amount;
+            }
+        }
+
+        // === APPLY CONTRACT PAYMENT RULES ===
+        if ($isContractPayment && $contractPaymentStatus == 1) {
+            $total_paid_amount = 'Pending';
+            $account_amounts = [];
+        }
+
+        $session_no = SessionList::where('id', $session->session_id)->value('session_no') ?? '';
+        $total_sessions = SessionData::where('main_session_id', $session->session_id)->count();
 
         $appointmentsAndSessions[] = [
-            'type' => 'session', // Mark as session
+            'type' => 'session',
             'appointment_no' => $session_no,
-            'fee' => $session->total_fee,
-            'session_count' => $session->total_sessions, // One session at a time
-            'single_session_fee' => ($session->total_sessions > 0)
-                ? $session->total_fee / $session->total_sessions
+            'fee' => $session->total_fee ?? 0,
+            'paid_amount' => $total_paid_amount,
+            'account_amounts' => $account_amounts,
+            'payment_type' => $detail->session_type,
+            'name' => $name,
+            'voucher_codes' => array_unique($voucher_codes),
+            'total_voucher_amount' => $voucher_amounts_sum,
+            'session_count' => $total_sessions,
+            'single_session_fee' => ($total_sessions > 0)
+                ? $session->total_fee / $total_sessions
                 : 0,
+            'contract_payment_check' => [
+                'is_contract' => $isContractPayment,
+                'status' => $contractPaymentStatus,
+            ],
         ];
     }
 
-    // Return as JSON
     return response()->json($appointmentsAndSessions);
 }
+
 
 
 
@@ -691,11 +846,12 @@ public function submit_contract_payment(Request $request)
 
                 if ($paidAmount > 0) {
                     if ($type === 'appointment') {
-                        // Save to SessionsPayment
+
                         $payment = new SessionsPayment();
                         $payment->appointment_id = $apt_id;
                     } else {
-                        // Save to Sessiononlypayment
+
+
                         $payment = new SessionsonlyPayment();
                         $payment->session_id = $session_id;
                     }
@@ -1053,7 +1209,7 @@ public function patient_session($id, Request $request) {
 
 
 
-    $id = $request->id;
+    $patient_id = $request->id;
 
     $user_id = Auth::id();
     $data = User::where('id', $user_id)->first();
@@ -1061,8 +1217,7 @@ public function patient_session($id, Request $request) {
     $branch_id = $data->branch_id;
 
 
-    $session= SessionData::where('id', $id)->first();
-    $patient_id=$session->patient_id;
+    $session= SessionData::where('patient_id', $patient_id)->first();
 
 
         $patient = Patient::where('id', $patient_id)->first();

@@ -14,11 +14,25 @@
         <div class="page-titles d-flex justify-content-between align-items-center">
             <ol class="breadcrumb mb-0">
                 <li class=""><a href="javascript:void(0)">Dashboard /</a></li>
-                <li class="active"><a href="javascript:void(0)">sessions</a></li>
+                <li class="active"><a href="javascript:void(0)">Sessions List</a></li>
             </ol>
             <div class="d-flex gap-2">
-                <a href="sessions" class="btn btn-primary btn-rounded">+ session</a>
-                <a href="{{ url('sessions_list') }}" class="btn btn-secondary btn-rounded">+ Session</a>
+                <a href="appointments" class="btn btn-secondary btn-rounded" data-bs-toggle="tooltip" data-bs-placement="top" title="Add a new appointment">
+                    <i class="bi bi-calendar-plus"></i> Add Appointment
+                </a>
+
+                <a href="{{ url('sessions_list') }}" class="btn btn-secondary btn-rounded" data-bs-toggle="tooltip" data-bs-placement="top" title="Add a new session">
+                    <i class="bi bi-journal-plus"></i> Add Sessions
+                </a>
+
+                <a href="{{ url('session_data') }}" class="btn btn-secondary btn-rounded" data-bs-toggle="tooltip" data-bs-placement="top" title="View all session data">
+                    <i class="bi bi-collection"></i> All Sessions Data
+                </a>
+
+                <a href="{{ url('all_sessions') }}" class="btn btn-secondary btn-rounded" data-bs-toggle="tooltip" data-bs-placement="top" title="See the Direct sessions Booking list">
+                    <i class="bi bi-list-ul"></i> Sessions List
+                </a>
+
             </div>
         </div>
 

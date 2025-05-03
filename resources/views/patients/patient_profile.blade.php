@@ -174,13 +174,13 @@
                         </div>
                     </div>
                     <!-- Compact Button Panel Card -->
-                    @if(!empty($apt))
+                    @if($total_active_session>0)
                     <div class="col-lg-6 mb-3">
                         <div class="card shadow-sm rounded-3 position-relative">
                             <!-- Display appointment number at top-right corner -->
-                            <div class="position-absolute top-0 end-0 p-3">
+                            {{-- <div class="position-absolute top-0 end-0 p-3">
                                 <span class="fw-bold text-primary" style="font-size: 0.6rem;">#{{ $apt->appointment_no }}</span>
-                            </div>
+                            </div> --}}
 
 
                             <div class="card-body p-3 text-center">
@@ -190,11 +190,12 @@
 
                                 <!-- Existing buttons -->
                                 <div class="d-grid gap-2 mb-3">
-                                    @if(!empty($detail))
+                                    @if (!empty($check1) || !empty($check2))
                                     <button class="btn btn-info btn-sm rounded-pill" data-bs-toggle="modal" data-bs-target="#paymentModal">
                                         Contract Payment
                                     </button>
-                                    @endif
+                                @endif
+
 
                                     <button class="btn btn-success btn-sm rounded-pill" data-bs-toggle="offcanvas"
                                         data-bs-target="#rightPopup" aria-controls="rightPopup">Add Prescription</button>
