@@ -221,6 +221,11 @@
                                             <i class="bi bi-globe-americas me-1"></i>Sessions Detail
                                         </a>
                                     </li>
+                                    <li class="nav-item">
+                                        <a href="#sessiontransfer" data-bs-toggle="tab" class="nav-link">
+                                            <i class="bi bi-globe-americas me-1"></i>Transfer History
+                                        </a>
+                                    </li>
                                 </ul>
 
 
@@ -262,6 +267,25 @@
                                                     <th>Pay-Status</th>
                                                     <th>Sessions</th>
                                                     <th>Fee/Session</th>
+
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="tab-pane fade" id="sessiontransfer">
+                                    <div class="table-responsive">
+                                        <table class="table table-striped table-bordered align-middle text-center">
+                                            <thead class="table-danger">
+                                                <tr>
+                                                    <th>Session Detail</th>
+                                                    <th>Tranffered By</th>
+                                                    <th>Transffered To</th>
+                                                    <th>Transfer Date</th>
+                                                    <th>Added By</th>
 
                                                 </tr>
                                             </thead>

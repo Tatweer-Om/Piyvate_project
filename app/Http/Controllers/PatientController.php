@@ -613,6 +613,50 @@ public function show_all_sessions_by_patient(Request $request)
 }
 
 
+// PatientController.php
+
+public function session_transfer($id)
+{
+    $transfer_logs = DB::table('session_transfer_logs')
+        ->where(function ($query) use ($id) {
+            $query->where('old_patient_id', $id)
+                  ->orWhere('new_patient_id', $id);
+        })
+        ->get();
+
+    // Collect patient IDs and session IDs for batch queries
+    $patientIds = $transfer_logs->pluck('old_patient_id')
+        ->merge($transfer_logs->pluck('new_patient_id'))
+        ->unique()
+        ->toArray();
+
+    $sessionIds = $transfer_logs->pluck('session_id')->unique()->toArray();
+
+    // Get patient names
+    $patients = DB::table('patients')
+        ->whereIn('id', $patientIds)
+        ->pluck('full_name', 'id'); // returns [id => name]
+
+    $sessions = DB::table('session_data')
+        ->whereIn('id', $sessionIds)
+        ->get(['id', 'session_date', 'session_time']) // get all needed columns
+        ->keyBy('id'); // returns [id => session_data]
+
+    // Attach names and session data to each log
+    $transfer_logs = $transfer_logs->map(function ($log) use ($patients, $sessions) {
+        $log->old_patient_name = $patients[$log->old_patient_id] ?? 'Unknown';
+        $log->new_patient_name = $patients[$log->new_patient_id] ?? 'Unknown';
+        $log->session_date = $sessions[$log->session_id]->session_date ?? 'No date';
+        $log->session_time = $sessions[$log->session_id]->session_time ?? 'No time';
+        $log->created_at_date = \Carbon\Carbon::parse($log->created_at)->format('Y-m-d');
+        $log->added_by_name = $log->transferred_by ?? 'Unknown';  // directly from table
+        return $log;
+    });
+
+    return response()->json($transfer_logs);
+}
+
+
 
 
 
@@ -680,10 +724,18 @@ public function getAppointmentsAndSessions($id)
 
         $apt_no = Appointment::where('id', $appointment->appointment_id)->value('appointment_no') ?? '';
         $total_sessions = SessionData::where('main_appointment_id', $appointment->appointment_id)->count();
+        $taken_session= SessionData::where('main_appointment_id', $appointment->appointment_id)->where('status', 2)->count();
+        $pending= SessionData::where('main_appointment_id', $appointment->appointment_id)->where('status', 1)->count();
+        $ot= SessionData::where('main_appointment_id', $appointment->appointment_id)->where('session_cat', 'OT')->count();
+        $pt= SessionData::where('main_appointment_id', $appointment->appointment_id)->where('session_cat', 'PT')->count();
 
         $appointmentsAndSessions[] = [
             'type' => 'appointment',
             'appointment_no' => $apt_no,
+            'taken_session'=>$taken_session,
+            'pending'=>$pending,
+            'ot'=>$ot,
+            'pt'=>$pt,
             'fee' => $appointment->total_price ?? 0,
             'paid_amount' => $total_paid_amount,
             'account_amounts' => $account_amounts,
@@ -752,12 +804,21 @@ public function getAppointmentsAndSessions($id)
 
         $session_no = SessionList::where('id', $session->session_id)->value('session_no') ?? '';
         $total_sessions = SessionData::where('main_session_id', $session->session_id)->count();
+        $taken_session= SessionData::where('main_session_id', $session->session_id)->where('status', 2)->count();
+        $pending= SessionData::where('main_session_id', $session->session_id)->where('status', 1)->count();
+        $ot= SessionData::where('main_session_id', $session->session_id)->where('session_cat', 'OT')->count();
+        $pt= SessionData::where('main_session_id', $session->session_id)->where('session_cat', 'PT')->count();
+
 
         $appointmentsAndSessions[] = [
             'type' => 'session',
             'appointment_no' => $session_no,
             'fee' => $session->total_fee ?? 0,
             'paid_amount' => $total_paid_amount,
+            'taken_session'=>$taken_session,
+            'pending'=>$pending,
+            'ot'=>$ot,
+            'pt'=>$pt,
             'account_amounts' => $account_amounts,
             'payment_type' => $detail->session_type,
             'name' => $name,
@@ -1185,6 +1246,7 @@ $session= SessionData::where('id', $id)->first();
         ->where('id', $id)
         ->update([
             'patient_id' => $new_patient_id,
+            'status'=>3,
 
         ]);
 
@@ -1278,25 +1340,21 @@ $patients= Patient::all();
 
 
 
-    public function download($fileId)
+    public function download($file_id)
+
     {
-        // Retrieve the file record from the database
-        $file = Patientfiles::find($fileId);
 
-        if ($file) {
-            // Construct the full path to the file
-            $filePath = public_path('images/lab_reports/' . $file->file_path);
+        $file = Patientfiles::where('id', $file_id)->first();  // adjust to your actual model
 
-            // Check if the file exists before attempting to download
-            if (file_exists($filePath)) {
-                return response()->download($filePath, $file->file_name);
-            } else {
-                return abort(404, 'File not found');
-            }
+        $filePath = public_path('images/lab_reports/' . $file->file_name);
+
+        if (file_exists($filePath)) {
+            return response()->download($filePath);
+        } else {
+            abort(404, 'File not found');
         }
-
-        return abort(404, 'File not found');
     }
+
 
 
 }
