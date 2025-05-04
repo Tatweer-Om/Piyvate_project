@@ -4,6 +4,7 @@
         fetchAppointments(patientId);
         fetchAppointmentsdetail(patientId);
         fetchAppointmentsAndSessions(patientId);
+        fetchsessiontransfer(patientId);
 
         $('a[href="#sessionsBody"]').click(function() {
             fetchSessions(patientId);
@@ -62,26 +63,27 @@
 
                         <td>${(appointment.test_recommendations && appointment.test_recommendations.length > 0) ? appointment.test_recommendations.join(', ') : 'No test'}</td>
 
-                       <td>
-                                ${
-                                    (appointment.files && appointment.files.length > 0)
-                                        ? appointment.files.map(file => `
-                                            <div class="d-flex align-items-start gap-2 mb-2 flex-column align-items-start">
-                                                <div class="d-flex align-items-center gap-2">
-                                                    <img src="/images/dummy_images/file.png" alt="File Icon" width="20">
-                                                    <a
-                                                        href="${'{{ route('file.download', ['file_id' => ':file_id']) }}'.replace(':file_id', file.file_id)}"
-                                                        class="btn btn-sm btn-link text-decoration-none p-0"
-                                                        title="${file.file_name}" <!-- Tooltip here -->
-                                                    >
-                                                        <i class="fas fa-download"></i>
-                                                    </a>
-                                                </div>
+                      <td>
+                            ${
+                                (appointment.files && appointment.files.length > 0)
+                                    ? appointment.files.map(file => `
+                                        <div class="d-flex align-items-start gap-2 mb-2 flex-column align-items-start">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <img src="/images/dummy_images/file.png" alt="File Icon" width="20">
+                                                <a
+                                                    href="/download/${file.file_id}"
+                                                    class="btn btn-sm btn-link text-decoration-none p-0"
+                                                    title="${file.file_name}"
+                                                >
+                                                    <i class="fas fa-download"></i>
+                                                </a>
                                             </div>
-                                        `).join('')
-                                        : '<span class="text-muted">No file</span>'
-                                }
-                            </td>
+                                        </div>
+                                    `).join('')
+                                    : '<span class="text-muted">No file</span>'
+                            }
+                        </td>
+
 
                            <td>
                             <!-- Button for Prescription Notes -->
@@ -149,6 +151,45 @@
                 }
             });
         }
+        function fetchsessiontransfer(patientId) {
+                $.ajax({
+                    url: '/patient/' + patientId + '/session_transfer',
+                    method: 'GET',
+                    success: function(response) {
+                        var tableBody = $('#sessiontransfer tbody');
+                        tableBody.empty();
+
+                        if (response.length > 0) {
+                            response.forEach(function(session_transfer, index) {
+                                tableBody.append(`
+                                    <tr>
+                                        <td>
+                                            ${session_transfer.session_date}<br>
+                                            ${session_transfer.session_time}
+                                        </td>
+                                        <td>
+                                          ${session_transfer.old_patient_name}<br>
+
+                                        </td>
+                                         <td>
+
+                                            ${session_transfer.new_patient_name}
+                                        </td>
+                                        <td>${session_transfer.created_at_date}</td>
+                                        <td>${session_transfer.added_by_name}</td>
+                                    </tr>
+                                `);
+                            });
+                        } else {
+                            tableBody.append(
+                                '<tr><td colspan="4" class="text-center">No session transfers found.</td></tr>'
+                            );
+                        }
+                    }
+                });
+            }
+
+
 
         function fetchAppointmentsAndSessions(patientId) {
             $.ajax({
@@ -191,10 +232,10 @@
                                 <tr>
                                     <td>${index + 1}</td>
                                     <td>${item.appointment_no}</td>
-                                    <td>${sessionInfo}</td>
+                                    <td>${sessionInfo} <br> Taken:${item.taken_session} <br> Pending: ${item.pending} <br> OT: ${item.ot} <br>PT: ${item.pt}</td>
                                     <td>
-                                        <span>Fee: ${item.fee}</span> <br><br>
-                                        <span> Payment: ${item.paid_amount/2}</span> <br><br>
+                                        <span>Fee: ${item.fee}</span> <br>
+                                        <span> Payment: ${item.paid_amount/2}</span> <br>
 
                                         ${
                                             (item.account_amounts && Object.keys(item.account_amounts).length > 0)
@@ -202,7 +243,7 @@
                                                 Object.entries(item.account_amounts)
                                                     .map(([name, amount]) => `${name}: ${amount}`)
                                                     .join('<br>')
-                                            }</span> <br><br>`
+                                            }</span> <br>`
                                             : ''
                                         }
 

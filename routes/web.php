@@ -62,12 +62,13 @@ Route::post('update_transfer_ind_session', [PatientController::class, 'update_tr
 
 Route::get('/patient/{id}/appointments-and-sessions', [PatientController::class, 'getAppointmentsAndSessions']);
 // routes/web.php
-Route::get('download-file/{file_id}', [PatientController::class, 'download'])->name('file.download');
+Route::get('download/{file_id}', [PatientController::class, 'download'])->name('file.download');
 
+Route::get('download/{file_id}', [PatientController::class, 'download'])->name('file.download');
 
 // routes/web.php
 Route::get('/patient/{id}/appointments', [PatientController::class, 'getAppointments']);
-Route::get('/patient/{id}/appointmentsdetail', [PatientController::class, 'appointmentsdetail']);
+Route::get('/patient/{id}/session_transfer', [PatientController::class, 'session_transfer']);
 
 Route::get('/patient/{id}/sessions', [PatientController::class, 'getSessions']);
 Route::get('/patient/{id}/payments', [PatientController::class, 'getPayments']);
