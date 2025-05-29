@@ -19,6 +19,8 @@
             var formdatas = new FormData($(this)[0]);
             formdatas.append('_token', '{{ csrf_token() }}');
             var title = $('.expense_name').val();
+            var fileInput = $('#fileUpload')[0];  // Get the file input element
+
             var id = $('.expense_id').val();
 
             if (title === "") {
@@ -26,6 +28,12 @@
                     '{{ trans('messages.add_expense_name_lang', [], session('locale')) }}');
                 return false;
             }
+            if (fileInput.files.length === 0) {
+    show_notification('error',
+        '{{ trans('messages.add_expense_recipt_lang', [], session('locale')) }}');
+    return false;
+}
+
 
             showPreloader();
             before_submit();

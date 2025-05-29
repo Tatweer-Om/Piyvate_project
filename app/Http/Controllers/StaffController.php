@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Appointment;
 use Carbon\Carbon;
 use App\Models\Role;
 use App\Models\Staff;
@@ -9,6 +10,7 @@ use App\Models\Branch;
 use App\Models\User;
 use App\Models\History;
 use App\Models\Payroll;
+use App\Models\SessionData;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
@@ -25,7 +27,7 @@ class StaffController extends Controller
         return view ('staff.staf_list', compact('branches', 'roles'));
     }
 
-     
+
 
 
     public function show_employee()
@@ -93,9 +95,9 @@ class StaffController extends Controller
 
     public function add_employee(Request $request){
 
-        $user_id = Auth::id(); 
+        $user_id = Auth::id();
         $data= User::where('id', $user_id)->first();
-        $user= $data->user_name; 
+        $user= $data->user_name;
 
         $employee_image = "";
 
@@ -117,7 +119,7 @@ class StaffController extends Controller
         $employee->annual_leaves = $request['annual_leaves'];
         $employee->emergency_leaves = $request['emergency_leaves'];
         $employee->employee_phone = $request['phone'];
-        // $employee->permissions = implode(',',$request['permissions']);
+        $employee->joining_date = $request['joining_date'];
         $employee->password = Hash::make($request['password']);
         $employee->employee_image = $employee_image;
         $employee->branch_id = $request['branch_id'];
@@ -154,6 +156,7 @@ class StaffController extends Controller
             'employee_phone' => $employee_data->employee_phone,
             'permissions' => $employee_data->permissions,
             'password' => $employee_data->password,
+            'joining_date' => $employee_data->joining_date,
             'branch_id' => $employee_data->branch_id,
             'role_id' => $employee_data->role_id,
             'employee_image' => $employee_image,
@@ -167,9 +170,9 @@ class StaffController extends Controller
 
     public function update_employee(Request $request){
 
-        $user_id = Auth::id(); 
+        $user_id = Auth::id();
         $data= User::where('id', $user_id)->first();
-        $user= $data->user_name; 
+        $user= $data->user_name;
 
         $employee_id = $request->input('employee_id');
 
@@ -209,7 +212,7 @@ class StaffController extends Controller
         $employee->employee_phone = $request['phone'];
         $employee->annual_leaves = $request['annual_leaves'];
         $employee->emergency_leaves = $request['emergency_leaves'];
-        // $employee->permissions = implode(',',$request['permissions']);
+        $employee->joining_date = $request['joining_date'];
         $employee->password = Hash::make($request['password']);
         $employee->employee_image = $employee_image;
         $employee->branch_id = $request['branch_id'];
@@ -274,15 +277,34 @@ class StaffController extends Controller
     }
 
 
-    public function staff_profile($id){
-        $staff= Staff::where('id', $id)->first();
-        $branch= Branch::where('id', $staff->branch_id)->value('branch_name');
-        $role= Role::where('id', $staff->role)->value('role_name');
- 
-        return view ('staff.staf_profile', compact('staff','branch','role'));
+    public function staff_profile($id)
+    {
+        $staff = Staff::find($id); // more concise than where()->first()
+
+        if (!$staff) {
+            return redirect()->back()->with('error', 'Staff not found.');
+        }
+
+        $branch = Branch::where('id', $staff->branch_id)->value('branch_name') ?? 'N/A';
+        $role = Role::where('id', $staff->role)->value('role_name') ?? 'N/A';
+
+        // Safely find the related user by phone
+        $stf = User::where('user_phone', $staff->employee_phone)->first();
+        $total_session = 0;
+
+        if ($stf) {
+            $total_session = SessionData::where('user_id', $stf->id)->count();
+            $appointments= Appointment::where('user_id', $stf->id)->count();
+
+        }
+
+
+
+        return view('staff.staf_profile', compact('staff', 'branch', 'role', 'total_session', 'appointments'));
     }
 
 
-    
+
+
 
 }

@@ -38,12 +38,16 @@ class DoctorController extends Controller
         if ($doctors->count() > 0) {
             foreach ($doctors as $doctor) {
                 $doctor_name = '<a class="doctor-info ps-0" href="doctor_profile/' . $doctor->id . '">' . $doctor->doctor_name . '</a>';
-                $modal = '<a href="javascript:void(0);" class="me-3 edit-doctor" data-bs-toggle="modal" data-bs-target="#add_doctor_modal" onclick=edit("' . $doctor->id . '")>
-                            <i class="fa fa-pencil fs-18 text-success"></i>
-                         </a>
-                         <a href="javascript:void(0);" onclick=del("' . $doctor->id . '")>
-                            <i class="fa fa-trash fs-18 text-danger"></i>
-                         </a>';
+                $modal = '<a href="javascript:void(0);" class="me-3 edit-doctor" data-bs-toggle="modal" data-bs-target="#add_doctor_modal" onclick="edit(' . $doctor->id . ')">
+                <i class="fa fa-pencil fs-18 text-success"></i>
+              </a>
+              <a href="javascript:void(0);" onclick="del(' . $doctor->id . ')">
+                <i class="fa fa-trash fs-18 text-danger"></i>
+              </a>
+              <a href="' . url('calendar/' . $doctor->id) . '">
+                <i class="fa fa-calendar fs-18 text-danger"></i>
+              </a>';
+
 
                 $add_data = Carbon::parse($doctor->created_at)->format('d-m-Y (h:i a)');
                 $doctor_image = $doctor->doctor_image ? asset('images/doctor_images/' . $doctor->doctor_image) : asset('images/dummy_images/no_image.jpg');
@@ -94,6 +98,7 @@ class DoctorController extends Controller
         $doctor->user_name = $request->input('user_name');
         $doctor->email = $request->input('email');
         $doctor->annual_leaves = $request->input('annual_leaves');
+        $doctor->joining_date = $request->input('joining_date');
         $doctor->emergency_leaves = $request->input('emergency_leaves');
         if ($request->filled('password')) {
             $doctor->password = Hash::make($request->input('password'));
@@ -129,6 +134,7 @@ class DoctorController extends Controller
             'annual_leaves' => $doctor->annual_leaves,
             'emergency_leaves' => $doctor->emergency_leaves,
             'specialization' => $doctor->specialization,
+            'joining_date' => $doctor->joining_date,
             'doctor_image' => $doctor_image,
             'branch_id' => $doctor->branch_id,
             'notes' => $doctor->notes,
@@ -182,6 +188,8 @@ class DoctorController extends Controller
         }
         $doctor->annual_leaves = $request->input('annual_leaves');
         $doctor->emergency_leaves = $request->input('emergency_leaves');
+        $doctor->joining_date = $request->input('joining_date');
+
         $doctor->phone = $request->input('phone');
         $doctor->specialization = $request->input('speciality');
         $doctor->doctor_image = $doctor_image;
@@ -261,9 +269,7 @@ class DoctorController extends Controller
         $doctor= Doctor::where('id', $id)->first();
         $branch= Branch::where('id', $doctor->branch_id)->value('branch_name');
         $special= Speciality::where('id', $doctor->specialization)->value('speciality_name');
-        $all_direct_sessions= AllSessioDetail::where('doctor_id', $id)->count();
-        $all_apt_sessions= AppointmentSession::where('doctor_id', $id)->count();
-        $total_sessions= $all_direct_sessions + $all_apt_sessions;
+        $total_sessions= SessionData::where('doctor_id', $id)->where('status', 2)->count();
         $all_appointment_patients = Appointment::where('doctor_id', $id)
         ->select('patient_id')
         ->distinct()
@@ -284,10 +290,14 @@ class DoctorController extends Controller
 
     public function getDoctorAppointments($doctorId)
     {
+        $today = now()->startOfDay();
+        $thirtyDaysLater = now()->addDays(30)->endOfDay();
+
+        // Appointments within the next 30 days
         $appointments = Appointment::with('patient:id,full_name')
             ->where('doctor_id', $doctorId)
             ->whereIn('session_status', [2, 5])
-            ->whereDate('appointment_date', now()->toDateString()) // Fetch only today's appointments
+            ->whereBetween('appointment_date', [$today, $thirtyDaysLater])
             ->orderByDesc('updated_at')
             ->orderByDesc('created_at')
             ->take(3)
@@ -295,7 +305,7 @@ class DoctorController extends Controller
             ->map(function ($session) {
                 return [
                     'id' => $session->id,
-                    'patient_id' => $session->patient->id ?? null,  // Added patient ID
+                    'patient_id' => $session->patient->id ?? null,
                     'patient_name' => $session->patient->full_name ?? 'Unknown',
                     'date' => $session->appointment_date,
                     'appointment_no' => '<span class="badge text-white px-2 py-1 text-sm" style="background-color: #081339;">'
@@ -311,18 +321,31 @@ class DoctorController extends Controller
                 ];
             });
 
-            $sessions = SessionData::select('session_data.*', 'patients.full_name as patient_name')
+        // Sessions within the next 30 days
+        $sessions = SessionData::select(
+                'session_data.*',
+                'patients.full_name as patient_name',
+                DB::raw('CASE
+                            WHEN session_data.main_session_id IS NOT NULL THEN session_data.main_session_id
+                            ELSE session_data.main_appointment_id
+                        END as main_id'),
+                DB::raw('CASE
+                            WHEN session_data.main_session_id IS NOT NULL THEN 11
+                            ELSE 10
+                        END as source_flag')
+            )
             ->join('patients', 'session_data.patient_id', '=', 'patients.id')
             ->where('session_data.doctor_id', $doctorId)
             ->where('session_data.status', 4)
+            ->whereBetween('session_data.session_date', [$today, $thirtyDaysLater])
             ->get();
-
 
         return response()->json([
             'appointments' => $appointments,
             'sessions' => $sessions
         ]);
     }
+
 
 
 

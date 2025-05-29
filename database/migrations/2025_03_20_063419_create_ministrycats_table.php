@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('ministry_category_name')->nullable();
             $table->string('added_by')->nullable();
+            $table->string('ministry_category_color')->nullable();
             $table->string('updated_by')->nullable();
             $table->string('user_id', 255)->nullable();
             $table->timestamps();

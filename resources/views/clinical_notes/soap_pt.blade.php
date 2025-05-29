@@ -24,22 +24,33 @@
             @csrf
 
             <div class="header">
-                <img src="{{ asset('images/logo/piyalogo-1.png') }}" alt="Center Logo" height="50">
-                <div>
-                    HN: <input type="text" style="width:150px;" class="input-line" name="hn" value="{{ $patient->HN ?? '' }}">
-                    PT: <input type="text" class="input-line" name="pt" value="{{ old('pt', $soap->pt ?? '') }}"><br>
-                    Name: <input type="text" style="width:150px;" class="input-line" name="full_name" value="{{ $patient->full_name ?? '' }}">
-                    Age: <input type="text" class="input-short input-line" style="width:150px;" name="age" value="{{ $patient->age ?? '' }}"><br>
+                <img src="{{ asset('images/logo/piyalogo-1.png') }}" alt="Center Logo">
+
+                <div class="header-info">
+                    HN:
+                    <input class="input-dotted input-medium" value="{{ $patient->HN ?? '' }}" name="hn" readonly>
+
+                    PT no:
+                    <input class="input-dotted input-medium" name="pt_no"><br> {{-- Editable --}}
+
+                    Name:
+                    <input class="input-dotted input-long" value="{{ $patient->full_name ?? '' }}" name="name" readonly>
+
+                    Age:
+                    <input class="input-dotted input-short" value="{{ $patient->age ?? '' }}" name="age" readonly>
+
                     Gender:
-                    <label>
-                        <input type="radio" name="gender" value="Male" {{ ($patient->gender ?? '') == 'Male' ? 'checked' : '' }}> M
-                    </label>
-                    <label>
-                        <input type="radio" name="gender" value="Female" {{ ($patient->gender ?? '') == 'Female' ? 'checked' : '' }}> F
-                    </label><br>
-                    Therapist: <input type="text" class="input-line" name="therapist" value="{{ $doctor ?? '' }}">
+                    <input type="checkbox" name="gender_m" {{ $patient->gender == 'Male' ? 'checked' : '' }} onclick="return false;">M
+                    <input type="checkbox" name="gender_f" {{ $patient->gender == 'Female' ? 'checked' : '' }} onclick="return false;">F <br>
+
+                    Birth Date:
+                    <input class="input-dotted input-medium" value="{{ $patient->dob ?? '' }}" name="birth_date" readonly>
+
+                    Therapist:
+                    <input class="input-dotted input-medium" value="{{ $doctor ?? '' }}" name="therapist" readonly>
                 </div>
             </div>
+
 
             <input type="hidden" name="session_id" value="{{ $session_data->id ?? '' }}">
             <input type="hidden" value="{{ $session_data->main_session_id ?? '' }}" name="main_session_id">

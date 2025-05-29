@@ -20,7 +20,13 @@
         var formdatas = new FormData($('.add_employee')[0]);
         formdatas.append('_token', '{{ csrf_token() }}');
         var title = $('.employee_name').val();
+        var phone = $('.phone').val();
+        var joining = $('.joining_date').val();
+
         var password = $('.password').val();
+
+        var branch_id = $('#branch_id').val();
+
 
         var id = $('.employee_id').val();
 
@@ -30,6 +36,18 @@
         }
         if (password === "") {
             show_notification('error', '<?php echo trans('messages.provide_password_lang',[],session('locale')); ?>');
+            return false;
+        }
+        if (phone === "") {
+            show_notification('error', '<?php echo trans('messages.provide_contact_number',[],session('locale')); ?>');
+            return false;
+        }
+        if (branch_id === "") {
+            show_notification('error', '<?php echo trans('messages.provide_branch',[],session('locale')); ?>');
+            return false;
+        }
+        if (joining === "") {
+            show_notification('error', '<?php echo trans('messages.add_joining_date_lang',[],session('locale')); ?>');
             return false;
         }
 
@@ -89,6 +107,8 @@
                         $(".email").val(fetch.employee_email);
                         $(".phone").val(fetch.employee_phone);
                         $(".emergency_leaves").val(fetch.emergency_leaves);
+                        $(".joining_date").val(fetch.joining_date);
+
                         $(".annual_leaves").val(fetch.annual_leaves);
                         $(".notes").val(fetch.notes);
                         $(".employee_image").attr("src", fetch.employee_image);

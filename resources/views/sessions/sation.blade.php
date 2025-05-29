@@ -112,10 +112,18 @@
                                 <div class="form-group">
                                     <label class="col-form-label">Session Type</label>
                                     <div class="d-flex gap-3">
-                                        <div class="form-check">
+                                        @if ($data)
+
+                                        <div class="form-check d-none">
                                             <input class="form-check-input session_type" type="radio" name="session_type" id="normal" value="normal" checked>
                                             <label class="form-check-label" for="normal">Normal</label>
                                         </div>
+                                        @else
+                                        <div class="form-check ">
+                                            <input class="form-check-input session_type" type="radio" name="session_type" id="normal" value="normal" checked>
+                                            <label class="form-check-label" for="normal">Normal</label>
+                                        </div>
+                                        @endif
                                         <div class="form-check">
                                             <input class="form-check-input session_type" type="radio" name="session_type" id="ministry" value="ministry">
                                             <label class="form-check-label" for="ministry">Ministry</label>
@@ -138,27 +146,28 @@
                             </div>
 
                             <!-- Ministry Category Select Box (Hidden Initially) -->
-                            <div class="col-lg-4 col-md-4 col-sm-12 ministry-options" id="ministry2-options" style="display: none;">
-                                <div class="form-group">
-                                    <label class="col-form-label">Select Ministry Category</label>
-                                    <select class="form-control ministry_cat_id" name="ministry_cat_id">
-                                        <option value="">Select Category</option>
-                                        @foreach ($categories as $category)
-                                            <option value="{{ $category->id }}">{{ $category->ministry_category_name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
+                            <div class="col-lg-4 col-md-4 col-sm-12 ministry-options mt-4" id="ministry2-options" style="display: none;">
+                                <select class="form-control ministry_cat_id" name="ministry_cat_id">
+                                    <option value="">Select Category</option>
+                                    @foreach ($categories as $category)
+                                        <option value="{{ $category->id }}" style="background-color: {{ $category->ministry_category_color }}; color: #fff;">
+                                            {{ $category->ministry_category_name }} ({{ $category->ministry_category_color }})
+                                        </option>
+                                    @endforeach
+                                </select>
+
                             </div>
 
                             <!-- Session Name (Initially Visible) -->
-                            <div class="col-lg-4 col-md-4 col-sm-12" id="session_name_div">
+                            @if($data)
+                            <div class="col-lg-4 col-md-4 col-sm-12 d-none" id="session_name_div">
                                 <div class="form-group">
                                     <label class="col-form-label">Session Name</label>
                                     <input type="text" class="form-control session_name" name="session_name" placeholder="Session Name">
                                 </div>
                             </div>
 
-                            <input type="hidden" class="session_id" name="session_id">
+                            <input type="hidden" class="session_id d-none" name="session_id">
 
                             <!-- Session Price -->
                             <div class="col-lg-4 col-md-4 col-sm-12">
@@ -167,6 +176,24 @@
                                     <input type="text" class="form-control session_price" name="session_price" placeholder="Price">
                                 </div>
                             </div>
+                            @else
+                            <div class="col-lg-4 col-md-4 col-sm-12 " id="session_name_div">
+                                <div class="form-group">
+                                    <label class="col-form-label">Session Name</label>
+                                    <input type="text" class="form-control session_name" name="session_name" placeholder="Session Name">
+                                </div>
+                            </div>
+
+                            <input type="hidden" class="session_id " name="session_id">
+
+                            <!-- Session Price -->
+                            <div class="col-lg-4 col-md-4 col-sm-12">
+                                <div class="form-group">
+                                    <label class="col-form-label">Session Price</label>
+                                    <input type="text" class="form-control session_price" name="session_price" placeholder="Price">
+                                </div>
+                            </div>
+                            @endif
                         </div>
 
                         <!-- Notes (Full Width) -->

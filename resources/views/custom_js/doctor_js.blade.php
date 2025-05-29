@@ -20,6 +20,10 @@
         formdatas.append('_token', '{{ csrf_token() }}');
         var name = $('.doctor_name').val();
         var password = $('.password').val();
+        var phone = $('.phone').val();
+
+        var password = $('.password').val();
+        var branch_id = $('.branch_id').selectpicker('val');
         var id = $('.doctor_id').val();
 
         if (name === "") {
@@ -30,7 +34,14 @@
             show_notification('error', '<?php echo trans('messages.provide_password_lang',[],session('locale')); ?>');
             return false;
         }
-
+        if (phone === "") {
+            show_notification('error', '<?php echo trans('messages.add_doctor_phone_lang',[],session('locale')); ?>');
+            return false;
+        }
+        if (branch_id === "") {
+            show_notification('error', '<?php echo trans('messages.add_doctor_branch_lang',[],session('locale')); ?>');
+            return false;
+        }
         showPreloader();
         before_submit();
 
@@ -85,6 +96,7 @@ function edit(id) {
                 $(".email").val(fetch.email);
                 $(".phone").val(fetch.phone);
                 $(".annual_leaves").val(fetch.annual_leaves);
+                $(".joining_date").val(fetch.joining_date);
                 $(".emergency_leaves").val(fetch.emergency_leaves);
                 $(".notes").val(fetch.notes);
                 $(".doctor_image").attr("src", fetch.doctor_image);

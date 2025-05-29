@@ -15,17 +15,30 @@
             <div class="header">
                 <img src="{{ asset('images/logo/piyalogo-1.png') }}" alt="Center Logo">
                 <div class="header-info">
-                    HN: <input name="hn" class="input-line" value="{{ $patient->HN ?? '' }}">
-                    PT no: <input class="input-line" name="pt"><br>
-                    Name: <input class="input-line" name="full_name" value="{{ $patient->full_name ?? '' }}">
-                    Age: <input class="input-line" name="age" style="width: 40px;" value="{{ $patient->age ?? '' }}">
+                    HN:
+                    <input name="hn" class="input-line" value="{{ $patient->HN ?? '' }}" readonly>
+
+                    PT no:
+                    <input class="input-line" name="pt"> {{-- Editable --}}<br>
+
+                    Name:
+                    <input class="input-line" name="full_name" value="{{ $patient->full_name ?? '' }}" readonly>
+
+                    Age:
+                    <input class="input-line" name="age" style="width: 40px;" value="{{ $patient->age ?? '' }}" readonly>
+
                     Gender:
-                    <input type="checkbox" name="gender_male" {{ $patient->gender == 'Male' ? 'checked' : '' }}>M
-                    <input type="checkbox" name="gender_female" {{ $patient->gender == 'Female' ? 'checked' : '' }}>F
+                    <input type="checkbox" name="gender_male" {{ $patient->gender == 'Male' ? 'checked' : '' }} onclick="return false;">M
+                    <input type="checkbox" name="gender_female" {{ $patient->gender == 'Female' ? 'checked' : '' }} onclick="return false;">F
                     <br>
-                    Birth Date: <input class="input-line" name="dob" value="{{ $patient->dob ?? '' }}">
-                    Therapist: <input class="input-line" name="therapist" value="{{ $doctor ?? '' }}">
+
+                    Birth Date:
+                    <input class="input-line" name="dob" value="{{ $patient->dob ?? '' }}" readonly>
+
+                    Therapist:
+                    <input class="input-line" name="therapist" value="{{ $doctor ?? '' }}" readonly>
                 </div>
+
             </div>
 
             <input type="hidden" value="{{ $apt->id ?? '' }}" name="appointment_id" class="appointment_id">

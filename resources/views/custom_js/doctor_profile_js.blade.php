@@ -30,7 +30,7 @@
 
                             rowHTML += `
                     <div class="col-md-4">
-                        <a href="/patient_profile/${appointment.patient_id}" class="text-decoration-none">
+                        <a href="/patient_appointment/${appointment.id}" class="text-decoration-none">
                             <div class="timeline-panel bgl-dark border-0 p-3 rounded text-center shadow-sm">
                                 <p class="mb-1 fs-12 text-dark fw-bold">${appointment.appointment_no}</p>
                                 <p class="mb-1 fs-12 text-dark">${appointment.patient_name}</p>
@@ -51,7 +51,7 @@
                         response.sessions.forEach(function(session) {
                             rowHTML += `
                     <div class="col-md-4">
-                       <a href="/patient_session/${session.patient_id}"
+                       <a href="/patient_session/${session.main_id}?source=${session.source_flag}"
                             class="text-decoration-none session-link"
                            >
                             <div class="timeline-panel bg-light border-0 p-2 rounded text-center shadow-sm">

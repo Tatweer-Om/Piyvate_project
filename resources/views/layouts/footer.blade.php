@@ -37,7 +37,13 @@
     <!-- Material color picker init -->
     <script src="{{ asset('js/plugins-init/material-date-picker-init.js') }}"></script>
     <script src="{{ asset('js/dashboard/dashboard-1.js') }}"></script>
+
+    <script src="{{ asset('vendor/fullcalendar/js/main.min.js') }}"></script>
+
+    <script src="{{ asset('js/plugins-init/fullcalendar-init.js') }}"></script>
+
     <script src="{{ asset('js/deznav-init.js') }}"></script>
+
     <script src="{{ asset('js/demo.js') }}"></script>
     <script src="{{ asset('js/styleSwitcher.js') }}"></script>
     <script src="{{ asset('vendor/chartist/js/chartist.min.js') }}"></script>
@@ -51,10 +57,6 @@
 
 
 <!-- All init script -->
-
-
-
-
 
 	<script>
 		function assignedDoctor(){
@@ -246,8 +248,19 @@
         @include('custom_js.add_voucher_js')
         @elseif ($route_name == 'session_data')
         @include('custom_js.session_data_js')
+
         @elseif ($route_name == 'patient_session')
-        @include('custom_js.patient_profile_js')
+        @include('custom_js.patient_session_js')
+        @elseif ($route_name == 'govt_detail')
+        @include('custom_js.govt_detail_js')
+        @elseif ($route_name == 'all_balance')
+        @include('custom_js.balance_js')
+        @elseif ($route_name == 'patient_appointment')
+        @include('custom_js.patient_appointment_js')
+        @elseif ($route_name == 'calender')
+        @include('custom_js.calender_js')
+
+
     @endif
 
 </body>

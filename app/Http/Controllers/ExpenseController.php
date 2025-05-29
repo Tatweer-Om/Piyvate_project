@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Carbon\Carbon;
 use App\Models\User;
 use App\Models\Account;
+use App\Models\Balance;
 use App\Models\Expense;
 use App\Models\History;
 use App\Models\Expensecat;
@@ -19,7 +20,7 @@ class ExpenseController extends Controller
     public function index(){
 
 
-        $view_account= Account::all();
+        $view_account= Account::where('account_type', 2)->get();
         $expense_cats= Expensecat::all();
 
 
@@ -97,8 +98,8 @@ class ExpenseController extends Controller
                 $sno++;
                 $json[]= array(
                             $sno,
-                            $cat_name,
                             $expense_name,
+                            $cat_name,
 
                             $value->amount,
                             $value->expense_date,
@@ -124,6 +125,72 @@ class ExpenseController extends Controller
             echo json_encode($response);
         }
     }
+
+    // public function add_expense(Request $request)
+    // {
+    //     $user_id = Auth::id();
+    //     $data = User::where('id', $user_id)->first();
+    //     $user = $data->user_name;
+
+    //     $expense = new Expense();
+    //     $expense_file = "";
+
+    //     // Handle the file upload
+    //     if ($request->hasFile('expense_file')) {
+    //         $folderPath = public_path('uploads/expense_files');
+
+    //         // Check if the folder exists, if not create it
+    //         if (!File::isDirectory($folderPath)) {
+    //             File::makeDirectory($folderPath, 0777, true, true);
+    //         }
+
+    //         // Create a unique filename
+    //         $expense_file = time() . '.' . $request->file('expense_file')->extension();
+    //         $request->file('expense_file')->move($folderPath, $expense_file);
+    //     }
+
+    //     // Save expense details
+    //     $expense->category_id = $request['category_id'];
+    //     $expense->expense_name = $request['expense_name'];
+    //     $expense->payment_method = $request['account_id'];
+    //     $expense->amount = $request['amount'];
+    //     $expense->expense_date = $request['expense_date'];
+    //     $expense->notes = $request['notes'];
+    //     $expense->expense_image = $expense_file; // Save the file name in the database
+    //     $expense->added_by = $user;
+    //     $expense->user_id = $user_id;
+    //     $expense->save();
+
+    //     $account_data = Account::where('id', $request['account_id'])->first();
+    //     if ($account_data) {
+    //         $opening_balance = $account_data->opening_balance ?? 0;
+    //         $new_amount = $opening_balance - $request['amount'];
+
+    //         $account_data->opening_balance = $new_amount;
+    //         $account_data->updated_by = $user;
+    //         $account_data->save();
+    //     }
+
+
+    //    $blnc= new Balance();
+    //    $blnc->account_name = $account_data->account_name ?? '';
+    //    $blnc->account_id = $account_data->id;
+    //    $blnc->account_no = $account_data->account_no;
+    //    $blnc->previous_balance =$opening_balance;
+    //    $blnc->new_total_amount =$new_amount;
+    //    $blnc->source ='Expense';
+    //    $blnc->expense_amount= $expense->amount;
+    //    $blnc->expense_name=  $expense->expense_name;
+    //    $blnc->expense_date=  $expense->expense_date;
+    //    $blnc->expense_added_by= $user;
+    //    $blnc->expense_image =  $expense->expense_image; // Save the file name in the database
+    //    $blnc->notes = $expense->notes;
+    //    $blnc->added_by = $user;
+    //    $blnc->user_id =  $user_id;
+    //    $blnc->save();
+
+    //     return response()->json(['expense_id' => $expense->id]);
+    // }
 
     public function add_expense(Request $request)
     {
@@ -160,20 +227,42 @@ class ExpenseController extends Controller
         $expense->user_id = $user_id;
         $expense->save();
 
+        // Handle account data
         $account_data = Account::where('id', $request['account_id'])->first();
         if ($account_data) {
             $opening_balance = $account_data->opening_balance ?? 0;
+            // Make sure you're subtracting the amount correctly
             $new_amount = $opening_balance - $request['amount'];
 
+            // Update account balance
             $account_data->opening_balance = $new_amount;
             $account_data->updated_by = $user;
             $account_data->save();
+
+            // Create a balance entry
+            $blnc = new Balance();
+            $blnc->account_name = $account_data->account_name ?? '';
+            $blnc->account_id = $account_data->id;
+            $blnc->account_no = $account_data->account_no;
+            $blnc->previous_balance = $opening_balance;
+            $blnc->new_total_amount = $new_amount;
+            $blnc->source = 'Expense';
+            $blnc->expense_amount = $expense->amount;
+            $blnc->expense_name = $expense->expense_name;
+            $blnc->expense_date = $expense->expense_date;
+            $blnc->expense_added_by = $user;
+            $blnc->expense_image = $expense->expense_image; // Save the file name in the database
+            $blnc->notes = $expense->notes;
+            $blnc->added_by = $user;
+            $blnc->user_id = $user_id;
+            $blnc->save();
+        } else {
+            // Handle case where account is not found, maybe return an error
+            return response()->json(['error' => 'Account not found'], 404);
         }
-        $account_data->save();
 
         return response()->json(['expense_id' => $expense->id]);
     }
-
 
 
     public function edit_expense(Request $request){

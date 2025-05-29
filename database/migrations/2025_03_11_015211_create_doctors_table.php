@@ -18,7 +18,10 @@ return new class extends Migration
             $table->string('email')->unique()->nullable();
             $table->string('phone')->nullable();
             $table->string('password')->nullable();
+            $table->date('joining_date')->nullable();
             $table->text('specialization')->nullable();
+            $table->integer('annual_leaves')->nullable();
+            $table->integer('emergency_leaves')->nullable();
             $table->text('notes')->nullable();
             $table->string('doctor_image')->nullable();
             $table->string('branch_id')->nullable();

@@ -12,18 +12,32 @@
         @csrf
         <div class="header">
             <img src="{{ asset('images/logo/piyalogo-1.png') }}" alt="Center Logo">
+
             <div class="header-info">
-                HN: <input class="input-dotted input-medium" value="{{ $patient->HN ?? '' }}" name="hn">
-                PT no: <input class="input-dotted input-medium" name="pt_no"><br>
-                Name: <input class="input-dotted input-long" value="{{ $patient->full_name ?? '' }}" name="name">
-                Age: <input class="input-dotted input-short" value="{{ $patient->age ?? '' }}" name="age">
+                HN:
+                <input class="input-dotted input-medium" value="{{ $patient->HN ?? '' }}" name="hn" readonly>
+
+                PT no:
+                <input class="input-dotted input-medium" name="pt_no"><br> {{-- Editable --}}
+
+                Name:
+                <input class="input-dotted input-long" value="{{ $patient->full_name ?? '' }}" name="name" readonly>
+
+                Age:
+                <input class="input-dotted input-short" value="{{ $patient->age ?? '' }}" name="age" readonly>
+
                 Gender:
-                <input type="checkbox" name="gender_m" {{ $patient->gender == 'Male' ? 'checked' : '' }}>M
-                <input type="checkbox" name="gender_f" {{ $patient->gender == 'Female' ? 'checked' : '' }}>F <br>
-                Birth Date: <input class="input-dotted input-medium" value="{{ $patient->dob ?? '' }}" name="birth_date">
-                Therapist: <input class="input-dotted input-medium" value="{{ $doctor ?? '' }}" name="therapist">
+                <input type="checkbox" name="gender_m" {{ $patient->gender == 'Male' ? 'checked' : '' }} onclick="return false;">M
+                <input type="checkbox" name="gender_f" {{ $patient->gender == 'Female' ? 'checked' : '' }} onclick="return false;">F <br>
+
+                Birth Date:
+                <input class="input-dotted input-medium" value="{{ $patient->dob ?? '' }}" name="birth_date" readonly>
+
+                Therapist:
+                <input class="input-dotted input-medium" value="{{ $doctor ?? '' }}" name="therapist" readonly>
             </div>
         </div>
+
 
         <input type="hidden" value="{{ $apt->id ?? '' }}" name="appointment_id">
         <input type="hidden" value="{{ $patient->id ?? '' }}" name="patient_id">

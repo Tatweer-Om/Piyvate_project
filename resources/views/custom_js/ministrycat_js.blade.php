@@ -87,6 +87,7 @@
                     after_submit();
                     if (fetch != "") {
                         $(".ministry_category_name").val(fetch.ministry_category_name);
+                        $(".ministry_category_color").val(fetch.ministry_category_color);
                         $(".ministry_category_id").val(fetch.ministry_category_id);
                         $(".modal-title").html(
                             '{{ trans('messages.update_lang', [], session('locale')) }}');

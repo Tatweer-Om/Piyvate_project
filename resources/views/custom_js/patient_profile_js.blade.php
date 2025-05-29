@@ -1,10 +1,11 @@
 <script>
     $(document).ready(function() {
         var patientId = {{ $patient->id }};
-        fetchAppointments(patientId);
+        // fetchAppointments(patientId);
         fetchAppointmentsdetail(patientId);
         fetchAppointmentsAndSessions(patientId);
-        fetchsessiontransfer(patientId);
+        fetchPayments(patientId);
+
 
         $('a[href="#sessionsBody"]').click(function() {
             fetchSessions(patientId);
@@ -12,7 +13,7 @@
 
 
         // Fetch payments on tab click
-        $('#visits-tab').click(function() {
+        $('#payment').click(function() {
             fetchPayments(patientId);
         });
 
@@ -28,11 +29,12 @@
                         response.forEach(function(appointment) {
                             tableBody.append(`
                         <tr>
-                          <td>
-                                <span>${appointment.appointment_no}</span><br>
-                                <small class="text-muted">${appointment.appointment_date}</small>
-                          </td>
-
+                         <td>
+                        <a href="/patient_appointment/${appointment.id}" class="text-decoration-none text-primary small">
+                            ${appointment.appointment_no}
+                        </a><br>
+                        <small class="text-muted">${appointment.appointment_date}</small>
+                        </td>
 
                             <td>
 
@@ -110,7 +112,26 @@
                                 <i class="fas fa-file-alt" style="font-size: 14px;"></i>
                             </button>
                         </td>
-
+                  <td style="font-size: 10px; padding: 4px;">
+                    ${
+                        appointment.clinical_notes.map(note => `
+                        <div class="d-flex align-items-center justify-content-between mb-1" style="gap: 4px;">
+                            <div class="d-flex flex-column align-items-center text-center" style="width: 40px;">
+                                <img src="${note.icon}" alt="icon" width="24" height="24" class="rounded shadow-sm mb-1" style="object-fit: cover;">
+                                <div class="text-muted" style="font-size: 8px; line-height: 1;">${note.form_type}</div>
+                            </div>
+                            <div class="flex-grow-1 text-end">
+                                <a href="${note.view_url}" target="_blank" class="me-1 text-primary" title="View" style="font-size: 10px;">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="${note.edit_url}" class="text-warning" title="Edit" style="font-size: 10px;">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                            </div>
+                        </div>
+                        `).join('')
+                    }
+                </td>
                         </tr>
                     `);
                         });
@@ -123,71 +144,7 @@
             });
         }
 
-        function fetchAppointments(patientId) {
-            $.ajax({
-                url: '/patient/' + patientId + '/appointments',
-                method: 'GET',
-                success: function(response) {
-                    var tableBody = $('#appointmentstable tbody');
-                    tableBody.empty();
 
-                    if (response.length > 0) {
-                        response.forEach(function(appointment, index) {
-                            tableBody.append(`
-                        <tr>
-                            <td>${appointment.appointment_no}</td>
-                            <td>${appointment.appointment_date}</td>
-                            <td>${appointment.doctor?.doctor_name ?? ''}</td>
-                            <td>${appointment.status_badge}</td>
-
-                        </tr>
-                    `);
-                        });
-                    } else {
-                        tableBody.append(
-                            '<tr><td colspan="5" class="text-center">No appointments found.</td></tr>'
-                        );
-                    }
-                }
-            });
-        }
-        function fetchsessiontransfer(patientId) {
-                $.ajax({
-                    url: '/patient/' + patientId + '/session_transfer',
-                    method: 'GET',
-                    success: function(response) {
-                        var tableBody = $('#sessiontransfer tbody');
-                        tableBody.empty();
-
-                        if (response.length > 0) {
-                            response.forEach(function(session_transfer, index) {
-                                tableBody.append(`
-                                    <tr>
-                                        <td>
-                                            ${session_transfer.session_date}<br>
-                                            ${session_transfer.session_time}
-                                        </td>
-                                        <td>
-                                          ${session_transfer.old_patient_name}<br>
-
-                                        </td>
-                                         <td>
-
-                                            ${session_transfer.new_patient_name}
-                                        </td>
-                                        <td>${session_transfer.created_at_date}</td>
-                                        <td>${session_transfer.added_by_name}</td>
-                                    </tr>
-                                `);
-                            });
-                        } else {
-                            tableBody.append(
-                                '<tr><td colspan="4" class="text-center">No session transfers found.</td></tr>'
-                            );
-                        }
-                    }
-                });
-            }
 
 
 
@@ -206,64 +163,34 @@
                             let singleSessionFee = item.single_session_fee;
 
                             // If the type is 'appointment', add session-related info
-                            let sessionInfo = '';
-
+                            let badgeLabel = '';
+                            let badgeClass = '';
+                            let source = '';
                             if (item.type === 'appointment') {
-                                // Show the session count for appointments in a badge
-                                sessionInfo = `
-                            <span class="badge bg-info">
-                                Appointment Sessions
-                            </span>
-                        `;
+                                badgeLabel = 'Appointment Sessions';
+                                badgeClass = 'bg-info';
+                                source = 10;
                             } else if (item.type === 'session') {
-                                // Show "Sessions" for session type with a different color
-                                sessionInfo = `
-                            <span class="badge bg-success">
-                               Direct Sessions
-                            </span>
-                        `;
-                            } else {
-                                // Default case, show 'N/A' for other types
-                                sessionInfo = 'N/A';
+                                badgeLabel = 'Direct Sessions';
+                                badgeClass = 'bg-success';
+                                source = 11;
                             }
 
+
+                            let badgeHtml = `
+                                <a href="/patient_session/${item.id}?source=${source}" class="badge ${badgeClass}" style="text-decoration: none;">
+                                    ${badgeLabel}
+                                </a>
+                            `;
                             // Append data to the table
                             tableBody.append(`
                                 <tr>
-                                    <td>${index + 1}</td>
-                                    <td>${item.appointment_no}</td>
-                                    <td>${sessionInfo} <br> Taken:${item.taken_session} <br> Pending: ${item.pending} <br> OT: ${item.ot} <br>PT: ${item.pt}</td>
                                     <td>
-                                        <span>Fee: ${item.fee}</span> <br>
-                                        <span> Payment: ${item.paid_amount/2}</span> <br>
-
-                                        ${
-                                            (item.account_amounts && Object.keys(item.account_amounts).length > 0)
-                                            ? `<span> ${
-                                                Object.entries(item.account_amounts)
-                                                    .map(([name, amount]) => `${name}: ${amount}`)
-                                                    .join('<br>')
-                                            }</span> <br>`
-                                            : ''
-                                        }
-
-                                        ${
-                                            (item.voucher_codes && item.voucher_codes.length > 0)
-                                            ? `<span>Vouchers: ${item.voucher_codes.join(', ')}</span> <br>`
-                                            : ''
-                                        }
-
-                                        ${
-                                            (item.voucher_amounts && item.voucher_amounts.length > 0)
-                                            ? `<span>Voucher Amount: ${
-                                                item.voucher_amounts.reduce((sum, val) => sum + val, 0)
-                                            }</span> `
-                                            : (item.total_voucher_amount
-                                                ? `<span>Voucher Amount: ${item.total_voucher_amount}</span> `
-                                                : ''
-                                            )
-                                        }
+                                        ${item.appointment_no} <br>
+                                        ${badgeHtml}
                                     </td>
+                                    <td> Taken:${item.taken_session} <br> Pending: ${item.pending} <br> OT: ${item.ot} <br>PT: ${item.pt}</td>
+
                                     <td>
                                     sessions:    ${item.session_count} <br>
                                     Payment Type:    ${item.payment_type} <br>
@@ -283,273 +210,123 @@
             });
         }
 
-        $('#all_patient_session_table').DataTable({
-            "processing": true,
-            "serverSide": false, // You're returning pre-built JSON from Laravel, no need for serverSide
-            "ajax": {
-                "url": "{{ url('show_all_sessions_by_patient') }}",
-                "type": "GET",
-                "data": function(d) {
-                    d.patient_id = patientId;
-                },
-                "error": function(xhr, error, thrown) {
-                    console.log("AJAX Error:", xhr.responseText);
-                }
-            },
-            "columns": [{
-                    "title": "S.No"
-                },
-                {
-                    "title": "Date"
-                },
-                {
-                    "title": "Doctor"
-                },
-                {
-                    "title": "Time"
-                },
-                {
-                    "title": "Type"
-                },
-                {
-                    "title": "Status"
-                },
-                {
-                    "title": "Actions"
-                },
-
-
-            ],
-            "pagingType": "numbers",
-            "ordering": true,
-            "order": [
-                [1, "desc"]
-            ] // Default order by Session Date
-        });
-
-
-
-    });
-
-
-
-
-    $(document).ready(function() {
-        // Function to toggle session and test inputs with smooth animations
-        function toggleSessionInputs() {
-            const selected = $('input[name="prescription_type"]:checked').val();
-            if (selected === 'session') {
-                $('#sessionInputs').slideDown();
-                $('#testInputs').slideUp();
-            } else if (selected === 'test') {
-                $('#testInputs').slideDown();
-                $('#sessionInputs').slideUp();
-            } else {
-                $('#sessionInputs').slideUp();
-                $('#testInputs').slideUp();
-            }
-        }
-
-        // Initial toggle on load
-        toggleSessionInputs();
-
-        // Change event for prescription type
-        $('input[name="prescription_type"]').change(function() {
-            toggleSessionInputs();
-        });
-
-        // Add new test input dynamically
-        $('#testList').on('click', '.addTestInput', function() {
-            const newTestInput = `
-            <div class="row mb-2">
-                <div class="col-lg-4">
-                    <input type="text" class="form-control" name="test_recommendation[]" placeholder="Enter test name">
-                </div>
-                <div class="col-lg-2">
-                    <button type="button" class="btn btn-outline-danger removeTestInput">×</button>
-                </div>
-            </div>
-        `;
-            $('#testList').append(newTestInput);
-        });
-
-        // Remove test input field
-        $('#testList').on('click', '.removeTestInput', function() {
-            $(this).closest('.row').remove();
-        });
-
-        $('#prescriptionForm').submit(function(e) {
-            e.preventDefault();
-
-            // Collect form data
-            const formData = $('#prescriptionForm').serialize(); // ✅ serialize, not serializeArray
-
+        function fetchPayments(patientId) {
             $.ajax({
-                url: "{{ route('save_prescription') }}", // Your route
-                method: "POST",
-                data: formData, // ✅ send the correct serialized data
-                headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}' // CSRF token
-                },
+                url: '/patient/' + patientId +
+                    '/payment_history', // Make sure the URL matches your route
+                method: 'GET',
                 success: function(response) {
-                    // Check if session gap is missing
-                    if (response.status == 2) {
-                        show_notification('error',
-                        'Session Gap is required!'); // Clearer message
-                    }
-                    // Success case (when response.success is true)
-                    else if (response.success) {
-                        show_notification('success', response.message);
-                        $('#rightPopup').offcanvas('hide');
-                        $('#prescriptionForm')[0].reset();
-                    }
-                    // Error case for other failures
-                    else {
-                        show_notification('error', 'Error: ' + response.message);
-                    }
-                },
-                error: function(xhr) {
-                    let errorMessage = 'An error occurred';
-                    if (xhr.responseJSON && xhr.responseJSON.message) {
-                        errorMessage = xhr.responseJSON.message;
-                    }
-                    show_notification('error', errorMessage);
-                }
-            });
-        });
+                    var tableBody = $('#payment_history tbody');
+                    tableBody.empty();
 
-    });
+                    if (response.length > 0) {
+                        response.forEach(function(item, index) {
+                            let sessionCount = item.session_count;
+                            let singleSessionFee = item.single_session_fee;
 
+                            // Append data to the table
+                            tableBody.append(`
+                                <tr>
+                                    <td>
+                                        ${item.appointment_no} <br>
 
+                                    </td>
+                                  <td class="small">
+                                        <div class="mb-1">
+                                            <span class="badge bg-success rounded-pill d-inline-block mb-1">Taken: ${item.taken_session}</span><br>
+                                            <span class="badge bg-warning text-dark rounded-pill d-inline-block mb-1">Pending: ${item.pending}</span>
+                                        </div>
+                                        <div class="d-flex justify-content-center gap-3 mt-2">
+                                    <div class="text-center d-flex flex-column align-items-center">
+                                        <span class="badge bg-success rounded-circle d-flex flex-column justify-content-center align-items-center" style="width: 25px; height: 25px;">
+                                            <span style="font-size: 7px;">PT</span>
+                                            <small>${item.pt}</small>
+                                        </span>
+                                    </div>
+                                    <div class="text-center d-flex flex-column align-items-center">
+                                        <span class="badge bg-warning text-dark rounded-circle d-flex flex-column justify-content-center align-items-center" style="width: 25px; height: 25px;">
+                                            <span style="font-size: 7px;">OT</span>
+                                            <small>${item.ot}</small>
+                                        </span>
+                                    </div>
+                                </div>
 
+                                    </td>
 
+                                    <td class="small">
+                                        <div class="mb-1">
+                                            <span class="badge bg-secondary rounded-pill d-inline-block mb-1">Fee: ${item.fee}</span><br>
+                                            <span class="badge bg-success rounded-pill d-inline-block mb-1">Paid: ${item.paid_amount}</span>
+                                        </div>
 
-    document.addEventListener('DOMContentLoaded', function() {
-        const fileInput = document.getElementById('file_upload');
-        const filePreview = document.getElementById('file-preview');
-        const fileTrigger = document.getElementById('filePreview');
+                                        ${
+                                            (item.account_amounts && Object.keys(item.account_amounts).length > 0)
+                                            ? `
+                                                <div class="mb-1">
+                                                ${Object.entries(item.account_amounts)
+                                                    .map(([name, amount]) =>
+                                                        `<span class="badge bg-dark rounded-pill d-block mb-1">${name}: ${amount}</span>`
+                                                    ).join('')
+                                                }
+                                                </div>
+                                            `
+                                            : ''
+                                        }
 
-        let selectedFiles = [];
+                                        ${
+                                            (item.voucher_codes && item.voucher_codes.length > 0)
+                                            ? `<div class="mb-1"><span class="badge bg-warning text-dark rounded-pill d-inline-block">Vouchers: ${item.voucher_codes.join(', ')}</span></div>`
+                                            : ''
+                                        }
 
-        // Trigger file input when clicking the preview area
-        fileTrigger.addEventListener('click', () => fileInput.click());
+                                        ${
+                                            (item.voucher_amounts && item.voucher_amounts.length > 0)
+                                            ? `<div class="mb-1"><span class="badge bg-info text-dark rounded-pill d-inline-block">Voucher Amount: ${
+                                                item.voucher_amounts.reduce((sum, val) => sum + val, 0)
+                                            }</span></div>`
+                                            : (item.total_voucher_amount
+                                                ? `<div class="mb-1"><span class="badge bg-info text-dark rounded-pill d-inline-block">Voucher Amount: ${item.total_voucher_amount}</span></div>`
+                                                : ''
+                                            )
+                                        }
+                                    </td>
 
-        // When files are selected, add them to the selectedFiles array and render previews
-        fileInput.addEventListener('change', (event) => {
-            const newFiles = Array.from(event.target.files);
+                                    <td class="small">
+                                        <div class="mb-1">
+                                            <span class="badge bg-primary rounded-pill d-inline-block mb-1">Sessions: ${item.session_count}</span><br>
+                                            <span class="badge bg-secondary rounded-pill d-inline-block mb-1">Payment: ${item.payment_type}</span><br>
+                                            <span class="badge bg-light text-dark border d-inline-block mb-1">${item.name}</span>
+                                        </div>
+                                    </td>
 
-            newFiles.forEach(file => {
-                selectedFiles.push(file);
-            });
+                                    <td>${item.single_session_fee}</td>
+                                    <td>${item.appointment_fee_paid !== undefined ? item.appointment_fee_paid : '0'} <br>
+                                        ${(item.appointment_account_amounts && Object.keys(item.appointment_account_amounts).length > 0)
+                                        ? `
+                                        <div class="mb-1">
+                                            ${Object.entries(item.appointment_account_amounts)
+                                                .map(([name, amount]) =>
+                                                    `<span class="badge bg-primary rounded-pill d-block mb-1">${name}: ${amount}</span>`
+                                                ).join('')
+                                            }
+                                        </div>
+                                        `
+                                        : ''
+                                         }
+                                    </td>
+                                </tr>
+                            `);
 
-            renderPreviews();
-        });
-
-        // Render previews for the selected files
-        function renderPreviews() {
-            filePreview.innerHTML = ''; // Clear previous previews
-
-            selectedFiles.forEach((file, index) => {
-                const reader = new FileReader();
-                const fileName = file.name.toLowerCase();
-
-                const item = document.createElement('div');
-                item.className =
-                    'file-preview-item col-auto position-relative'; // Ensure positioning for remove button
-
-                const img = document.createElement('img');
-                img.className = 'file-preview-img';
-                img.style.maxWidth = '50px'; // Adjust image size
-
-                // Create a remove button for each file preview
-                const removeBtn = document.createElement('button');
-                removeBtn.className = 'remove-btn btn btn-danger btn-sm position-absolute top-0 end-0';
-                removeBtn.innerHTML = '&times;';
-                removeBtn.onclick = () => {
-                    selectedFiles.splice(index, 1); // Remove file from selectedFiles array
-                    renderPreviews(); // Re-render previews
-                };
-
-                // Handle image files
-                if (file.type.startsWith('image/')) {
-                    reader.onload = (e) => {
-                        img.src = e.target.result;
-                        item.appendChild(removeBtn);
-                        item.appendChild(img);
-                        filePreview.appendChild(item);
-                    };
-                    reader.readAsDataURL(file);
-                } else {
-                    // Handle non-image files (e.g., PDF, DOC, XLS)
-                    if (fileName.endsWith('.pdf')) {
-                        img.src = "{{ asset('images/dummy_images/pdf.png') }}";
-                    } else if (fileName.endsWith('.doc') || fileName.endsWith('.docx')) {
-                        img.src = "{{ asset('images/dummy_images/word.jpeg') }}";
-                    } else if (fileName.endsWith('.xls') || fileName.endsWith('.xlsx')) {
-                        img.src = "{{ asset('images/dummy_images/excel.jpeg') }}";
+                        });
                     } else {
-                        img.src = "{{ asset('images/dummy_images/file.png') }}";
+                        tableBody.append(
+                            '<tr><td colspan="6" class="text-center">No appointments or sessions found.</td></tr>'
+                        );
                     }
-
-                    item.appendChild(removeBtn);
-                    item.appendChild(img);
-                    filePreview.appendChild(item);
                 }
-
-                // Add the file name below the preview
-                const fileLabel = document.createElement('div');
-                fileLabel.className = 'small text-truncate mt-1';
-                fileLabel.style.maxWidth = '100px';
-                fileLabel.title = file.name; // Tooltip if the name is too long
-                fileLabel.textContent = file.name;
-                item.appendChild(fileLabel); // Add file name to preview
             });
         }
-
-        // Optional: Prepare FormData and submit manually (when form is submitted)
-        document.getElementById('labReportForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const formData = new FormData();
-
-            // Add selected files to the FormData object
-            selectedFiles.forEach(file => {
-                formData.append('lab_reports[]', file);
-            });
-
-            // Add additional form data (like patient_id, if needed)
-            formData.append('patient_id', "{{ $patient->id ?? '' }}");
-            formData.append('appoint_id', "{{ $apt_id ?? '' }}");
-
-
-            // Send the files via AJAX
-            fetch("{{ route('lab_reports_upload') }}", {
-                    method: "POST",
-                    body: formData,
-                    headers: {
-                        'X-CSRF-TOKEN': "{{ csrf_token() }}"
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        show_notification('success', data.message);
-                        selectedFiles = []; // Clear selected files
-                        filePreview.innerHTML = ''; // Clear preview area
-                        document.getElementById('labReportForm').reset(); // Reset form
-
-                        // Hide the offcanvas using Bootstrap's built-in mechanism
-                        $('#leftPopup').offcanvas('hide');
-                    } else {
-                        show_notification('error', data.message);
-                    }
-                })
-                .catch(error => {
-                    console.error('Upload failed:', error);
-                    show_notification('error', 'Something went wrong');
-                });
-        });
     });
-
 
     function toggleAmountInput(accountId, accountStatus) {
         const checkbox = document.getElementById("account_" + accountId);
@@ -616,216 +393,11 @@
             success: function(response) {
                 show_notification('success', 'Payment data submitted successfully!');
                 $('#paymentModal').modal('hide');
+                location.reload();
             },
             error: function(xhr) {
                 show_notification('error', 'Something went wrong. Please try again.');
                 console.log(xhr.responseText);
-            }
-        });
-    });
-
-    function edit(id, source) {
-        showPreloader();
-        before_submit();
-        var csrfToken = $('meta[name="csrf-token"]').attr('content');
-        $.ajax({
-            dataType: 'JSON',
-            url: "{{ url('edit_ind_session') }}",
-            method: "POST",
-            data: {
-                id: id,
-                source: source,
-                _token: csrfToken
-            },
-            success: function(fetch) {
-                hidePreloader();
-
-                after_submit();
-                if (fetch != "") {
-
-                    $("#patient_name").val(fetch.patient);
-                    $("#patient_primary_id").val(fetch.patient_id);
-                    $("#inputDate").val(fetch.date);
-                    $("#inputTime").val(fetch.time);
-                    $("#doctor").val(fetch.doctor);
-                    $("#session_primary_id").val(fetch.session_primary_id);
-                    $("#source").val(fetch.source);
-                    $('#doctor').selectpicker('refresh');
-
-
-                    $(".modal-title").html('<?php echo trans('messages.update_lang', [], session('locale')); ?>');
-                }
-            },
-            error: function(html) {
-                hidePreloader();
-
-                after_submit();
-                show_notification('error', '<?php echo trans('messages.edit_failed_lang', [], session('locale')); ?>');
-
-                return false;
-            }
-        });
-    }
-
-
-    $(document).ready(function() {
-        // When the form is submitted
-        $('#editSessionForm').on('submit', function(event) {
-            event.preventDefault();
-            document.activeElement.blur();
-
-            // Get the form data
-            var id = $("#session_primary_id").val(); // Get the session ID
-            var patient_id = $("#patient_primary_id").val(); // Get the session ID
-
-            var source = $("#source").val(); // Get the source value
-
-            var patient_name = $("#patient_name").val();
-            var session_date = $("#inputDate").val();
-            var session_time = $("#inputTime").val();
-            var doctor = $("#doctor").val();
-
-            // CSRF token for security
-            var csrfToken = $('meta[name="csrf-token"]').attr('content');
-
-            // Make the AJAX request to update the session
-            $.ajax({
-                url: "{{ url('update_ind_session') }}", // Adjust URL as needed
-                method: "POST",
-                data: {
-                    id: id,
-                    source: source,
-                    patient_id: patient_id,
-                    session_date: session_date,
-                    session_time: session_time,
-                    doctor: doctor,
-                    _token: csrfToken
-                },
-                success: function(response) {
-
-                    $('#editSessionModal').modal('hide');
-
-
-                    show_notification('success', '<?php echo trans('messages.data_add_success_lang', [], session('locale')); ?>');
-                    $('#all_patient_session_table').DataTable().ajax.reload();
-
-
-                },
-                error: function(xhr) {
-                    // Handle error, show error message
-                    show_notification('error', '<?php echo trans('messages.data_add_failed_lang', [], session('locale')); ?>');
-                }
-            });
-        });
-    });
-
-
-    function transfer(id, source) {
-        showPreloader();
-        before_submit();
-        var csrfToken = $('meta[name="csrf-token"]').attr('content');
-        $.ajax({
-            dataType: 'JSON',
-            url: "{{ url('transfer_ind_session') }}",
-            method: "POST",
-            data: {
-                id: id,
-                source: source,
-                _token: csrfToken
-            },
-            success: function(fetch) {
-                hidePreloader();
-
-                after_submit();
-                if (fetch != "") {
-
-                    $("#source_patient").val(fetch.patient);
-                    $("#patient_primary_id2").val(fetch.patient_id);
-                    $("#ses_date").val(fetch.date);
-                    $("#ses_time").val(fetch.time);
-                    $("#session_primary_id2").val(fetch.session_primary_id);
-                    $("#source2").val(fetch.source);
-
-                }
-            },
-            error: function(html) {
-                hidePreloader();
-
-                after_submit();
-                show_notification('error', '<?php echo trans('messages.transfer_failed_lang', [], session('locale')); ?>');
-
-                return false;
-            }
-        });
-    }
-
-    $(document).ready(function() {
-        // When the form is submitted
-        $('#transferForm').on('submit', function(event) {
-            event.preventDefault();
-            document.activeElement.blur();
-
-            // Get the form data
-            var id = $("#session_primary_id2").val(); // Get the session ID
-            var old_patient_id = $("#patient_primary_id2").val(); // Get the session ID
-
-            var source = $("#source2").val(); // Get the source value
-
-            var patient_name = $("#patient_name").val();
-            var session_date = $("#ses_date").val();
-            var session_time = $("#ses_time").val();
-            var target_patient = $("#target_patient").val();
-
-            // CSRF token for security
-            var csrfToken = $('meta[name="csrf-token"]').attr('content');
-
-            // Make the AJAX request to update the session
-            $.ajax({
-                url: "{{ url('update_transfer_ind_session') }}", // Adjust URL as needed
-                method: "POST",
-                data: {
-                    id: id,
-                    source: source,
-                    old_patient_id: old_patient_id,
-                    session_date: session_date,
-                    session_time: session_time,
-                    target_patient: target_patient,
-                    _token: csrfToken
-                },
-                success: function(response) {
-
-                    $('#transferModal').modal('hide');
-
-
-                    show_notification('success', '<?php echo trans('messages.data_add_success_lang', [], session('locale')); ?>');
-                    $('#all_patient_session_table').DataTable().ajax.reload();
-
-
-                },
-                error: function(xhr) {
-                    // Handle error, show error message
-                    show_notification('error', '<?php echo trans('messages.data_add_failed_lang', [], session('locale')); ?>');
-                }
-            });
-        });
-    });
-
-
-
-    $(document).ready(function() {
-        $('.session-checkbox').change(function() {
-            if ($('#checkbox_ot').is(':checked')) {
-                $('#ot_sessions_box').show();
-            } else {
-                $('#ot_sessions_box').hide();
-                $('#ot_sessions').val('');
-            }
-
-            if ($('#checkbox_pt').is(':checked')) {
-                $('#pt_sessions_box').show();
-            } else {
-                $('#pt_sessions_box').hide();
-                $('#pt_sessions').val('');
             }
         });
     });

@@ -14,14 +14,14 @@
                 <p class="mb-0 fs-18">Rehabilitation and Physiotherapy Center</p>
             </div>
 
-            <div class="input-group search-area ms-auto d-inline-flex">
+            <div class="input-group search-area ms-auto d-inline-flex d-none">
                 <input type="text" class="form-control" placeholder="Search here">
                 <div class="input-group-append">
                     <button type="button" class="input-group-text"><i class="flaticon-381-search-2"></i></button>
                 </div>
             </div>
         </div>
-        <div class="row">
+        <div class="row d-none">
             <div class="col-xl-3 col-xxl-3 col-sm-6">
                 <div class="card gradient-bx text-white bg-danger">
                     <div class="card-body">

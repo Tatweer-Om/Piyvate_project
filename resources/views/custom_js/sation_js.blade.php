@@ -116,7 +116,7 @@ function edit(id) {
 
                     $("#session_name_div").hide();
                     $("#government").val(fetch.govt_id);
-                    $('.government').selectpicker('refresh');
+                    $('#government').selectpicker('refresh');
 
                     $(".ministry_cat_id").val(fetch.ministry_cat);
                     $('.ministry_cat_id').selectpicker('refresh');

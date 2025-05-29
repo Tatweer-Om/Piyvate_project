@@ -133,37 +133,29 @@ class ClinicalNotesController extends Controller
     public function otatp_pedriatic($id)
     {
         $patient = Patient::where('id', $id)->first();
-        $apt = Appointment::where('patient_id', $id)->first();
-        $session = SessionList::where('patient_id', $id)->first();
+        $apt = Appointment::where('patient_id', $id)->where('session_status', 2)->first();
+
 
         if ($apt) {
             $doctor = $apt ? Doctor::where('id', $apt->doctor_id)->value('doctor_name') : null;
         }
-        if ($session) {
-            $doctor = Doctor::where('id', $session->doctor_id)->value('doctor_name');
-        }
+
         return view('clinical_notes.otatp_pediatric', compact('patient',  'apt', 'doctor'));
     }
-
-
-
 
 
 
     public function neuro_pedriatic($id)
     {
         $patient = Patient::find($id);
-        $apt = Appointment::where('patient_id', $id)->first();
-        $note = ClinicalNotes::where('patient_id', $id)->first();
+        $apt = Appointment::where('patient_id', $id)->where('session_status', 2)->first();
+                $note = ClinicalNotes::where('patient_id', $id)->first();
 
-        $session = SessionList::where('patient_id', $id)->first();
 
         if ($apt) {
             $doctor = $apt ? Doctor::where('id', $apt->doctor_id)->value('doctor_name') : null;
         }
-        if ($session) {
-            $doctor = Doctor::where('id', $session->doctor_id)->value('doctor_name');
-        }
+
 
         return view('clinical_notes.otatp_neuro_pediatric', [
             'patient' => $patient ?? null,
@@ -174,20 +166,16 @@ class ClinicalNotesController extends Controller
     }
 
 
-
     public function otatp_ortho($id)
     {
         $patient = Patient::where('id', $id)->first();
 
-        $apt = Appointment::where('patient_id', $id)->first();
-        $session = SessionList::where('patient_id', $id)->first();
+        $apt = Appointment::where('patient_id', $id)->where('session_status', 2)->first();
 
         if ($apt) {
             $doctor = $apt ? Doctor::where('id', $apt->doctor_id)->value('doctor_name') : null;
         }
-        if ($session) {
-            $doctor = Doctor::where('id', $session->doctor_id)->value('doctor_name');
-        }
+
         return view('clinical_notes.otatp_orthopedic', compact('patient', 'apt', 'doctor'));
     }
 
@@ -195,15 +183,12 @@ class ClinicalNotesController extends Controller
     {
         $patient = Patient::where('id', $id)->first();
 
-        $apt = Appointment::where('patient_id', $id)->first();
-        $session = SessionList::where('patient_id', $id)->first();
+        $apt = Appointment::where('patient_id', $id)->where('session_status', 2)->first();
 
         if ($apt) {
             $doctor = $apt ? Doctor::where('id', $apt->doctor_id)->value('doctor_name') : null;
         }
-        if ($session) {
-            $doctor = Doctor::where('id', $session->doctor_id)->value('doctor_name');
-        }
+
         return view('clinical_notes.otatp_physical_dysfunction', compact('patient', 'apt', 'doctor'));
     }
 
@@ -258,11 +243,8 @@ class ClinicalNotesController extends Controller
 
         $neuroPediatric->save();
 
-        $appointment = Appointment::findOrFail($neuroPediatric->appointment_id);
-        $appointment->session_status = 7;
-        $appointment->save();
 
-        return redirect()->to('patient_profile/' . $neuroPediatric->patient_id)->with('success', 'Data saved successfully.');
+        return redirect()->to('patient_appointment/' . $neuroPediatric->appointment_id)->with('success', 'Data saved successfully.');
     }
 
 
@@ -312,7 +294,7 @@ class ClinicalNotesController extends Controller
 
         $neuroPediatric->save();
 
-        return redirect('patient_profile/' . $neuroPediatric->patient_id)->with('success', 'Data saved successfully.');
+        return redirect('patient_appointment/' . $neuroPediatric->appointment_id)->with('success', 'Data saved successfully.');
     }
 
 
@@ -385,11 +367,8 @@ class ClinicalNotesController extends Controller
 
         $neuroPediatric->save();
 
-        $appointment = Appointment::findOrFail($neuroPediatric->appointment_id);
-        $appointment->session_status = 7;
-        $appointment->save();
 
-        return redirect()->to('patient_profile/' . $neuroPediatric->patient_id)->with('success', 'Data saved successfully.');
+        return redirect()->to('patient_appointment/' . $neuroPediatric->appointment_id)->with('success', 'Data saved successfully.');
     }
 
 
@@ -457,7 +436,7 @@ class ClinicalNotesController extends Controller
 
         $neuroPediatric->save();
 
-        return redirect('patient_profile/' . $neuroPediatric->patient_id)->with('success', 'Data saved successfully.');
+        return redirect('patient_appointment/' . $neuroPediatric->appointment_id)->with('success', 'Data saved successfully.');
     }
 
 
@@ -485,11 +464,8 @@ class ClinicalNotesController extends Controller
         $neuroPediatric->save();
 
 
-        $appointment = Appointment::findOrFail($neuroPediatric->appointment_id);
-        $appointment->session_status = 7;
-        $appointment->save();
 
-        return redirect()->to('patient_profile/' . $neuroPediatric->patient_id)->with('success', 'Data saved successfully.');
+        return redirect()->to('patient_appointment/' . $neuroPediatric->appointment_id)->with('success', 'Data saved successfully.');
     }
 
     public function edit_otp_pediatric($id)
@@ -536,7 +512,7 @@ class ClinicalNotesController extends Controller
 
         $neuroPediatric->save();
 
-        return redirect('patient_profile/' . $neuroPediatric->patient_id)->with('success', 'Data saved successfully.');
+        return redirect('patient_appointment/' . $neuroPediatric->appointment_id)->with('success', 'Data saved successfully.');
     }
 
     //physical_dysfucntion
@@ -564,11 +540,8 @@ class ClinicalNotesController extends Controller
 
         $neuroPediatric->save();
 
-        $appointment = Appointment::findOrFail($neuroPediatric->appointment_id);
-        $appointment->session_status = 7;
-        $appointment->save();
 
-        return redirect()->to('patient_profile/' . $neuroPediatric->patient_id)->with('success', 'Data saved successfully.');
+        return redirect()->to('patient_appointment/' . $neuroPediatric->appointment_id)->with('success', 'Data saved successfully.');
     }
 
 
@@ -614,7 +587,7 @@ class ClinicalNotesController extends Controller
 
         $neuroPediatric->save();
 
-        return redirect('patient_profile/' . $neuroPediatric->patient_id)->with('success', 'Data saved successfully.');
+        return redirect('patient_appointment/' . $neuroPediatric->appointment_id)->with('success', 'Data saved successfully.');
     }
 
 
@@ -624,10 +597,12 @@ class ClinicalNotesController extends Controller
             return redirect()->back()->with('error', 'Date and Time are required.');
         }
 
+
         $user = Auth::user();
         $user_id = $user->id;
         $branch_id = $user->branch_id;
         $id = $request->session_id;
+
 
         $soap = SoapOT::where('session_id', $id)->first();
 
@@ -716,8 +691,20 @@ class ClinicalNotesController extends Controller
             $sessiondata->save();
         }
 
-        return redirect('patient_session/' . $soap->patient_id)->with('success', $message);
-    }
+        if (is_null($soap->main_appointment_id)) {
+            $source = 11;
+            $main_id = $soap->main_session_id;
+        } elseif (is_null($soap->main_session_id)) {
+            $source = 10;
+            $main_id = $soap->main_appointment_id;
+        } else {
+            // Fallback: if both are not null, use session-based redirect
+            return redirect('patient_profile/' . $soap->patient_id)->with('success', $message);
+        }
+
+        // Build and redirect to: patient_session/{main_id}?source={source}
+        $redirectUrl = 'patient_session/' . $main_id . '?source=' . $source;
+        return redirect($redirectUrl)->with('success', $message);    }
 
 
     public function add_soap_pt(Request $request)
@@ -820,22 +807,22 @@ class ClinicalNotesController extends Controller
         }
 
         if (!is_null($soap->main_session_id)) {
-            $nextSession = AllSessioDetail::where('session_id', $soap->main_session_id)->where('id', $id)->first();
+
+
             $session_data = SessionData::where('source', 1)
                 ->where('main_session_id', $soap->main_session_id)->where('id', $id)
                 ->first();
 
-            if (!$nextSession || !$session_data) {
+            if (!$session_data) {
                 return redirect()->back()->with('error', 'You do not have a session on the selected date.');
             }
 
-            $nextSession->status = 2;
             $session_data->status = 2;
-            $nextSession->save();
             $session_data->save();
         }
 
         if (!is_null($soap->main_appointment_id)) {
+
             $nextAppSession = AppointmentSession::where('appointment_id', $soap->main_appointment_id)->where('id', $id)->first();
             $sessiondata = SessionData::where('main_appointment_id', $soap->main_appointment_id)->where('id', $id)
                 ->where('session_cat', 'PT')
@@ -852,6 +839,21 @@ class ClinicalNotesController extends Controller
             $sessiondata->save();
         }
 
-        return redirect('patient_session/' . $soap->patient_id)->with('success', $message);
-    }
+
+
+        if (is_null($soap->main_appointment_id)) {
+            $source = 11;
+            $main_id = $soap->main_session_id;
+        } elseif (is_null($soap->main_session_id)) {
+            $source = 10;
+            $main_id = $soap->main_appointment_id;
+        } else {
+            // Fallback: if both are not null, use session-based redirect
+            return redirect('patient_profile/' . $soap->patient_id)->with('success', $message);
+        }
+
+        // Build and redirect to: patient_session/{main_id}?source={source}
+        $redirectUrl = 'patient_session/' . $main_id . '?source=' . $source;
+        return redirect($redirectUrl)->with('success', $message);    }
+
 }

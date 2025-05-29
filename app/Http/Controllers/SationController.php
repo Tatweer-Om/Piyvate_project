@@ -17,14 +17,25 @@ use Illuminate\Support\Facades\Auth;
 
 class SationController extends Controller
 {
-    public function index(){
+    public function index() {
+        $branches = Branch::all();
 
-        $branches= Branch::all();
-        $govts= GovtDept::all();
-        $categories= Ministrycat::all();
-        return view ('sessions.sation', compact('branches', 'govts', 'categories'));
+        $usedCategoryIds = Sation::pluck('ministry_cat_id')->filter()->all();
+        $categories = Ministrycat::when(!empty($usedCategoryIds), function ($query) use ($usedCategoryIds) {
+            return $query->whereNotIn('id', $usedCategoryIds);
+        })->get();
 
-        }
+        $usedGovtIds = Sation::pluck('government_id')->filter()->all();
+        $govts = GovtDept::when(!empty($usedGovtIds), function ($query) use ($usedGovtIds) {
+            return $query->whereNotIn('id', $usedGovtIds);
+        })->get();
+
+        $data = Sation::where('session_type', 'normal')->first();
+
+        return view('sessions.sation', compact('branches', 'data', 'govts', 'categories'));
+    }
+
+
 
         public function show_sation()
         {
@@ -90,7 +101,21 @@ class SationController extends Controller
         public function add_sation(Request $request)
         {
             $user_id = Auth::id();
-            $user = User::where('id', $user_id)->first();
+            $user = User::find($user_id);
+
+            // Check for duplicates (only for ministry session)
+            if ($request->input('session_type') === 'ministry') {
+                $existing = Sation::where('government_id', $request->input('government'))
+                                  ->where('ministry_cat_id', $request->input('ministry_cat_id'))
+                                  ->first();
+
+                if ($existing) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'This ministry category is already assigned to the selected government department.'
+                    ]);
+                }
+            }
 
             $session = new Sation();
             $session->session_type = $request->input('session_type');
@@ -104,18 +129,26 @@ class SationController extends Controller
                 $session->government_id = $request->input('government');
                 $session->ministry_cat_id = $request->input('ministry_cat_id');
 
+                // Optional logic to assign category to the government (if needed)
+                $govt = GovtDept::find($session->government_id);
+                $govt->ministry_category_id = $session->ministry_cat_id;
+
+                $mincat = Ministrycat::find($govt->ministry_category_id);
+                $govt->ministry_category_color = $mincat->ministry_category_color;
+                $govt->save();
+
                 $session->session_name = null;
             } else {
                 $session->session_name = $request->input('session_name');
                 $session->government_id = null;
                 $session->ministry_cat_id = null;
-
             }
 
-             $session->save();
+            $session->save();
 
             return response()->json(['success' => true, 'message' => 'Session added successfully!']);
         }
+
 
 
         public function edit_sation(Request $request)
@@ -154,22 +187,37 @@ class SationController extends Controller
         {
             $session_id = $request->input('session_id');
             $user_id = Auth::id();
-            $user = User::where('id', $user_id)->first();
-
+            $user = User::find($user_id);
 
             if (!$user) {
                 return response()->json(['error' => 'User not found'], 404);
             }
 
-            $session = Sation::where('id', $session_id)->first();
+            $session = Sation::find($session_id);
             if (!$session) {
                 return response()->json(['error' => trans('messages.session_not_found', [], session('locale'))], 404);
+            }
+
+            // 🛑 Check for duplicates only if session_type is ministry
+            if ($request->input('session_type') === 'ministry') {
+                $exists = Sation::where('government_id', $request->input('government'))
+                                ->where('ministry_cat_id', $request->input('ministry_cat_id'))
+                                ->where('id', '!=', $session_id) // Exclude current session from check
+                                ->exists();
+
+                if ($exists) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'This ministry category is already assigned to the selected government department.'
+                    ]);
+                }
             }
 
             $previousData = $session->only([
                 'session_type', 'session_name', 'government_id', 'session_price', 'branch_id', 'notes', 'added_by', 'user_id', 'created_at'
             ]);
 
+            // ✏️ Update fields
             $session->session_type = $request->input('session_type');
             $session->session_price = $request->input('session_price');
             $session->branch_id = $user->branch_id;
@@ -180,16 +228,16 @@ class SationController extends Controller
             if ($request->input('session_type') === 'ministry') {
                 $session->government_id = $request->input('government');
                 $session->ministry_cat_id = $request->input('ministry_cat_id');
-
                 $session->session_name = null;
             } else {
                 $session->session_name = $request->input('session_name');
-                $session->ministry_cat_id = null;
                 $session->government_id = null;
+                $session->ministry_cat_id = null;
             }
 
             $session->save();
 
+            // 📚 History logging
             $history = new History();
             $history->user_id = $user_id;
             $history->table_name = 'sessions';
@@ -204,7 +252,10 @@ class SationController extends Controller
             $history->added_by = $user->user_name;
             $history->save();
 
-            return response()->json([trans('messages.success_lang', [], session('locale')) => trans('messages.user_update_lang', [], session('locale'))]);
+            return response()->json([
+                trans('messages.success_lang', [], session('locale')) =>
+                trans('messages.user_update_lang', [], session('locale'))
+            ]);
         }
 
 

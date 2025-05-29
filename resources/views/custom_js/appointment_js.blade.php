@@ -345,30 +345,30 @@
 
    $(document).ready(function () {
     // Add Session
-    $("#addSessionBtn").click(function () {
-        let lastRow = $("#session_table tbody tr:last");
-        let currentSessionCount = $("#session_table tbody td").length;
-        let newSessionNumber = currentSessionCount + 1;
-        let formattedDate = new Date().toISOString().split('T')[0];
+        $("#addSessionBtn").click(function () {
+            let lastRow = $("#session_table tbody tr:last");
+            let currentSessionCount = $("#session_table tbody td").length;
+            let newSessionNumber = currentSessionCount + 1;
+            let formattedDate = new Date().toISOString().split('T')[0];
 
-        let sessionTd = `
-        <td class="col-md-2 text-center">
-            <label class="session-label">Session ${newSessionNumber}</label>
-            <input type="date" class="form-control form-control-sm session-date mt-1"
-                name="session_dates[]" value="${formattedDate}" />
-            <div class="input-group clockpicker mt-1">
-                <input type="text" class="form-control form-control-sm success_time"
-                    name="session_times[]" value="10:30">
-                <span class="input-group-text"><i class="fas fa-clock"></i></span>
-            </div>
-        </td>`;
+            let sessionTd = `
+            <td class="col-md-2 text-center">
+                <label class="session-label">Session ${newSessionNumber}</label>
+                <input type="date" class="form-control form-control-sm session-date mt-1"
+                    name="session_dates[]" value="${formattedDate}" />
+                <div class="input-group clockpicker mt-1">
+                    <input type="text" class="form-control form-control-sm success_time"
+                        name="session_times[]" value="10:30">
+                    <span class="input-group-text"><i class="fas fa-clock"></i></span>
+                </div>
+            </td>`;
 
-        if (lastRow.length === 0 || lastRow.children("td").length >= 6) {
-            $("#session_table tbody").append(`<tr>${sessionTd}</tr>`);
-        } else {
-            lastRow.append(sessionTd);
-        }
-    });
+            if (lastRow.length === 0 || lastRow.children("td").length >= 6) {
+                $("#session_table tbody").append(`<tr>${sessionTd}</tr>`);
+            } else {
+                lastRow.append(sessionTd);
+            }
+        });
 
     // Remove Session
     $("#removeSessionBtn").click(function () {
@@ -534,7 +534,9 @@
             } else if (sessionType === "offer") {
                 let offerPrice = parseFloat($("#hiddenOfferPrice").val()) || 0;
                 totalSessions = parseInt($("#hiddenTotalSessions").val()) || totalSessions;
+
                 totalPrice = offerPrice;
+
             } else if (sessionType === "normal") {
                 let sessionPrice = parseFloat($("#hiddenSessionPrice").val()) || 0;
                 totalPrice = sessionPrice * totalSessions;
@@ -589,6 +591,23 @@
                 type: "POST",
                 data: formData,
                 success: function(response) {
+
+                    if (response.status == 5) {
+                    show_notification('error',
+                        '{{ trans('messages.please_make_sessions_as_per_the_total_sessions_of_offer', [], session('locale')) }}'
+                    );
+                    session(response.appointment_id);
+                    return;
+                }
+                 if (response.status == 6 || response.status == 7) {
+            // Optional: show a different error if needed
+                    show_notification('success',
+                                '{{ trans('messages.please_click_submit_again_sessions_have_been_added_to_doctors_reccomendations', [], session('locale')) }}'
+                            );
+                    session(response.appointment_id);
+                    return;
+                    }
+
                     $("#sessionModal").modal("hide");
                     $("#secondModal").modal("show");
                 },
@@ -610,6 +629,7 @@
             let paymentStatus = parseInt($(".payment_status").val()) || 0;
             let totalAmount = parseFloat($("#total_amount").text()) || 0;
 
+
             $(".payment-method-checkbox:checked").each(function() {
                 let accountId = $(this).val();
                 let amount = parseFloat($("#amount_" + accountId).val()) || 0;
@@ -630,6 +650,12 @@
                 show_notification('error',
                     '{{ trans('messages.Please_select_atleast_a_payment_method', [], session('locale')) }}'
                     );
+                return;
+            }
+            if (paymentStatus !== 3 && totalPaid !== totalAmount) {
+                show_notification('error',
+                    '{{ trans('messages.total_paid_must_be_equal_to_total_amount', [], session('locale')) }}'
+                );
                 return;
             }
 
@@ -674,6 +700,8 @@
                 $("#pendingPaymentAlert").removeClass("d-none").addClass("d-block");
                 $("#accountss").hide();
                 $(".deta").hide();
+                $(".sel_payment").hide();
+
             } else {
                 // If payment status is not 3, hide the pending payment alert and show relevant content
                 $("#pendingPaymentAlert").removeClass("d-block").addClass("d-none");
@@ -817,8 +845,8 @@
                 // SweetAlert for "Offer" selection
                 Swal.fire({
                     icon: 'warning',
-                    title: 'Check the session count as per the offer!',
-                    text: 'Please ensure the session count matches the details in the offer.',
+                    title: 'Please Announce!',
+                    text: 'Now Total Sessions and Price will be as per offer.',
                     showCancelButton: true,
                     confirmButtonText: 'Understood',
                     cancelButtonText: 'Close',
@@ -835,4 +863,57 @@
             Swal.close(); // Close SweetAlert if Ministry is selected
         });
     });
+
+
+    function approve_appointment(id) {
+            Swal.fire({
+                title: '{{ trans('messages.sure_lang', [], session('locale')) }}',
+                text: '{{ trans('messages.approve_lang', [], session('locale')) }}',
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: '{{ trans('messages.approve_it_lang', [], session('locale')) }}',
+                confirmButtonClass: "btn btn-primary",
+                cancelButtonClass: "btn btn-danger ml-1",
+                buttonsStyling: false
+            }).then(function(result) {
+                if (result.value) {
+                    showPreloader();
+                    before_submit();
+                    var csrfToken = $('meta[name="csrf-token"]').attr('content');
+                    $.ajax({
+                        url: "{{ url('approve_appointment') }}",
+                        type: 'POST',
+                        data: {
+                            id: id,
+                            _token: csrfToken
+                        },
+                        error: function() {
+                            hidePreloader();
+                            after_submit();
+                            show_notification('error',
+                                '{{ trans('messages.delete_failed_lang', [], session('locale')) }}'
+                            );
+                        },
+                        success: function(data) {
+                            hidePreloader();
+                            after_submit();
+                            $('#all_appointments').DataTable().ajax.reload();
+                            show_notification('success',
+                                '{{ trans('messages.delete_success_lang', [], session('locale')) }}'
+                            );
+                        }
+                    });
+                } else if (result.dismiss === Swal.DismissReason.cancel) {
+                    show_notification('success',
+                        '{{ trans('messages.safe_lang', [], session('locale')) }}');
+                }
+            });
+        }
+
+
+
+
+
 </script>

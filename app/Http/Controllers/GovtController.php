@@ -2,12 +2,22 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use Carbon\Carbon;
 use App\Models\User;
+use App\Models\Offer;
+use App\Models\Account;
 use App\Models\History;
+use App\Models\Patient;
 use App\Models\Category;
 use App\Models\GovtDept;
+use App\Models\Appointment;
+use App\Models\SessionData;
+use App\Models\SessionList;
+use Illuminate\Http\Request;
+use App\Models\SessionDetail;
+use App\Models\SessionsPayment;
+use App\Models\AppointmentDetail;
+use App\Models\SessionsonlyPayment;
 use Illuminate\Support\Facades\Auth;
 
 class GovtController extends Controller
@@ -26,7 +36,7 @@ class GovtController extends Controller
     if (count($view_govt) > 0) {
         foreach ($view_govt as $value) {
 
-            $govt_name = '<a class="patient-info ps-0" href="javascript:void(0);">' . $value->govt_name . '</a>';
+            $govt_name = '<a class="patient-info ps-0" href="govt_detail/' . $value->id . '">' . $value->govt_name . '</a>';
 
             $modal = '
             <a href="javascript:void(0);" class="me-3 edit-staff" data-bs-toggle="modal" data-bs-target="#add_govt_modal" onclick=edit("' . $value->id . '")>
@@ -41,7 +51,7 @@ class GovtController extends Controller
             $sno++;
             $json[] = array(
                 '<span class="patient-info ps-0">' . $sno . '</span>',
-                '<span class="text-nowrap ms-2">' . $govt_name . '</span>',
+                 $govt_name,
                 '<span class="text-primary">' . $value->govt_phone . '</span>',
                 '<span class="text-primary">' . $value->govt_email . '</span>',
                 '<span>' . $value->added_by . '</span>',
@@ -180,6 +190,214 @@ public function delete_govt(Request $request)
 
     return response()->json([
         trans('messages.success_lang', [], session('locale')) => trans('messages.govt_deleted_success', [], session('locale'))
+    ]);
+}
+
+public function govt_detail($id) {
+
+    $mini = GovtDept::where('id', $id)->first();
+
+    $appointments = AppointmentDetail::where('ministry_id', $id)
+        ->whereNotNull('ministry_id')
+        ->where('contract_payment', 1)
+        ->get();
+        $appointments2 = AppointmentDetail::where('ministry_id', $id)
+        ->whereNotNull('ministry_id')
+        ->get();
+
+    $totalAppointmentPrice = $appointments->sum('total_price');
+    $totalUniquePatientsAppointments = $appointments2->pluck('patient_id')->unique()->count();
+
+    $sessionDetails = SessionDetail::where('ministry_id', $id)
+        ->whereNotNull('ministry_id')
+        ->where('contract_payment', 1)
+        ->get();
+        $sessionDetails2 = SessionDetail::where('ministry_id', $id)
+        ->whereNotNull('ministry_id')
+        ->get();
+
+    $totalSessionFee = $sessionDetails->sum('total_fee');
+    $totalUniquePatientsSessions = $sessionDetails2->pluck('patient_id')->unique()->count();
+
+    $total_pending = $totalAppointmentPrice + $totalSessionFee;
+
+    // Removed the condition of contract_payment == 2 for counting patients
+    $totalUniquePatients = $appointments2->pluck('patient_id')->merge($sessionDetails2->pluck('patient_id'))->unique()->count();
+
+
+
+    $totalPaidAppointments = SessionsPayment::
+        where('contract_payment', 2)
+        ->sum('amount');
+
+    $totalPaidSessions = SessionsonlyPayment::
+        where('contract_payment', 2)
+        ->sum('amount');
+
+    $total_paid_combined = $totalPaidAppointments + $totalPaidSessions;
+
+    return view('sessions.ministry_detail', compact('mini', 'total_pending', 'total_paid_combined', 'totalUniquePatients'));
+}
+
+
+
+public function show_all_contract(Request $request) {
+    $miniId = $request->input('mini_id');
+    $appointments = AppointmentDetail::whereNotNull('ministry_id')->where('ministry_id', $miniId)->get();
+    $sessions = SessionDetail::whereNotNull('ministry_id')->where('ministry_id', $miniId)->get();
+
+    $data = [];
+
+
+    foreach ($appointments as $appointment) {
+        $payments = SessionsPayment::where('appointment_id', $appointment->appointment_id)->where('contract_payment', 2)->get();
+        $detail = AppointmentDetail::where('appointment_id', $appointment->appointment_id)->first();
+
+
+        $isContractPayment = $detail->ministry_id ? true : false;
+        $contractPaymentStatus = $detail->contract_payment;
+
+        $total_paid_amount = 0;
+        $account_amounts = [];
+        $voucher_codes = [];
+        $voucher_amounts = [];
+
+        foreach ($payments as $payment) {
+            $total_paid_amount += $payment->amount ?? 0;
+
+            if ($payment->account_id) {
+                $account_name = Account::where('id', $payment->account_id)->value('account_name');
+                if ($account_name) {
+                    if (!isset($account_amounts[$account_name])) {
+                        $account_amounts[$account_name] = 0;
+                    }
+                    $account_amounts[$account_name] += $payment->amount ?? 0;
+                }
+            }
+
+            if ($payment->voucher_code) {
+                $voucher_codes[] = $payment->voucher_code;
+            }
+
+            if ($payment->voucher_amount) {
+                $voucher_amounts[] = $payment->voucher_amount;
+            }
+        }
+
+        // === APPLY CONTRACT PAYMENT RULES ===
+        if ($isContractPayment && $contractPaymentStatus == 1) {
+            $total_paid_amount = 'Pending';
+            $account_amounts = [];
+        }
+
+        $apt_no = Appointment::where('id', $appointment->appointment_id)->value('appointment_no') ?? '';
+        $total_sessions = SessionData::where('main_appointment_id', $appointment->appointment_id)->count();
+        $taken_session= SessionData::where('main_appointment_id', $appointment->appointment_id)->where('status', 2)->count();
+        $pending= SessionData::where('main_appointment_id', $appointment->appointment_id)->where('status', 1)->count();
+        $ot= SessionData::where('main_appointment_id', $appointment->appointment_id)->where('session_cat', 'OT')->count();
+        $pt= SessionData::where('main_appointment_id', $appointment->appointment_id)->where('session_cat', 'PT')->count();
+
+        $data[] = [
+            'type' => 'appointment',
+            'appointment_no' => $apt_no,
+            'taken_session'=>$taken_session,
+            'pending'=>$pending,
+            'ot'=>$ot,
+            'pt'=>$pt,
+            'fee' => $appointment->total_price ?? 0,
+            'paid_amount' => $total_paid_amount,
+            'account_amounts' => $account_amounts,
+            'payment_type' => $detail->session_type,
+            'voucher_codes' => array_unique($voucher_codes),
+            'voucher_amounts' => $voucher_amounts,
+            'session_count' => $total_sessions,
+            'single_session_fee' => ($total_sessions > 0)
+                ? $appointment->total_price / $total_sessions
+                : 0,
+            'contract_payment_check' => [
+                'is_contract' => $isContractPayment,
+                'status' => $contractPaymentStatus,
+            ],
+        ];
+    }
+
+    foreach ($sessions as $session) {
+        $payments = SessionsonlyPayment::where('session_id', $session->session_id)->where('contract_payment', 2)->get();
+        $detail = SessionDetail::where('session_id', $session->session_id)->first();
+
+
+
+        $isContractPayment = $detail->ministry_id ? true : false;
+        $contractPaymentStatus = $detail->contract_payment;
+
+        $total_paid_amount = 0;
+        $account_amounts = [];
+        $voucher_codes = [];
+        $voucher_amounts_sum = 0;
+
+        foreach ($payments as $payment) {
+            $total_paid_amount += $payment->amount ?? 0;
+
+            if ($payment->account_id) {
+                $account_name = Account::where('id', $payment->account_id)->value('account_name');
+                if ($account_name) {
+                    if (!isset($account_amounts[$account_name])) {
+                        $account_amounts[$account_name] = 0;
+                    }
+                    $account_amounts[$account_name] += $payment->amount ?? 0;
+                }
+            }
+
+            if ($payment->voucher_code) {
+                $voucher_codes[] = $payment->voucher_code;
+            }
+
+            if ($payment->voucher_amount) {
+                $voucher_amounts_sum += $payment->voucher_amount;
+            }
+        }
+
+        // === APPLY CONTRACT PAYMENT RULES ===
+        if ($isContractPayment && $contractPaymentStatus == 1) {
+            $total_paid_amount = 'Pending';
+            $account_amounts = [];
+        }
+
+        $session_no = SessionList::where('id', $session->session_id)->value('session_no') ?? '';
+        $total_sessions = SessionData::where('main_session_id', $session->session_id)->count();
+        $taken_session= SessionData::where('main_session_id', $session->session_id)->where('status', 2)->count();
+        $pending= SessionData::where('main_session_id', $session->session_id)->where('status', 1)->count();
+        $ot= SessionData::where('main_session_id', $session->session_id)->where('session_cat', 'OT')->count();
+        $pt= SessionData::where('main_session_id', $session->session_id)->where('session_cat', 'PT')->count();
+
+
+        $data[] = [
+            'type' => 'session',
+            'appointment_no' => $session_no,
+            'fee' => $session->total_fee ?? 0,
+            'paid_amount' => $total_paid_amount,
+            'taken_session'=>$taken_session,
+            'pending'=>$pending,
+            'ot'=>$ot,
+            'pt'=>$pt,
+            'account_amounts' => $account_amounts,
+            'payment_type' => $detail->session_type,
+            'voucher_codes' => array_unique($voucher_codes),
+            'total_voucher_amount' => $voucher_amounts_sum,
+            'session_count' => $total_sessions,
+            'single_session_fee' => ($total_sessions > 0)
+                ? $session->total_fee / $total_sessions
+                : 0,
+            'contract_payment_check' => [
+                'is_contract' => $isContractPayment,
+                'status' => $contractPaymentStatus,
+            ],
+        ];
+    }
+
+
+    return response()->json([
+        'data' => $data,
     ]);
 }
 

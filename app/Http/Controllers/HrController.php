@@ -10,7 +10,7 @@ use App\Models\Branch;
 use App\Models\User;
 use App\Models\History;
 use App\Models\Leave;
-use App\Models\Payroll; 
+use App\Models\Payroll;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
@@ -23,13 +23,13 @@ class HrController extends Controller
     public function payroll(){
         $staff= Staff::all();
         $doctor= Doctor::all();
-        $branch= Branch::all(); 
-         
+        $branch= Branch::all();
+
         return view ('hr.payroll', compact('staff','doctor','branch'));
     }
     public function show_employee_payroll(Request $request)
     {
-        
+
         $staff= Staff::all();
         $doctor= Doctor::all();
         // Merge both collections, adding the payroll_type and other necessary fields
@@ -56,7 +56,7 @@ class HrController extends Controller
         foreach($mergedData as $pay_staff)
         {
             // Fetch current month payroll data
-            $payroll_data = Payroll::select('employee_id', 'payroll_type', \DB::raw('SUM(amount) as total_amount'))
+            $payroll_data = Payroll::select('employee_id', 'payroll_type', DB::raw('SUM(amount) as total_amount'))
                 ->where('employee_id', $pay_staff->id) // Use the object syntax here
                 ->where('employee_type', $pay_staff->employee_type) // Use the object syntax here
                 ->whereMonth('pay_date', Carbon::now()->month)
@@ -125,7 +125,7 @@ class HrController extends Controller
                 ]);
             }
 
-            
+
 
             // Only process payroll data if available
             if (!$payroll_data->isEmpty()) {
@@ -182,7 +182,7 @@ class HrController extends Controller
                     $gross_salary = $data[1] + $data[2] + $data[3] + $data[4];
                     $total_deduction = $data[11] + $data[12] + $data[13];
                     $no_of_pt = 0;
-                    
+
                     $net_salary = $gross_salary - $total_deduction + $data[5] + $data[6] + $data[7] + $data[8] + $data[9] + $data[10];
 
                     // Get notes from the database (for example, from a notes or remarks table)
@@ -206,7 +206,7 @@ class HrController extends Controller
                     {
                         $leaves = $leaves_data->total_leaves;
                     }
-                    
+
 
                     $json[] = [
                         $pay_staff->name,
@@ -247,17 +247,17 @@ class HrController extends Controller
                 'aaData' => []
             ]);
         }
-        
+
     }
 
 
 
     public function add_payroll(Request $request){
 
-        $user_id = Auth::id(); 
+        $user_id = Auth::id();
         $data= User::where('id', $user_id)->first();
         $staff_data= Staff::where('id', $request['employee_id'])->first();
-        $user= $data->user_name; 
+        $user= $data->user_name;
 
         $payroll_image = "";
 
@@ -280,10 +280,10 @@ class HrController extends Controller
 
         $payroll->employee_id = $employee_id;
         $payroll->payroll_type = $request['payroll_type'];
-        $payroll->employee_type = $employee_type; 
+        $payroll->employee_type = $employee_type;
         $payroll->amount = $request['amount'];
         $payroll->payment_file = $payroll_image;
-        $payroll->pay_date = $request['pay_date']; 
+        $payroll->pay_date = $request['pay_date'];
         $payroll->notes = $request['notes'];
         $payroll->branch_id = $staff_data->branch_id;
         $payroll->added_by = $user;
@@ -299,8 +299,8 @@ class HrController extends Controller
 
         $sno=0;
 
-         
-        
+
+
 
         $payroll_data = Payroll::whereMonth('pay_date', Carbon::now()->month)
         ->whereYear('pay_date', Carbon::now()->year)
@@ -319,7 +319,7 @@ class HrController extends Controller
                     $employee_name = Doctor::where('id', $value->employee_id)->value('doctor_name');
                 }
 
-                
+
                 $modal = '
                 <a href="javascript:void(0);" onclick=del_payroll("'.$value->id.'")>
                     <i class="fa fa-trash fs-18 text-danger"></i>
@@ -358,7 +358,7 @@ class HrController extends Controller
                 } elseif ($value->payroll_type == 13) {
                     $payroll_type_name = trans('messages.other_salary_lang',[],session('locale'));
                 }
-                
+
 
 
                 $sno++;
@@ -367,7 +367,7 @@ class HrController extends Controller
                     $payroll_type_name,
                     $value->amount,
                     $value->pay_date,
-                    $value->notes, 
+                    $value->notes,
                     $modal
                 );
 
@@ -417,11 +417,11 @@ class HrController extends Controller
         ]);
 
         // Get current payroll info
-        $user_id = Auth::id(); 
+        $user_id = Auth::id();
         $data= User::where('id', $user_id)->first();
         $user= $data->user_name;
         $branch= $data->branch_id;
-         
+
 
         // Save history before deletion
         $history = new History();
@@ -446,16 +446,16 @@ class HrController extends Controller
     public function leaves(){
         $staff= Staff::all();
         $doctor= Doctor::all();
-        $branch= Branch::all(); 
+        $branch= Branch::all();
         return view ('hr.leaves', compact('staff','doctor','branch'));
     }
 
     public function add_leaves(Request $request){
 
-        $user_id = Auth::id(); 
+        $user_id = Auth::id();
         $data= User::where('id', $user_id)->first();
         $staff_data= Staff::where('id', $request['employee_id'])->first();
-        $user= $data->user_name; 
+        $user= $data->user_name;
 
         $leaves_image = "";
 
@@ -492,7 +492,7 @@ class HrController extends Controller
             {
                 $all_leaves = $staff_data->emergency_leaves;
             }
-            
+
         }
         else
         {
@@ -520,12 +520,12 @@ class HrController extends Controller
 
         $leaves->employee_id = $employee_id;
         $leaves->leaves_type = $request['leaves_type'];
-        $leaves->employee_type = $employee_type; 
+        $leaves->employee_type = $employee_type;
         $leaves->total_leaves = $request['total_leaves'];
         $leaves->remaining_leaves = $remaining_leaves;
         $leaves->leave_file = $leaves_image;
-        $leaves->from_date = $request['from_date']; 
-        $leaves->to_date = $to_date; 
+        $leaves->from_date = $request['from_date'];
+        $leaves->to_date = $to_date;
         $leaves->reason = $request['reason'];
         $leaves->branch_id = $staff_data->branch_id;
         $leaves->added_by = $user;
@@ -551,7 +551,7 @@ class HrController extends Controller
                     $employee_name = Doctor::where('id', $value->employee_id)->value('doctor_name');
                 }
 
-                
+
                 $modal = '
                 <a href="javascript:void(0);" onclick=del_leaves("'.$value->id.'")>
                     <i class="fa fa-trash fs-18 text-danger"></i>
@@ -569,7 +569,7 @@ class HrController extends Controller
                     $leaves_type_name = trans('messages.emergency_leaves_lang',[],session('locale'));
                 } elseif ($value->leaves_type == 3) {
                     $leaves_type_name = trans('messages.sick_leaves_lang',[],session('locale'));
-                } 
+                }
 
                 $sno++;
                 $json[] = array(
@@ -593,7 +593,7 @@ class HrController extends Controller
     public function show_employee_leaves_data(Request $request)
     {
         $sno = 0;
-       
+
         $json=[];
         if(!empty($request['employee_id']))
         {
@@ -606,7 +606,7 @@ class HrController extends Controller
                     ->whereYear('from_date', Carbon::now()->year)
                     ->get();
 
-            
+
             foreach ($leaves_data as $value) {
                 if($value->employee_type==1)
                 {
@@ -617,7 +617,7 @@ class HrController extends Controller
                     $employee_name = Doctor::where('id', $value->employee_id)->value('doctor_name');
                 }
 
-                
+
                 $modal = '
                 <a href="javascript:void(0);" onclick=del_leaves("'.$value->id.'")>
                     <i class="fa fa-trash fs-18 text-danger"></i>
@@ -635,7 +635,7 @@ class HrController extends Controller
                     $leaves_type_name = trans('messages.emergency_leaves_lang',[],session('locale'));
                 } elseif ($value->leaves_type == 3) {
                     $leaves_type_name = trans('messages.sick_leaves_lang',[],session('locale'));
-                } 
+                }
 
 
                 if ($value->status == 1) {
@@ -644,7 +644,7 @@ class HrController extends Controller
                     $status = '<span class="badge bg-success">'.trans('messages.accepted_lang',[],session('locale')).'</span>';
                 } elseif ($value->status == 3) {
                     $status = '<span class="badge bg-danger">'.trans('messages.rejected_lang',[],session('locale')).'</span>';
-                } 
+                }
 
                 $sno++;
                 $json[] = array(
@@ -654,13 +654,13 @@ class HrController extends Controller
                     $value->from_date,
                     $value->to_date,
                     $value->reason,
-                     
+
                 );
             }
 
             return response()->json(['success' => true, 'aaData' => $json]);
-            
-        
+
+
         }
         else
         {
@@ -698,11 +698,11 @@ class HrController extends Controller
         ]);
 
         // Get current leaves info
-        $user_id = Auth::id(); 
+        $user_id = Auth::id();
         $data= User::where('id', $user_id)->first();
         $user= $data->user_name;
         $branch= $data->branch_id;
-         
+
 
         // Save history before deletion
         $history = new History();
@@ -736,7 +736,7 @@ class HrController extends Controller
                 // ->where('status', 2) // Use the object syntax here
                 ->whereYear('from_date', Carbon::now()->year)
                 ->first();
-        
+
         $all_leaves = 0;
         if($employee_type == 1)
         {
@@ -749,7 +749,7 @@ class HrController extends Controller
             {
                 $all_leaves = $staff_data->emergency_leaves;
             }
-            
+
         }
         else
         {
@@ -777,27 +777,27 @@ class HrController extends Controller
 
     // pending leaves
     public function pending_leaves(){
-         
+
         return view ('hr.pending_leaves');
     }
 
     public function add_leaves_reponse(Request $request){
 
-        $user_id = Auth::id(); 
-        $data= User::where('id', $user_id)->first(); 
-        $user= $data->user_name; 
+        $user_id = Auth::id();
+        $data= User::where('id', $user_id)->first();
+        $user= $data->user_name;
 
-        
+
 
         $leave_id = $request['leave_id'];
         $leave_data = Leave::where('id',$leave_id)->first();
-        
- 
-        $leave_data->status = $request['response_type']; 
-        $leave_data->response_reason = $request['reason']; 
-        $leave_data->responded_by = $user_id; 
+
+
+        $leave_data->status = $request['response_type'];
+        $leave_data->response_reason = $request['reason'];
+        $leave_data->responded_by = $user_id;
         $leave_data->responded_date = date('Y-m-d H:i:s');
-        $leave_data->save(); 
+        $leave_data->save();
 
     }
 
@@ -817,7 +817,7 @@ class HrController extends Controller
                     $employee_name = Doctor::where('id', $value->employee_id)->value('doctor_name');
                 }
 
-                
+
                 $modal = '<a href="javascript:void();"   onclick=leave_response_type("3","'.$value->id.'") data-bs-toggle="modal" data-bs-target="#add_leave_response_modal"><i class="fas fa-times fs-18 text-danger"></i></a>&nbsp;
                 <a href="javascript:void();"   onclick=leave_response_type("2","'.$value->id.'") data-bs-toggle="modal" data-bs-target="#add_leave_response_modal"><i class="fas fa-check fs-18 text-success"></i></a>';
                 if(!empty($value->leave_file))
@@ -833,7 +833,7 @@ class HrController extends Controller
                     $leaves_type_name = trans('messages.emergency_leaves_lang',[],session('locale'));
                 } elseif ($value->leaves_type == 3) {
                     $leaves_type_name = trans('messages.sick_leaves_lang',[],session('locale'));
-                } 
+                }
 
                 $sno++;
                 $json[] = array(
@@ -855,12 +855,12 @@ class HrController extends Controller
 
     // responded leaves
     public function responded_leaves(){
-         
+
         return view ('hr.responded_leaves');
     }
     public function show_responded_leaves(Request $request)
     {
-        $sno = 0; 
+        $sno = 0;
         if (!empty($request['status'])) {
             $leaves = Leave::where('status', $request['status'])->get();
         } else {
@@ -877,7 +877,7 @@ class HrController extends Controller
                     $employee_name = Doctor::where('id', $value->employee_id)->value('doctor_name');
                 }
 
-                
+
                 $modal="";
                 if(!empty($value->leave_file))
                 {
@@ -892,7 +892,7 @@ class HrController extends Controller
                     $leaves_type_name = trans('messages.emergency_leaves_lang',[],session('locale'));
                 } elseif ($value->leaves_type == 3) {
                     $leaves_type_name = trans('messages.sick_leaves_lang',[],session('locale'));
-                } 
+                }
 
                 if ($value->status == 1) {
                     $status = '<span class="badge bg-primary">'.trans('messages.pending_lang',[],session('locale')).'</span>';
@@ -900,7 +900,7 @@ class HrController extends Controller
                     $status = '<span class="badge bg-success">'.trans('messages.accepted_lang',[],session('locale')).'</span>';
                 } elseif ($value->status == 3) {
                     $status = '<span class="badge bg-danger">'.trans('messages.rejected_lang',[],session('locale')).'</span>';
-                } 
+                }
 
                 $sno++;
                 $json[] = array(

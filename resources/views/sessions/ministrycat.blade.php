@@ -102,13 +102,19 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form  class="add_ministry_category">
+                    <form class="add_ministry_category">
                         @csrf
                         <div class="row">
-                            <div class="col-lg-12">
+                            <div class="col-lg-8">
                                 <div class="form-group">
                                     <label class="col-form-label">Ministry Category Name</label>
                                     <input type="text" class="form-control ministry_category_name" id="name1" name="ministry_category_name" placeholder="Ministry Category Name" required>
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="form-group">
+                                    <label class="col-form-label">Assign Color</label>
+                                    <input type="color" class="form-control form-control-color ministry_category_color" name="ministry_category_color" value="#ff0000" title="Choose a color">
                                 </div>
                             </div>
                             <input type="hidden" class="ministry_category_id" name="ministry_category_id">
@@ -119,6 +125,7 @@
                             <button type="submit" class="btn btn-primary">Add Data</button>
                         </div>
                     </form>
+
                 </div>
             </div>
         </div>

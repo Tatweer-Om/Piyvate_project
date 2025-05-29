@@ -11,9 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('staff', function (Blueprint $table) {
-            $table->integer('annual_leaves')->nullable();
-            $table->integer('emergency_leaves')->nullable();
+        Schema::table('session_data', function (Blueprint $table) {
+            $table->string('user_id')->nullable()->after('created_at'); // add after 'id' or any other column
         });
     }
 
@@ -22,7 +21,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('staff', function (Blueprint $table) {
+        Schema::table('session_data', function (Blueprint $table) {
             //
         });
     }

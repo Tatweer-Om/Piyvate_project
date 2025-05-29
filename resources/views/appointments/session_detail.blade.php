@@ -35,9 +35,10 @@
                                     <h5>Total Sessions: <span id="total_sessions" class="fw-normal">{{ $session->no_of_sessions ?? '' }}</span></h5>
                                     <h5>Total Fee:
                                         <span id="total_fee" class="fw-normal">
-                                            {{ ($session_price ?? '') }}
+                                            {{ $session->session_fee ?? '' }}
                                         </span>
                                     </h5>
+
 
                                     <!-- Hidden Inputs for Submission -->
                                     <input type="hidden" name="session_id" value="{{ $session->id ?? '' }}">
@@ -48,7 +49,7 @@
                                     <input type="hidden" name="mini_id" value="{{ $session->ministry_id ?? '' }}">
                                     <input type="hidden" name="offer_id" value="{{ $session->offer_id ?? '' }}">
                                     <input type="hidden" name="no_of_sessions" value="{{ $session->no_of_sessions ?? '' }}">
-                                    <input type="hidden" name="session_fee" value="{{ $session->session_fee ?? '' }}">
+                                    <input type="hidden" id="session_fee" name="session_fee" value="{{ $session->session_fee ?? '' }}">
                                 </div>
                             </div>
 
@@ -71,8 +72,11 @@
 
                         <!-- Footer Buttons -->
                         <div class="card-footer text-end">
+                            @if(empty($offer_name))
                             <button type="button" class="btn btn-info btn-sm px-2 py-1" id="addSessionBtn">➕ Session</button>
                             <button type="button" class="btn btn-warning btn-sm px-2 py-1" id="removeSessionBtn">➖ Session</button>
+                        @endif
+
                             <button type="submit" class="btn btn-primary btn-sm px-2 py-1">Save Sessions</button>
                         </div>
                     </div>
@@ -112,7 +116,6 @@
                     <input type="hidden" name="session_id2" id="session_id" class="session_id2" value="{{ $session->id ?? '' }}">
                     <input type="hidden" name="payment_status" class="payment_status3" id="payment_status" value="{{ $session->payment_status ?? '' }}">
 
-                    <!-- Payment Status Message (Only for Pending Payments) -->
                     <div id="pendingPaymentAlert" class="alert alert-warning text-center d-none">
                         <i class="fas fa-exclamation-triangle"></i> <strong>This payment will be kept as pending.</strong>
                     </div>
@@ -126,7 +129,7 @@
                         </button>
                     </div>
                     <!-- Payment Method Title -->
-                    <div class="mb-3">
+                    <div class="mb-3 select_payment">
                         <label class="col-form-label fw-bold fs-5">Select Payment Method</label>
                         <p class="text-muted">You can choose multiple payment methods and specify the amount for each.</p>
                     </div>
@@ -159,10 +162,11 @@
 
                     <!-- Submit Buttons -->
                     <div class="modal-footer d-flex justify-content-between">
-                        <button type="button" class="btn btn-danger w-100 me-2" data-bs-dismiss="modal">Close</button>
                         <button type="submit" class="btn btn-success w-100" id="confirm_payment2">
-                            <i class="fas fa-check"></i> Confirm Payment
+                            <i class="fas fa-check"></i> Continue
                         </button>
+                        <button type="button" class="btn btn-danger w-100 me-2" data-bs-dismiss="modal">Close</button>
+
                     </div>
                 </form>
             </div>
