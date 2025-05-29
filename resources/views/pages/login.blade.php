@@ -22,10 +22,41 @@
     <link class="main-css" href="{{ asset('css/style.css') }}" rel="stylesheet">
     <link rel="stylesheet" href="{{  asset('vendor/toastr/css/toastr.min.css')}}">
 
-
+<style>
+    .small-alert {
+    font-size: 14px;
+    padding: 8px 12px;
+    background-color: #f44336; /* Red */
+    color: #fff;
+    border-radius: 4px;
+    width: fit-content;
+    margin: 10px auto;
+}
+</style>
 
 
 </head>
+
+
+@if(session('error'))
+    <div class="alert alert-danger small-alert" id="errorAlert">
+        {{ session('error') }}
+    </div>
+@endif
+
+<script>
+    setTimeout(function() {
+        let alertBox = document.getElementById('errorAlert');
+        if (alertBox) {
+            alertBox.style.transition = 'opacity 0.5s ease';
+            alertBox.style.opacity = '0';
+            setTimeout(function() {
+                alertBox.style.display = 'none';
+            }, 500);
+        }
+    }, 3000); // 3 seconds
+</script>
+
 
 <body class="vh-100">
 
@@ -69,6 +100,9 @@
             </div>
         </div>
     </div>
+
+
+
     @include('custom_js.custom_js')
 
     @php
@@ -80,6 +114,8 @@
 @endphp
 
     @if ($route_name == 'login_page')
+        @include('custom_js.login_js')
+        @elseif ($route_name == 'home')
         @include('custom_js.login_js')
     @endif
 

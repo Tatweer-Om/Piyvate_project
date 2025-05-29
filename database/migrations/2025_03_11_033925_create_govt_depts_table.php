@@ -16,6 +16,8 @@ return new class extends Migration
             $table->string('govt_name');
             $table->longText('notes')->nullable();
             $table->string('govt_phone')->nullable();
+            $table->string('ministry_category_id')->nullable();
+            $table->string('ministry_category_color')->nullable();
             $table->string('govt_email')->nullable();
             $table->string('user_id', 255)->nullable();
             $table->string('added_by')->nullable();

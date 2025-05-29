@@ -28,6 +28,8 @@
             }
         }, 4000); // 2 seconds
     </script>
+
+
     <div class="container-fluid">
 
 
@@ -42,7 +44,8 @@
                                 </h5>
                                 <span class="text-muted small">#{{ $patient->HN ?? 'N/A' }}</span>
                             </div>
-
+                            <input type="hidden" id="source" value="{{ $source }}">
+                            <input type="hidden" id="main_id" value="{{ $main_id }}">
                             <!-- Patient Info Section -->
                             <div class="row mb-4">
                                 <div class="col-12 col-md-6 mb-3">
@@ -168,31 +171,30 @@
 
                             <!-- SOAP Links -->
                             <div class="d-flex justify-content-around mt-auto">
-                                @if ($session && $session->patient_id)
-                                <a href="{{ url('soap_pt_all/' . $session->patient_id) }}" class="text-decoration-none text-dark">
+                                @if ($session && $patient_id)
+                                <a href="{{ url('soap_pt_all/' . $patient_id) }}" class="text-decoration-none text-dark">
                             @endif
                                 <div class="d-flex flex-column align-items-center">
                                     <img src="{{ asset('images/logo/1.png') }}" class="rounded-circle shadow-sm mb-2"
                                          style="width: 60px; height: 60px; object-fit: cover;">
                                     <div class="fw-bold small">SOAP-PT</div>
                                 </div>
-                            @if ($session && $session->patient_id)
+                            @if ($patient_id)
                                 </a>
                             @endif
 
 
-
-                            @if ($session && $session->patient_id)
-                            <a href="{{ url('soap_ot_all/' . $session->patient_id ) }}" class="text-decoration-none text-dark">
-                        @endif
-                            <div class="d-flex flex-column align-items-center">
-                                <img src="{{ asset('images/logo/2.png') }}" class="rounded-circle shadow-sm mb-2"
-                                     style="width: 60px; height: 60px; object-fit: cover;">
-                                <div class="fw-bold small">SOAP-OT</div>
-                            </div>
-                        @if ($session && $session->patient_id)
-                            </a>
-                        @endif
+                            @if ($patient_id)
+                                <a href="{{ url('soap_ot_all/' . $patient_id ) }}" class="text-decoration-none text-dark">
+                            @endif
+                                <div class="d-flex flex-column align-items-center">
+                                    <img src="{{ asset('images/logo/2.png') }}" class="rounded-circle shadow-sm mb-2"
+                                        style="width: 60px; height: 60px; object-fit: cover;">
+                                    <div class="fw-bold small">SOAP-OT</div>
+                                </div>
+                            @if ($patient_id)
+                                </a>
+                            @endif
 
                             </div>
 
@@ -216,11 +218,7 @@
                                             <i class="bi bi-person-video2 me-1"></i>Sessions
                                         </a>
                                     </li>
-                                    <li class="nav-item">
-                                        <a href="#total_appt_session" data-bs-toggle="tab" class="nav-link">
-                                            <i class="bi bi-globe-americas me-1"></i>Sessions Detail
-                                        </a>
-                                    </li>
+
                                     <li class="nav-item">
                                         <a href="#sessiontransfer" data-bs-toggle="tab" class="nav-link">
                                             <i class="bi bi-globe-americas me-1"></i>Transfer History
@@ -256,26 +254,7 @@
                                 </div>
 
                                 <!-- Visits Tab -->
-                                <div class="tab-pane fade" id="total_appt_session">
-                                    <div class="table-responsive">
-                                        <table class="table table-striped table-bordered align-middle text-center">
-                                            <thead class="table-danger">
-                                                <tr>
-                                                    <th>#</th>
-                                                    <th>Appt/Session No.</th>
-                                                    <th>Source</th>
-                                                    <th>Pay-Status</th>
-                                                    <th>Sessions</th>
-                                                    <th>Fee/Session</th>
 
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
                                 <div class="tab-pane fade" id="sessiontransfer">
                                     <div class="table-responsive">
                                         <table class="table table-striped table-bordered align-middle text-center">
@@ -353,6 +332,17 @@
                                     @endforeach
                                 </select>
                             </div>
+                            <div class="col-lg-4">
+                                <label class="col-form-label">Session Cat</label>
+                                <select class="form-control shadow-sm" id="session_cat" name="session_cat">
+                                    <option value="">Choose...</option>
+
+                                        <option value="OT">OT</option>
+                                        <option value="PT">PT</option>
+
+
+                                </select>
+                            </div>
                         </div>
 
                         <div class="mt-4 text-end">
@@ -411,13 +401,19 @@
 
                         <div class="col-md-5">
                             <label for="target_patient" class="form-label">New Patient</label>
-                            <select class="form-control  shadow-sm" id="target_patient" name="target_patient">
-                                <option value="">Choose...</option>
+                            <select class="form-control selectpicker shadow-sm"
+                                    id="target_patient"
+                                    name="target_patient"
+                                    data-live-search="true"
+                                    title="Choose a patient...">
                                 @foreach ($patients as $pat)
-                                    <option value="{{ $pat->id }}">{{ $pat->full_name }}</option>
+                                    <option value="{{ $pat->id }}" data-tokens="{{ $pat->full_name }} {{ $pat->mobile }}">
+                                        {{ $pat->full_name }} - {{ $pat->mobile }}
+                                    </option>
                                 @endforeach
                             </select>
                         </div>
+
                     </div>
 
                     <div class="row g-3 mt-3">

@@ -14,20 +14,24 @@
                 <li class="active"><a href="javascript:void(0)">Appointments</a></li>
             </ol>
             <div class="d-flex gap-2">
-                <a href="appointments" class="btn btn-secondary btn-rounded" data-bs-toggle="tooltip" data-bs-placement="top" title="Add a new appointment">
+                <a href="appointments" class="btn btn-secondary btn-sm btn-rounded" data-bs-toggle="tooltip" data-bs-placement="top" title="Add a new appointment">
                     <i class="bi bi-calendar-plus"></i> Add Appointment
                 </a>
 
-                <a href="{{ url('sessions_list') }}" class="btn btn-secondary btn-rounded" data-bs-toggle="tooltip" data-bs-placement="top" title="Add a new session">
+                <a href="{{ url('sessions_list') }}" class="btn btn-secondary btn-sm btn-rounded" data-bs-toggle="tooltip" data-bs-placement="top" title="Add a new session">
                     <i class="bi bi-journal-plus"></i> Add Sessions
                 </a>
 
-                <a href="{{ url('session_data') }}" class="btn btn-secondary btn-rounded" data-bs-toggle="tooltip" data-bs-placement="top" title="View all session data">
+                <a href="{{ url('session_data') }}" class="btn btn-secondary btn-sm btn-rounded" data-bs-toggle="tooltip" data-bs-placement="top" title="View all session data">
                     <i class="bi bi-collection"></i> All Sessions Data
                 </a>
 
-                <a href="{{ url('all_sessions') }}" class="btn btn-secondary btn-rounded" data-bs-toggle="tooltip" data-bs-placement="top" title="See the Direct sessions Booking list">
+                <a href="{{ url('all_sessions') }}" class="btn btn-secondary btn-sm btn-rounded" data-bs-toggle="tooltip" data-bs-placement="top" title="See the Direct sessions Booking list">
                     <i class="bi bi-list-ul"></i> Sessions List
+                </a>
+
+                <a href="{{ url('all_appointments') }}" class="btn btn-secondary btn-sm btn-rounded" data-bs-toggle="tooltip" data-bs-placement="top" title="See the Direct sessions Booking list">
+                    <i class="bi bi-card-list"></i> All Appointments
                 </a>
 
 
@@ -106,9 +110,14 @@
                                     <label class="col-form-label">Ministry:</label>
                                     <select id="ministrySelect" name="ministry_id" class="form-control form-control-sm">
                                         <option value="">Select Ministry</option>
-                                        <?php foreach ($ministries as $ministry) : ?>
-                                            <option value="<?= $ministry['id'] ?>"><?= $ministry['govt_name'] ?></option>
-                                        <?php endforeach; ?>
+                                        @foreach ($ministries as $ministry)
+                                        @foreach ($ministry->ministrycats as $mini)
+                                        <option value="{{ $ministry->id }}" style="background-color: {{ $mini->ministry_category_color }}; color: #fff;">
+                                            {{ $ministry->govt_name }} — {{ $mini->ministry_category_name }}
+                                                ({{ $mini->ministry_category_color }})
+                                            </option>
+                                        @endforeach
+                                    @endforeach
                                     </select>
                                     <div class="d-flex gap-2 mt-2">
                                         <span id="sessionCategory" class="badge bg-primary">Department Category: </span>
@@ -204,7 +213,7 @@
                     </div>
 
                     <!-- Payment Method Title -->
-                    <div class="mb-3">
+                    <div class="mb-3 sel_payment">
                         <label class="col-form-label fw-bold fs-5">Select Payment Method</label>
                         <p class="text-muted">You can choose multiple payment methods and specify the amount for each.</p>
                     </div>
@@ -237,10 +246,11 @@
 
                     <!-- Submit Buttons -->
                     <div class="modal-footer d-flex justify-content-between">
-                        <button type="button" class="btn btn-danger w-100 me-2" data-bs-dismiss="modal">Close</button>
                         <button type="submit" class="btn btn-success w-100" id="confirm_payment2">
-                            <i class="fas fa-check"></i> Confirm Payment
+                            <i class="fas fa-check"></i> Continue
                         </button>
+                        <button type="button" class="btn btn-danger w-100 me-2" data-bs-dismiss="modal">Close</button>
+
                     </div>
                 </form>
             </div>

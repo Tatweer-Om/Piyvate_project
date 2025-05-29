@@ -19,12 +19,12 @@
                     <img src="{{ asset('images/logo/piyalogo-1.png') }}" alt="Center Logo" height="50" style="margin-right: 20px;">
                     <div style="text-align: justify;">
                         <div>
-                            HN:<input type="text" class="input-line" value="{{ $patient->HN ?? '' }}" name="hn" />
+                            HN:<input type="text" class="input-line" value="{{ $patient->HN ?? '' }}" name="hn" readonly/>
                             PT:<input type="text" class="input-line" name="pt" />
                         </div>
                         <div>
-                            Name:<input type="text" class="input-line" value="{{ $patient->full_name ?? '' }}" name="full_name" />
-                            Age:<input type="text" value="{{ $patient->age ?? '' }}" class="input-line" name="age" />
+                            Name:<input type="text" class="input-line" value="{{ $patient->full_name ?? '' }}" name="full_name" readonly/>
+                            Age:<input type="text" value="{{ $patient->age ?? '' }}" class="input-line" name="age" readonly/>
                         </div>
                         <div>
                             Gender:
@@ -36,8 +36,8 @@
                             </label>
                         </div>
                         <div>
-                            Birth Date:<input type="text" class="input-line" value="{{ $patient->dob ?? '' }}" name="dob" />
-                            Therapist:<input type="text" class="input-line" value="{{ $doctor ?? '' }}" name="therapist" />
+                            Birth Date:<input type="text" class="input-line" value="{{ $patient->dob ?? '' }}" name="dob" readonly/>
+                            Therapist:<input type="text" class="input-line" value="{{ $doctor ?? '' }}" name="therapist" readonly />
                         </div>
                     </div>
                 </div>

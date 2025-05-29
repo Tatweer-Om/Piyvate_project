@@ -11,12 +11,7 @@
 
         <!-- row -->
         <div class="container-fluid">
-            <div class="page-titles">
-                <ol class="breadcrumb">
-                    <li><a href="javascript:void(0)">Dashboard</a></li>
-                    <li class=" active"><a href="javascript:void(0)"> /Doctor Details</a></li>
-                </ol>
-            </div>
+
             <div class="row">
                 <div class="col-lg-4">
                     <div class="profile card card-body px-3 pt-3 text-center">
@@ -42,7 +37,9 @@
                                 </li>
                                 <li class="list-group-item d-flex justify-content-between align-items-center small">
                                     <span><i class="fas fa-clock text-success"></i> Sessions</span>
-                                    <span class="badge bg-success rounded-pill">{{ $total_sessions ?? '0' }}</span>
+                                    <span class="badge rounded-pill {{ ($total_sessions ?? 0) <= 100 ? 'bg-danger' : 'bg-success' }}">
+                                        {{ $total_sessions ?? '0' }}
+                                    </span>
                                 </li>
                                 <li class="list-group-item d-flex justify-content-between align-items-center small">
                                     <span><i class="fas fa-user text-danger"></i> Patients</span>

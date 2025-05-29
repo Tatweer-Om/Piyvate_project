@@ -21,7 +21,8 @@ $('#add_user_modal').on('hidden.bs.modal', function() {
     formdatas.append('_token', '{{ csrf_token() }}');
     var title = $('.user_name').val();
     var password = $('.password').val();
-
+    var phone = $('.phone').val();
+    var branch_id = $('#branch_id').val();
     var id = $('.user_id').val();
 
     if (title === "") {
@@ -32,6 +33,14 @@ $('#add_user_modal').on('hidden.bs.modal', function() {
         show_notification('error', '<?php echo trans('messages.provide_password_lang',[],session('locale')); ?>');
         return false;
     }
+    if (phone === "") {
+            show_notification('error', '<?php echo trans('messages.add_doctor_phone_lang',[],session('locale')); ?>');
+            return false;
+        }
+        if (branch_id === "") {
+            show_notification('error', '<?php echo trans('messages.add_doctor_branch_lang',[],session('locale')); ?>');
+            return false;
+        }
 
 
     showPreloader();

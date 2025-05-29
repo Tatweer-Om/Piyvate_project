@@ -171,8 +171,8 @@
 
                 <div class="col-lg-4 col-xl-4">
                     <div class="form-group">
-                        <label class="col-form-label">Emergeny Leaves</label>
-                        <input type="text" class="form-control emergency_leaves isnumber"   name="emergency_leaves"  >
+                        <label class="col-form-label">Joining Date</label>
+                        <input type="date" class="form-control joining_date"   name="joining_date"  >
                     </div>
                 </div>
                   <div class="row mt-3">

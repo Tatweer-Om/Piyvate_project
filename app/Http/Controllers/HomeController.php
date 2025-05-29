@@ -3,12 +3,21 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class HomeController extends Controller
 {
-    public function index(){
-        return view ('dashboard.index');
+
+
+public function index() {
+
+
+    if (Auth::check()) {
+        return view('dashboard.index');
+    } else {
+        return redirect()->route('login_page')->with('error', 'Please login first');
     }
+}
 
 
     public function switchLanguage($locale)

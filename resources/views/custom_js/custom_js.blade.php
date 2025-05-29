@@ -25,27 +25,7 @@ $(document).ready(function () {
         });
     });
 
-// document.getElementById('imagePreview').addEventListener('click', function() {
-//     document.getElementById('imageUpload').click();
-// });
 
-// document.getElementById('imageUpload').addEventListener('change', function(event) {
-//     let file = event.target.files[0];
-//     if (file) {
-//         let reader = new FileReader();
-//         reader.onload = function(e) {
-//             document.getElementById('imagePreview').src = e.target.result;
-//             document.getElementById('removeImage').style.display = "block";
-//         };
-//         reader.readAsDataURL(file);
-//     }
-// });
-
-// document.getElementById('removeImage').addEventListener('click', function() {
-//     document.getElementById('imagePreview').src = "{{ asset('images/dummy_images/cover-image-icon.png') }}";
-//     document.getElementById('imageUpload').value = "";
-//     this.style.display = "none";
-// });
 
 $('.datepicker').bootstrapMaterialDatePicker({
     weekStart: 0,
@@ -190,7 +170,6 @@ function show_notification(type, msg) {
 function hidePreloader() {
     $('#preloader').remove(); // Completely removes it after hiding
 }
-
 
 
 

@@ -20,6 +20,9 @@ return new class extends Migration
             $table->text('permissions')->nullable();
             $table->longText('notes')->nullable();
             $table->string('employee_image')->nullable();
+            $table->date('joining_date')->nullable();
+            $table->integer('annual_leaves')->nullable();
+            $table->integer('emergency_leaves')->nullable();
             $table->string('role')->nullable();
             $table->string('branch_id')->nullable();
             $table->string('user_id', 255)->nullable();

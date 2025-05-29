@@ -6,9 +6,12 @@ use Carbon\Carbon;
 use App\Models\User;
 use App\Models\Branch;
 use App\Models\Account;
+use App\Models\Balance;
 use App\Models\History;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Response;
 
 class AccountController extends Controller
 {
@@ -58,24 +61,37 @@ class AccountController extends Controller
 
                 $account_name='<a href="javascript:void(0);">'.$value->account_name.'</a>';
                 $modal = '
-                <a href="javascript:void(0);" class="me-3 edit-staff" data-bs-toggle="modal" data-bs-target="#add_account_modal" onclick=edit("'.$value->id.'")>
+                <a href="javascript:void(0);" class="me-1 edit-staff" data-bs-toggle="modal" data-bs-target="#add_account_modal" onclick=edit("'.$value->id.'")>
                     <i class="fa fa-pencil fs-18 text-success"></i>
                 </a>
-                <a href="javascript:void(0);" onclick=del("'.$value->id.'")>
+                <a href="javascript:void(0);" class="me-1" onclick=del("'.$value->id.'")>
                     <i class="fa fa-trash fs-18 text-danger"></i>
                 </a>';
+
+                $account_type= "";
                 $add_data=Carbon::parse($value->created_at)->format('d-m-Y (h:i a)');
-                if($value->account_type) {
-                    $account_type = trans('accounts.normal_account', [], session('locale'));
+                if($value->account_type==1) {
+                    $account_type = 'normal_account';
                 } else {
-                    $account_type = trans('accounts.saving_account', [], session('locale'));
+                    $account_type = 'saving_account';
                 }
+
+                if ($value->account_type == 2) { // assuming 2 = saving_account
+                    $modal .= '
+                    <a href="javascript:void(0);" class="view-details" onclick="viewDetails(' . $value->id . ')" data-bs-toggle="tooltip" title="Add Balance">
+                        <i class="fas fa-info-circle fs-18 text-primary"></i>
+                    </a>
+                    <a href="' . url('all_balance/' . $value->id) . '" class="view-details" data-bs-toggle="tooltip" title="View Balance History">
+                        <i class="fas fa-credit-card fs-18 text-primary"></i>
+                    </a>
+                    ';
+                }
+
 
                 $sno++;
                 $json[] = array(
-                    $sno,
-                    $account_name .' '.(  $value->account_branch),
-                    $value->account_no .' '. $value->account_type,
+                    $account_name .'<br> '.(  $value->account_branch),
+                    $value->account_no .'<br> '. $account_type,
                     $value->opening_balance,
                     $value->added_by,
                     $add_data,
@@ -100,12 +116,23 @@ class AccountController extends Controller
         }
     }
 
-    public function add_account(Request $request){
-
+    public function add_account(Request $request)
+    {
         $user_id = Auth::id();
-        $data= User::where('id', $user_id)->first();
-        $user= $data->user_name;
-        $branch_id=  $request['branch_id'];
+        $data = User::where('id', $user_id)->first();
+        $user = $data->user_name;
+        $branch_id = $request['branch_id'];
+
+        // Check if the account type is 2 (saving account)
+        if ($request['account_type'] == 2) {
+            // If an account with account_type 2 already exists, return an error
+            $existingAccount = Account::where('account_type', 2)->first();
+
+            if ($existingAccount) {
+                // Return a response indicating that only one account with type 2 can exist
+                return response()->json(['status' => 2]);
+            }
+        }
 
         $account = new Account();
         $account->account_name = $request['account_name'];
@@ -118,15 +145,18 @@ class AccountController extends Controller
         $account->branch_id = $branch_id;
         $account->notes = $request['notes'];
         $account->added_by = $user;
-        $account->user_id =  $user_id;
+        $account->user_id = $user_id;
         $account->save();
-        return response()->json(['account_id' => $account->id]);
 
+        return response()->json(['account_id' => $account->id]);
     }
+
 
     public function edit_account(Request $request){
         $account_id = $request->input('id');
         $account_data = Account::where('id', $account_id)->first();
+
+
 
         if (!$account_data) {
             return response()->json(['error' => trans('messages.account_not_found_lang', [], session('locale'))], 404);
@@ -151,9 +181,22 @@ class AccountController extends Controller
         $account_id = $request->input('account_id');
         $account = Account::where('id', $account_id)->first();
 
+
         if (!$account) {
             return response()->json(['error' => trans('messages.account_not_found_lang', [], session('locale'))], 404);
         }
+         // Check if the account type is 2 (saving account)
+         if ($request['account_type'] == 2) {
+            // If an account with account_type 2 already exists, return an error
+            $existingAccount = Account::where('account_type', 2)->first();
+
+            if ($existingAccount) {
+                // Return a response indicating that only one account with type 2 can exist
+                return response()->json(['status' => 2]);
+            }
+        }
+
+
 
         // Store previous data for history
         $previousData = $account->only([
@@ -230,4 +273,225 @@ class AccountController extends Controller
         $account->delete();
         return response()->json(['success' => trans('messages.delete_success_lang', [], session('locale'))]);
     }
+
+
+
+
+    public function getAccountDetail($id)
+{
+
+    $account_data = Account::find($id);
+
+    if (!$account_data) {
+        return response()->json(['error' => 'Account not found'], 404);
+    }
+
+    return response()->json([
+        'account_name' => $account_data->account_name,
+        'account_id' => $account_data->id,
+        'opening_balance' => $account_data->opening_balance,
+    ]);
+}
+
+
+public function add_balance(Request $request){
+
+
+    $user_id = Auth::id();
+    $data= User::where('id', $user_id)->first();
+    $user= $data->user_name;
+    $branch_id=  $request['branch_id'];
+
+    $account_id=  $request['balance_account_id'];
+
+    $balance_account = Account::where('id',  $account_id)->first();
+    $old_balance = $balance_account->opening_balance;
+
+    $balance_account->opening_balance = $old_balance + $request['new_balance'];
+    $balance_account->save();
+
+
+    $account = new Balance();
+
+    $expense_file = "";
+
+    // Handle the file upload
+    if ($request->hasFile('balance_file')) {
+        $folderPath = public_path('uploads/balance_files');
+
+        // Check if the folder exists, if not create it
+        if (!File::isDirectory($folderPath)) {
+            File::makeDirectory($folderPath, 0777, true, true);
+        }
+
+        // Create a unique filename
+        $balance_file = time() . '.' . $request->file('balance_file')->extension();
+        $request->file('balance_file')->move($folderPath, $balance_file);
+    }
+
+    $account->account_name = $request['balance_name'];
+    $account->account_id = $account_id;
+    $account->source = 'Balance';
+    $account->account_no = $balance_account->account_no;
+    $account->previous_balance = $old_balance;
+    $account->balance_date = $request['balance_date'];
+    $account->new_total_amount = $request['amount'];
+    $account->new_balance = $request['new_balance'];
+    $account->balance_image = $balance_file; // Save the file name in the database
+    $account->notes = $request['notes'];
+    $account->added_by = $user;
+    $account->user_id =  $user_id;
+
+
+    $account->save();
+    return response()->json(['account_id' => $account->id]);
+
+}
+
+public function all_balance($id){
+
+    $id=$id;
+    $account= Account::where('id', $id)->first();
+    return view('expense.all_balance', compact('id', 'account'));
+}
+
+public function show_balance(Request $request){
+
+    $balanceId = $request->input('balance_id');
+
+    $sno=0;
+    $view_account= Balance::where('account_id',  $balanceId)->get();
+    if(count($view_account)>0)
+    {
+        foreach($view_account as $value) {
+
+            $account_name = $value->account_name;
+            $account_number = $value->account_no;
+            $pre_blnc = $value->previous_balance;
+            $new_blnc = $value->new_balance;
+            $new_total = $value->new_total_amount;
+            $soucre = $value->source;
+            $expense_name = $value->expense_name;
+            $expense_amount = $value->expense_amount;
+            $expense_date = $value->expense_date;
+            $balance_date = $value->balance_date;
+
+            $detail = !empty($expense_name) ? $expense_name : 'Balance Added';
+
+
+
+            $added = !empty($value->expense_added_by) ? $value->expense_added_by : $value->added_by;
+
+            $final_date = !empty($expense_date) ? $expense_date : $balance_date;
+           $expense_display = ($expense_amount > 0)
+                ? '<span class="badge bg-danger">' . $expense_amount . ' ⬇</span>'
+                : $expense_amount ?? 0;
+
+            $new_blnc_display = ($new_blnc > 0)
+                ? '<span class="badge bg-success">' . $new_blnc . ' ⬆</span>'
+                : $new_blnc ?? 0;
+
+
+
+                $expense_file = $value->expense_image;
+                $balance_file = $value->balance_image;
+
+                $display_file = null;
+                $file_type = null;
+
+                if (!empty($expense_file) && file_exists(public_path('uploads/expense_files/' . $expense_file))) {
+                    $display_file = $expense_file;
+                    $file_type = 'expense';
+                } elseif (!empty($balance_file) && file_exists(public_path('uploads/balance_files/' . $balance_file))) {
+                    $display_file = $balance_file;
+                    $file_type = 'balance';
+                }
+
+                $file_display = '';
+                if ($display_file) {
+                    $file_path = asset("uploads/{$file_type}_files/" . $display_file);
+                    $file_extension = pathinfo($display_file, PATHINFO_EXTENSION);
+                    $download_path = url("download_{$file_type}_image/" . $display_file);
+
+                    $dummy_icons = [
+                        'pdf'  => asset('images/dummy_images/pdf.png'),
+                        'doc'  => asset('images/dummy_images/word.jpeg'),
+                        'docx' => asset('images/dummy_images/word.jpeg'),
+                        'xls'  => asset('images/dummy_images/excel.jpeg'),
+                        'xlsx' => asset('images/dummy_images/excel.jpeg'),
+                    ];
+
+                    $download_icon = "<a href='{$download_path}' download title='Download'>
+                                        <img src='" . asset('images/dummy_images/download.png') . "' alt='Download' width='20'>
+                                    </a>";
+
+                    if (in_array(strtolower($file_extension), ['jpg', 'jpeg', 'png', 'gif'])) {
+                        $file_display = "<img src='{$file_path}' alt='Receipt' width='30' height='30'> {$download_icon}";
+                    } else {
+                        $icon_path = $dummy_icons[strtolower($file_extension)] ?? asset('images/dummy_images/file.png');
+                        $file_display = "<a href='{$file_path}' target='_blank'>
+                                            <img src='{$icon_path}' alt='File' width='30' height='30'>
+                                        </a> {$download_icon}";
+                    }
+                } else {
+                    $no_image = asset('images/dummy_images/no_image.jpg');
+                    $file_display = "<img src='{$no_image}' alt='No Image' width='50' height='50'>";
+                }
+
+
+            $sno++;
+            $json[] = array(
+                '<span class="badge bg-primary">' . $soucre . '</span>',
+                $pre_blnc,
+                $expense_display,
+                $new_blnc_display,
+                $new_total,
+                $added,
+                $final_date,
+                $file_display,
+
+
+            );
+
+        }
+
+        $response = array();
+        $response['success'] = true;
+        $response['aaData'] = $json;
+        echo json_encode($response);
+    }
+    else
+    {
+        $response = array();
+        $response['sEcho'] = 0;
+        $response['iTotalRecords'] = 0;
+        $response['iTotalDisplayRecords'] = 0;
+        $response['aaData'] = [];
+        echo json_encode($response);
+    }
+}
+
+
+public function downloadExpenseImage($filename)
+{
+    $path = public_path('uploads/expense_files/' . $filename);
+
+    if (File::exists($path)) {
+        return Response::download($path);
+    } else {
+        return response()->json(['error' => 'File not found.'], 404);
+    }
+}
+
+public function downloadBalanceImage($filename)
+{
+    $path = public_path('uploads/balance_files/' . $filename);
+
+    if (File::exists($path)) {
+        return Response::download($path);
+    } else {
+        return response()->json(['error' => 'File not found.'], 404);
+    }
+}
+
 }

@@ -16,25 +16,36 @@
         <div class="header">
             <img src="{{ asset('images/logo/piyalogo-1.png') }}" alt="Center Logo" height="50">
             <div>
-                HN: <input type="text" style="width:150px;" class="input-line" name="hn"
-                    value="{{ $patient->HN ?? '' }}">
-                PT: <input type="text" class="input-line" name="pt" value="{{ $pt ?? '' }}"><br>
-                Name: <input type="text" style="width:150px; class="input-line" name="full_name"
-                    value="{{ $patient->full_name ?? '' }}">
-                Age: <input type="text" class="input-short input-line" style="width:150px; name="age"
-                    value="{{ $patient->age ?? '' }}"> <br>
+                HN:
+                <input type="text" style="width:150px;" class="input-line" name="hn"
+                    value="{{ $patient->HN ?? '' }}" readonly>
+
+                PT:
+                <input type="text" class="input-line" name="pt" value="{{ $pt ?? '' }}"><br> {{-- Editable --}}
+
+                Name:
+                <input type="text" style="width:150px;" class="input-line" name="full_name"
+                    value="{{ $patient->full_name ?? '' }}" readonly>
+
+                Age:
+                <input type="text" class="input-short input-line" style="width:150px;" name="age"
+                    value="{{ $patient->age ?? '' }}" readonly> <br>
+
                 Gender:
                 <label>
                     <input type="radio" name="gender" value="Male"
-                        {{ ($patient->gender ?? '') == 'Male' ? 'checked' : '' }}> M
+                        {{ ($patient->gender ?? '') == 'Male' ? 'checked' : '' }} onclick="return false;"> M
                 </label>
                 <label>
                     <input type="radio" name="gender" value="Female"
-                        {{ ($patient->gender ?? '') == 'Female' ? 'checked' : '' }}> F
+                        {{ ($patient->gender ?? '') == 'Female' ? 'checked' : '' }} onclick="return false;"> F
                 </label>
                 <br>
-                Therapist: <input type="text" class="input-line" name="therapist" value="{{ $doctor ?? '' }}">
+
+                Therapist:
+                <input type="text" class="input-line" name="therapist" value="{{ $doctor ?? '' }}" readonly>
             </div>
+
         </div>
 
         <div class="section" id="section-template">

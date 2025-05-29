@@ -54,6 +54,11 @@ $('#session_select_box .session-checkbox:checked').each(function() {
             success: function (response) {
         if(response.status == 3){
             show_notification('error', '<?php echo trans('messages.please_select_session_type', [], session('locale')); ?>');
+            return
+        }
+        if(response.status == 4){
+            show_notification('error', '<?php echo trans('messages.offer_sessions_must_be_equal_to_total_sessions_type', [], session('locale')); ?>');
+            return
         }
         if (response.success) {
             show_notification('success', '<?php echo trans('messages.data_add_success_lang', [], session('locale')); ?>');
@@ -517,6 +522,8 @@ $(document).ready(function () {
             $("#accountss").hide();
             $("#voucher_div").hide();
             $(".deta").hide();
+            $(".select_payment").hide();
+
         }
         else if (paymentStatus === 2) {
             $("#voucher_div").hide();
@@ -699,3 +706,54 @@ $('#ot_sessions, #pt_sessions').on('input', function() {
 });
 
     </script>
+
+
+
+   <script>
+document.addEventListener("DOMContentLoaded", function () {
+    const addBtn = document.getElementById("addSessionBtn");
+    const removeBtn = document.getElementById("removeSessionBtn");
+
+    const totalSessionsSpan = document.getElementById("total_sessions");
+    const totalFeeSpan = document.getElementById("total_fee");
+    const totalAmountSpan = document.getElementById("total_amount");
+    const afterDiscountSpan = document.getElementById("after_discount");
+
+    const sessionFee = parseFloat(document.querySelector("input[name='session_fee']").value) || 0;
+
+    let sessionCount = parseInt(document.querySelector("input[name='no_of_sessions']").value) || 0;
+
+    function updateDisplay() {
+        const totalFee = sessionCount * sessionFee;
+
+        // Fixed discount (example: 10%)
+
+        const discountInput = document.getElementById(" voucher_discount");
+        const afterDiscount = totalFee - discountInput;
+
+        totalSessionsSpan.textContent = sessionCount;
+        totalFeeSpan.textContent = totalFee.toFixed(2);
+        totalAmountSpan.textContent = totalFee.toFixed(2);
+        afterDiscountSpan.textContent = afterDiscount.toFixed(2);
+
+        document.querySelector("input[name='no_of_sessions']").value = sessionCount;
+    }
+
+    addBtn.addEventListener("click", function () {
+        sessionCount++;
+        updateDisplay();
+    });
+
+    removeBtn.addEventListener("click", function () {
+        if (sessionCount > 0) {
+            sessionCount--;
+            updateDisplay();
+        }
+    });
+
+    updateDisplay();
+});
+</script>
+
+
+

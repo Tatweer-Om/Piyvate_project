@@ -40,6 +40,27 @@ class SessionCONTROLLER extends Controller
             $data = User::where('id', $user_id)->first();
             $user = $data->user_name;
             $branch_id = $data->branch_id;
+            $offer_id= $request->offer_id;
+
+            $sessionTypes = $request->input('session_types');
+            $otSessions = $request->input('ot_sessions', 0);
+            $ptSessions = $request->input('pt_sessions', 0);
+            if( $request->session_type==null){
+                return response()->json(['status' => 3]);
+
+            }
+
+            if ($offer_id) {
+                    $offer = Offer::where('id', $offer_id)->first();
+
+                    if ($offer) {
+                        $sessions = (int) $offer->sessions;
+
+                        if ($sessions !== ($otSessions + $ptSessions)) {
+                            return response()->json(['status' => 4]);
+                        }
+                    }
+            }
 
             // Determine title
             $titles = [1 => 'Miss', 2 => 'Mr.', 3 => 'Mrs.'];
@@ -101,14 +122,6 @@ class SessionCONTROLLER extends Controller
             $session_fee= $request->session_fee;
 
 
-            $sessionTypes = $request->input('session_types');
-            $otSessions = $request->input('ot_sessions', 0);
-            $ptSessions = $request->input('pt_sessions', 0);
-            if( $request->session_type==null){
-                return response()->json(['status' => 3]);
-
-            }
-
             $session = new SessionList();
             $session->doctor_id = $request->doctor;
             $session->session_type = $request->session_type;
@@ -116,7 +129,7 @@ class SessionCONTROLLER extends Controller
             $session->no_of_sessions = $sessions_count;
             $session->session_gap = $request->session_gap;
             $session->session_date = $request->session_date;
-            $session->offer_id = $request->offer_id;
+            $session->offer_id = $offer_id;
             $session->ministry_id = $request->ministry_id;
             $session->session_cat = implode(',', $sessionTypes);
             $session->ot_sessions = $otSessions;
@@ -160,25 +173,31 @@ class SessionCONTROLLER extends Controller
             $user = User::find($user_id);
             $branch_id= $user->branch_id;
             $session = SessionList::findOrFail($id);
-            $accounts = Account::where('branch_id',$branch_id)->get();
+            $accounts = Account::where('branch_id',$branch_id)->where('account_type', 1)->get();
 
             $offer_name= "";
             $mini_name = "";
+            $offer_price= "";
             if (!empty($session->offer_id)) {
                 $offer_name = Offer::where('id', $session->offer_id)->value('offer_name');
+                $offer_price = Offer::where('id', $session->offer_id)->value('offer_price');
+
             }
 
             if (!empty($session->ministry_id)) {
                 $mini_name = GovtDept::where('id', $session->ministry_id)->value('govt_name');
             }
-            $session_price = null; // Declare first
+            $session_price = null; // Declare firstdd()
 
-            if ($session->session_type == 'offer') {
+            $session_type = strtolower(trim($session->session_type ?? ''));
+            if ($session_type == 'offer') {
                 $session_price = $session->session_fee;
             } else {
                 $session_price = ($session->no_of_sessions ?? 0) * ($session->session_fee ?? 0);
             }
+
             $payment= SessionsonlyPayment::where('session_id', $session->id)->first();
+
 
             return view('appointments.session_detail', [
                 'patient_name' => Patient::find($session->patient_id)->full_name ?? 'Unknown',
@@ -188,6 +207,7 @@ class SessionCONTROLLER extends Controller
                 'gap'          => $session->session_gap,
                 'session'=>$session,
                 'offer_name'   => $offer_name,
+                'offer_price'   => $offer_price,
                 'mini_name'    => $mini_name,
                 'accounts'=>$accounts,
                 'payment'=>$payment,
@@ -228,14 +248,50 @@ class SessionCONTROLLER extends Controller
                 $no_of_sessions = $request->no_of_sessions ?? 0;
                 $session_fee = $request->session_fee ?? 0;
 
-                $single_session_price = ($no_of_sessions > 0)
-                    ? $session_fee / $no_of_sessions
-                    : 0;
+
 
                 $appointment = new SessionDetail();
+
                 $session_data = SessionList::find($request->session_id);
                 $appointment->session_id = $request->session_id;
                 $appointment->session_type = $request->session_type;
+                $appointment->total_sessions = $no_of_sessions;
+
+                $existing_total = $session_data->no_of_sessions;
+                $new_total = $appointment->total_sessions;
+
+                $ot = $session_data->ot_sessions ?? 0;
+                $pt = $session_data->pt_sessions ?? 0;
+
+                if ($new_total > $existing_total) {
+                    $diff = $new_total - $existing_total;
+
+                    if ($ot == 0 && $pt > 0) {
+                        $session_data->pt_sessions += $diff;
+                    } elseif ($pt == 0 && $ot > 0) {
+                        $session_data->ot_sessions += $diff;
+                    } elseif ($ot <= $pt) {
+                        $session_data->ot_sessions += $diff;
+                    } else {
+                        $session_data->pt_sessions += $diff;
+                    }
+
+                } elseif ($new_total < $existing_total) {
+                    $diff = $existing_total - $new_total;
+
+                    if ($ot == 0 && $pt > 0) {
+                        $session_data->pt_sessions = max(0, $pt - $diff);
+                    } elseif ($pt == 0 && $ot > 0) {
+                        $session_data->ot_sessions = max(0, $ot - $diff);
+                    } elseif ($ot >= $pt) {
+                        $session_data->ot_sessions = max(0, $ot - $diff);
+                    } else {
+                        $session_data->pt_sessions = max(0, $pt - $diff);
+                    }
+                }
+
+                $session_data->no_of_sessions = $new_total;
+                $session_data->save();
 
                 $appointment->ministry_id = $request->mini_id;
                 $appointment->offer_id = $request->offer_id;
@@ -245,14 +301,14 @@ class SessionCONTROLLER extends Controller
                 $appointment->pt_sessions = $session_data->pt_sessions;
                 $appointment->doctor_id = $request->doctor_id;
                 $appointment->contract_payment = 1;
-                $appointment->total_sessions = $request->no_of_sessions;
+
                 if($appointment->session_type=='ministry'){
                     $appointment->total_fee = $request->session_fee *  $appointment->total_sessions;
                 }
                 else{
-                    $appointment->total_fee = $request->session_fee;
+                    $appointment->total_fee = $request->session_fee *  $appointment->total_sessions;
                 }
-                $appointment->single_session_price = $single_session_price;
+                $appointment->single_session_price = $session_fee;
                 $appointment->session_data = $request->sessions;
                 $appointment->user_id = $user->id;
                 $appointment->added_by = $user->id;
@@ -280,12 +336,11 @@ class SessionCONTROLLER extends Controller
                         $sessiondetail->doctor_id = $appointment->doctor_id;
                         $sessiondetail->session_date = $session['date']; // Use the correct key here
                         $sessiondetail->session_time = $session['time']; // Use the correct key here
-                        $sessiondetail->session_price = $single_session_price;
+                        $sessiondetail->session_price = $session_fee;
                         $sessiondetail->session_cat = $session_cat;
                         $sessiondetail->status = 1;
                         $sessiondetail->save();
 
-                        // Save session data to SessionData
                         $session_data = new SessionData();
                         $session_data->main_session_id =  $sessiondetail->session_id;
                         $session_data->patient_id = $appointment->patient_id;
@@ -294,9 +349,11 @@ class SessionCONTROLLER extends Controller
                         $session_data->contract_payment = 1;
                         $session_data->session_date = $session['date']; // Use the correct key here
                         $session_data->session_time = $session['time']; // Use the correct key here
-                        $session_data->session_price = $single_session_price;
+                        $session_data->session_price = $session_fee;
                         $session_data->source = 1;
                         $session_data->status = 1;
+                        $session_data->user_id = $user->id;
+
                         $session_data->save();
                     }
                 }
@@ -467,6 +524,8 @@ public function save_session_payment2(Request $request)
         $payment->payment_status = $request->payment_status;
         $payment->amount = $request->input('totalAmount'); // No amount since no payment made
         $payment->user_id = $user_id;
+        $payment->contract_payment = 1;
+
         $payment->branch_id = $user->branch_id;
         $payment->added_by = $user->id;
         $payment->save();
@@ -490,7 +549,7 @@ public function show_sessions()
     $sessions = SessionList::get();
     if ($sessions->count() > 0) {
         foreach ($sessions as $appointment) {
-            $total_sessions = AllSessioDetail::where('session_id', $appointment->id)->count();
+            $total_sessions = SessionData::where('main_session_id', $appointment->id)->count();
 
             $modal = '
             <a href="javascript:void(0);" class="me-3" >
@@ -521,13 +580,15 @@ public function show_sessions()
 
             }
 
-            $remaining_sessions= AllSessioDetail::where('status', 1)->where('session_id', $appointment->id)->count();
+            $remaining_sessions = SessionData::whereIn('status', [1, 3])
+            ->where('main_session_id', $appointment->id)
+            ->count();
 
 
             $sno++;
             $json[] = array(
                 '<span class="patient-info ps-0">' . $appointment->session_no . '</span>',
-                '<a class="text-nowrap ms-2" href="' . url('patient_session/' . $appointment->patient_id ) . '">' . $patient_name . '</a>',
+                '<a class="text-nowrap ms-2" href="' . url('patient_profile/' . $appointment->patient_id ) . '">' . $patient_name . '</a>',
                 '<span class="badge bg-success bg-sm text-center">
                     <i class="fas fa-list-alt me-1"></i>' . $total_sessions . '
                 </span>',
@@ -640,7 +701,7 @@ public function show_sessions()
                 // Add the session data to the response
                 $json[] = array(
                     $modal,
-                    '<span class="patient-info ps-0"><a href="' . url('patient_session/' . $appointment->patient_id) . '">' . $patient_name . '</a></span>',
+                    '<span class="patient-info ps-0"><a href="' . url('patient_profile/' . $appointment->patient_id) . '">' . $patient_name . '</a></span>',
                     '<span class="text-nowrap ms-2">' . $doctor_name . '</span>',
                     $appointment->session_date,
                     $appointment->session_time,

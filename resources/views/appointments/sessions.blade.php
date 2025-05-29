@@ -119,13 +119,17 @@
                                 </select>
                             </div>
 
-                            <!-- Ministry Dropdown (Hidden Initially) -->
-                            <div class="col-md-2" id="ministry_select_box" style="display: none;">
+                            <div class="col-md-4" id="ministry_select_box" style="display: none;">
                                 <label class="col-form-label">Select Ministry:</label>
                                 <select class="form-control form-control-sm" name="ministry_id">
                                     <option value="">Choose...</option>
                                     @foreach ($ministries as $ministry)
-                                        <option value="{{ $ministry->id }}">{{ $ministry->govt_name }}</option>
+                                        @foreach ($ministry->ministrycats as $mini)
+                                        <option value="{{ $ministry->id }}" style="background-color: {{ $mini->ministry_category_color }}; color: #fff;">
+                                            {{ $ministry->govt_name }} — {{ $mini->ministry_category_name }}
+                                                ({{ $mini->ministry_category_color }})
+                                            </option>
+                                        @endforeach
                                     @endforeach
                                 </select>
                             </div>

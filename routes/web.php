@@ -26,6 +26,7 @@ use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\ExpensecatController;
 use App\Http\Controllers\SpecialityController;
 use App\Http\Controllers\AppointmentController;
+use App\Http\Controllers\CalenderController;
 use App\Http\Controllers\ClinicalNotesController;
 use App\Http\Controllers\HrController;
 use App\Http\Controllers\VoucherController;
@@ -68,10 +69,12 @@ Route::get('download/{file_id}', [PatientController::class, 'download'])->name('
 
 // routes/web.php
 Route::get('/patient/{id}/appointments', [PatientController::class, 'getAppointments']);
+Route::get('/patient/{id}/appointmentsdetail', [PatientController::class, 'appointmentsdetail']);
+
 Route::get('/patient/{id}/session_transfer', [PatientController::class, 'session_transfer']);
 
 Route::get('/patient/{id}/sessions', [PatientController::class, 'getSessions']);
-Route::get('/patient/{id}/payments', [PatientController::class, 'getPayments']);
+Route::get('/patient/{id}/payment_history', [PatientController::class, 'payment_history']);
 Route::get('show_all_sessions_by_patient', [PatientController::class, 'show_all_sessions_by_patient'])->name('show_all_sessions_by_patient');
 Route::get('show_all_payment_by_patient', [PatientController::class, 'show_all_payment_by_patient'])->name('show_all_payment_by_patient');
 Route::post('submit_contract_payment', [PatientController::class, 'submit_contract_payment'])->name('submit_contract_payment');
@@ -114,9 +117,22 @@ Route::get('show_appointment', [AppointmentController::class, 'show_appointment'
 Route::post('add_appointment', [AppointmentController::class, 'add_appointment'])->name('add_appointment');
 Route::post('update_appointment', [AppointmentController::class, 'update_appointment'])->name('update_appointment');
 Route::post('cancel_appointment', [AppointmentController::class, 'cancel_appointment'])->name('cancel_appointment');
+Route::get('patient_appointment/{id}', [AppointmentController::class, 'patient_appointment'])->name('patient_appointment');
+Route::get('patient_appointment_detail/{id}', [AppointmentController::class, 'patient_appointment_detail'])->name('patient_appointment_detail');
+Route::get('show_all_sessions_under_appointment', [AppointmentController::class, 'show_all_sessions_under_appointment'])->name('show_all_sessions_under_appointment');
+
 
 Route::get('edit_appointment/{id}', [AppointmentController::class, 'edit_appointment'])->name('edit_appointment');
+Route::post('approve_appointment', [AppointmentController::class, 'approve_appointment'])->name('approve_appointment');
+
 Route::get('all_appointments', [AppointmentController::class, 'all_appointments'])->name('all_appointments');
+Route::get('calender/{id}', [CalenderController::class, 'calender'])->name('calender');
+
+
+Route::post('/get-calendar-appointments', [CalenderController::class, 'getCalendarAppointments']);
+Route::get('/api/day-schedule/{date}', [CalenderController::class, 'getDaySchedule']);
+
+
 Route::get('sessions_list', [AppointmentController::class, 'sessions_list'])->name('sessions_list');
 Route::post('/get-session-price', [AppointmentController::class, 'getSessionPrice'])->name('get.session.price');
 Route::get('/getMinistryDetails/{id}', [AppointmentController::class, 'getMinistryDetails'])->name('getMinistryDetails');
@@ -127,7 +143,7 @@ Route::post('/save_sessions', [AppointmentController::class, 'save_sessions'])->
 Route::post('/save_session_payment', [AppointmentController::class, 'save_session_payment'])->name('save_session_payment');
 Route::get('/search-patient', [AppointmentController::class, 'searchPatient']);
 
-
+Route::post('/get-next-available-time', [AppointmentController::class, 'getNextAvailableTime']);
 
 
 
@@ -219,10 +235,18 @@ Route::get('download_expense_image/{id}', [ExpenseController::class, 'download_e
 
 Route::get('account', [AccountController::class, 'index'])->name('account');
 Route::post('add_account', [AccountController::class, 'add_account'])->name('add_account');
+Route::post('add_balance', [AccountController::class, 'add_balance'])->name('add_balance');
+
 Route::get('show_account', [AccountController::class, 'show_account'])->name('show_account');
+Route::get('all_balance/{id}', [AccountController::class, 'all_balance'])->name('all_balance');
+Route::get('show_balance', [AccountController::class, 'show_balance'])->name('show_balance');
 Route::post('edit_account', [AccountController::class, 'edit_account'])->name('edit_account');
 Route::post('update_account', [AccountController::class, 'update_account'])->name('update_account');
 Route::post('delete_account', [AccountController::class, 'delete_account'])->name('delete_account');
+Route::get('/detail/{id}', [AccountController::class, 'getAccountDetail']);
+Route::get('download_expense_image/{filename}', [AccountController::class, 'downloadExpenseImage']);
+Route::get('download_balance_image/{filename}', [AccountController::class, 'downloadBalanceImage']);
+
 
 // roles
 Route::get('role', [RoleController::class, 'index'])->name('role');
@@ -386,7 +410,9 @@ Route::get('/doctor/{doctorId}/appointments', [DoctorController::class, 'getDoct
 
 //GovtController
 Route::get('govt', [GovtController::class, 'index'])->name('govt');
+Route::get('govt_detail/{id}', [GovtController::class, 'govt_detail'])->name('govt_detail');
 Route::post('add_govt', [GovtController::class, 'add_govt'])->name('add_govt');
+Route::get('show_all_contract', [GovtController::class, 'show_all_contract'])->name('show_all_contract');
 Route::get('show_govt', [GovtController::class, 'show_govt'])->name('show_govt');
 Route::post('edit_govt', [GovtController::class, 'edit_govt'])->name('edit_govt');
 Route::post('update_govt', [GovtController::class, 'update_govt'])->name('update_govt');

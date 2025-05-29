@@ -24,23 +24,25 @@
                                 name="hn" /> PT:<input type="text" value="{{ $data['pt'] ?? '' }}" class="input-line" name="pt" />
                         </div>
                         <div>
-                            Name:<input type="text" class="input-line" value="{{ $patient->full_name ?? '' }}" />
-                            Age:<input type="text" value="{{ $patient->age ?? '' }}" class="input-line" />
+                            Name:<input type="text" class="input-line" value="{{ $patient->full_name ?? '' }}" readonly />
+                            Age:<input type="text" value="{{ $patient->age ?? '' }}" class="input-line" readonly/>
                         </div>
                         <div>
                             Gender:
                             <label>
                                 <input type="checkbox" name="gender_m" value="male"
-                                    {{ $patient->gender == 'Male' ? 'checked' : '' }}> M
+                                       onclick="return false;"
+                                       {{ $patient->gender == 'Male' ? 'checked' : '' }}> M
                             </label>
                             <label>
                                 <input type="checkbox" name="gender_f" value="female"
-                                    {{ $patient->gender == 'Female' ? 'checked' : '' }}> F
+                                       onclick="return false;"
+                                       {{ $patient->gender == 'Female' ? 'checked' : '' }}> F
                             </label>
                         </div>
                         <div>
-                            Birth Date:<input type="text" class="input-line" value="{{ $patient->dob ?? '' }}" />
-                            Therapist:<input type="text" class="input-line" value="{{ $doctor ?? '' }}" />
+                            Birth Date:<input type="text" class="input-line" value="{{ $patient->dob ?? '' }}" readonly/>
+                            Therapist:<input type="text" class="input-line" value="{{ $doctor ?? '' }}" readonly/>
                         </div>
                     </div>
                 </div>
