@@ -138,9 +138,11 @@
                                     </button>
                                 @endif
 
+                                @if(isset($appointment) && $appointment->session_status != 1)
+                                <button class="btn btn-success btn-sm rounded-pill" data-bs-toggle="offcanvas"
+                                    data-bs-target="#rightPopup" aria-controls="rightPopup">Add Prescription</button>
+                            @endif
 
-                                    <button class="btn btn-success btn-sm rounded-pill" data-bs-toggle="offcanvas"
-                                        data-bs-target="#rightPopup" aria-controls="rightPopup">Add Prescription</button>
                                     <button class="btn btn-warning btn-sm rounded-pill" data-bs-toggle="offcanvas"
                                         data-bs-target="#leftPopup" aria-controls="leftPopup">Lab Reports</button>
                                 </div>

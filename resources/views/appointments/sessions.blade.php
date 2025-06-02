@@ -155,6 +155,13 @@
                                 <input type="hidden" name="session_fee" id="session_fee_input" >
 
                             </div>
+                            <div class="col-md-2 check">
+                                <label class="col-form-label label_sys">Total Fee:</label>
+                                <input type="text" class="form-control form-control-sm" id="total_fee_input" name="total_fee" readonly>
+                            </div>
+
+
+
 
                             <div class="col-md-2 mt-3 ">
                                 <!-- Age Badge & Hidden Input -->

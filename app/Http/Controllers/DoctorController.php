@@ -44,7 +44,7 @@ class DoctorController extends Controller
               <a href="javascript:void(0);" onclick="del(' . $doctor->id . ')">
                 <i class="fa fa-trash fs-18 text-danger"></i>
               </a>
-              <a href="' . url('calendar/' . $doctor->id) . '">
+              <a href="' . url('calender/' . $doctor->id) . '">
                 <i class="fa fa-calendar fs-18 text-danger"></i>
               </a>';
 

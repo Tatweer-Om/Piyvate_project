@@ -39,6 +39,7 @@ use App\Models\SessionPaymentExpense;
 use PHPUnit\Framework\returnValueMap;
 
 use App\Models\SessionsonlyPaymentExp;
+use App\Models\Speciality;
 use Illuminate\Contracts\Session\SessionnValueMap;
 use Symfony\Component\HttpFoundation\Session\Session;
 
@@ -98,13 +99,13 @@ class PatientController extends Controller
 
 
         $sessions = SessionDetail::where('patient_id', $id)
-            ->whereNotNull('ministry_id')
-            ->where('contract_payment', 1)
+        ->where('ministry_id', '!=', '')
+        ->where('contract_payment', 1)
             ->get(['ministry_id', 'total_sessions', 'total_fee', 'id']);
 
         $app_sessions = AppointmentDetail::where('patient_id', $id)
-            ->whereNotNull('ministry_id')
-            ->where('contract_payment', 1)
+        ->where('ministry_id', '!=', '')
+        ->where('contract_payment', 1)
             ->get(['ministry_id', 'total_sessions', 'total_price', 'appointment_id']);
 
         $ministry_name = null;
@@ -455,7 +456,7 @@ class PatientController extends Controller
             $appointment->pt_sessions = $data->where('session_cat', 'PT')->count();
             $appointment->ot_sessions = $data->where('session_cat', 'OT')->count();
             $appointment->session_taken = $data->where('status', 2)->count();
-            $appointment->session_remain = $data->where('status', 1)->count();
+            $appointment->session_remain = $data->whereIn('status', [1, 3])->count();
             $files = Patientfiles::where('appointment_id', $appointment->id)->get();
             $appointment->files = $files->map(function ($file) {
                 return [
@@ -601,7 +602,7 @@ class PatientController extends Controller
         // Session statistics
         $patient_total_sessions = (clone $baseQuery)->count();
         $total_session_taken = (clone $baseQuery)->where('status', 2)->count();
-        $total_active_session = (clone $baseQuery)->where('status', 1)->count();
+        $total_active_session = (clone $baseQuery)->whereIn('status', [1, 3])->count();
 
         $ot_sessions = (clone $baseQuery)->where('session_cat', 'OT')->count();
         $pt_sessions = (clone $baseQuery)->where('session_cat', 'PT')->count();
@@ -696,7 +697,7 @@ class PatientController extends Controller
             $today = Carbon::now()->format('Y-m-d');
 
             // Check if status is Pending (1)
-            if ($session->status == 1) {
+           if( in_array($session->status, ([1,3]))) {
                 // Show edit + transfer icons with tooltips
                 $modal .= '
                 <a href="javascript:void(0);" class="me-3" data-bs-toggle="modal" data-bs-target="#transferModal" onclick="transfer(' . $session->id . ', \'' . $session->source . '\')" title="Transfer Sessions from one patient to other" data-bs-toggle="tooltip">
@@ -706,25 +707,8 @@ class PatientController extends Controller
                     <i class="fa fa-pencil fs-18 text-success"></i>
                 </a>';
 
-                // Only show image if session date IS today
-                // if ($sessionDate == $today) {
-                //     if ($session->session_cat === 'OT') {
-                //         $url = url('soap_ot/' . $session->id);
-                //         $img = asset('images/logo/1.png');
-                //     } elseif ($session->session_cat === 'PT') {
-                //         $url = url('soap_pt/' . $session->id);
-                //         $img = asset('images/logo/2.png');
-                //     } else {
-                //         $url = '#';
-                //         $img = asset('images/logo/default.png');
-                //     }
 
-                //     $modal .= '
-                //     <a href="' . $url . '" class="me-3 text-decoration-none text-dark" title="Edit Session" data-bs-toggle="tooltip">
-                //         <img src="' . $img . '" class="rounded-circle shadow-sm mb-2" style="width: 30px; height: 30px; object-fit: cover;">
-                //     </a>';
-                // }
-            } elseif (!in_array($session->status, [1, 3])) {
+            } elseif (!in_array($session->status, [1, 3, 2])) {
                 // For all other statuses except On-going (4), show only the image
                 if ($session->session_cat === 'OT') {
                     $url = url('soap_ot/' . $session->id);
@@ -740,6 +724,27 @@ class PatientController extends Controller
                 $modal .= '
                 <a href="' . $url . '" class="me-3 text-decoration-none text-dark" >
                     <img src="' . $img . '" class="rounded-circle shadow-sm mb-2" style="width: 30px; height: 30px; object-fit: cover;">
+                </a>';
+            }
+            elseif (($session->status==2)) {
+                // For all other statuses except On-going (4), show only the image
+                if ($session->session_cat === 'OT') {
+                    $url = url('soap_ot/' . $session->id);
+                    $img = asset('images/logo/2.png');
+                } elseif ($session->session_cat === 'PT') {
+                    $url = url('soap_pt/' . $session->id);
+                    $img = asset('images/logo/1.png');
+                } else {
+                    $url = '#';
+                    $img = asset('images/logo/default.png');
+                }
+
+                $modal .= '
+                <a href="' . $url . '" class="me-3 text-decoration-none text-dark" >
+                    <img src="' . $img . '" class="rounded-circle shadow-sm mb-2" style="width: 30px; height: 30px; object-fit: cover;">
+                </a>
+                 <a href="'. url('session_recipt/' . $session->id) .'" class="me-3 text-decoration-none text-dark" title="Print Receipt">
+                    <i class="bi bi-printer fs-3"></i>
                 </a>';
             }
 
@@ -876,8 +881,10 @@ class PatientController extends Controller
             $apt_no = Appointment::where('id', $appointment->appointment_id)->value('appointment_no') ?? '';
             $total_sessions = SessionData::where('main_appointment_id', $appointment->appointment_id)->count();
             $taken_session = SessionData::where('main_appointment_id', $appointment->appointment_id)->where('status', 2)->count();
-            $pending = SessionData::where('main_appointment_id', $appointment->appointment_id)->where('status', 1)->count();
-            $ot = SessionData::where('main_appointment_id', $appointment->appointment_id)->where('session_cat', 'OT')->count();
+            $pending = SessionData::where('main_appointment_id', $appointment->appointment_id)
+            ->whereIn('status', [1, 3])
+            ->count();
+                    $ot = SessionData::where('main_appointment_id', $appointment->appointment_id)->where('session_cat', 'OT')->count();
             $pt = SessionData::where('main_appointment_id', $appointment->appointment_id)->where('session_cat', 'PT')->count();
 
             $appointmentsAndSessions[] = [
@@ -957,7 +964,7 @@ class PatientController extends Controller
             $session_no = SessionList::where('id', $session->session_id)->value('session_no') ?? '';
             $total_sessions = SessionData::where('main_session_id', $session->session_id)->count();
             $taken_session = SessionData::where('main_session_id', $session->session_id)->where('status', 2)->count();
-            $pending = SessionData::where('main_session_id', $session->session_id)->where('status', 1)->count();
+            $pending = SessionData::where('main_session_id', $session->session_id)->whereIn('status', [1, 3])->count();
             $ot = SessionData::where('main_session_id', $session->session_id)->where('session_cat', 'OT')->count();
             $pt = SessionData::where('main_session_id', $session->session_id)->where('session_cat', 'PT')->count();
 
@@ -1026,6 +1033,7 @@ class PatientController extends Controller
 
                 $session_detail = SessionDetail::where('session_id', $session_id)->first();
                 if ($session_detail) {
+
                     $session_detail->contract_payment = 2;
                     $session_detail->save();
                 }
@@ -1401,6 +1409,44 @@ class PatientController extends Controller
         $user_id = $user->id;
 
         $session = SessionData::where('id', $id)->first();
+        if (!empty($session->main_session_id)) {
+            $session_detail_update = SessionDetail::where('session_id', $session->main_session_id)->first();
+            if ($session_detail_update) {
+                $session_detail_update->total_sessions = $session_detail_update->total_sessions - 1;
+                $session_detail_update->total_fee= $session_detail_update->total_fee - $session_detail_update->single_session_price;
+
+                if($session->session_cat=='OT'){
+                    $session_detail_update->ot_sessions = $session_detail_update->ot_sessions - 1;
+
+                }
+                else{
+                    $session_detail_update->pt_sessions = $session_detail_update->pt_sessions - 1;
+
+                }
+                $session_detail_update->save();
+            }
+        }
+        if (!empty($session->main_appointment_id)) {
+            $apt_detail_update = AppointmentDetail::where('appointment_id', $session->main_appointment_id)->first();
+            if ($apt_detail_update) {
+                $apt_detail_update->sessions_reccomended = $apt_detail_update->sessions_reccomended - 1;
+                $apt_detail_update->total_sessions = $apt_detail_update->total_sessions - 1;
+
+                $apt_detail_update->total_price= $apt_detail_update->total_price - $apt_detail_update->single_session_price;
+
+                if($session->session_cat=='OT'){
+                    $apt_detail_update->ot_sessions = $apt_detail_update->ot_sessions - 1;
+
+                }
+                else{
+                    $apt_detail_update->pt_sessions = $apt_detail_update->pt_sessions - 1;
+
+                }
+                $apt_detail_update->save();
+            }
+        }
+
+
         if ($session) {
             // Update patient_id
             DB::table('session_data')
@@ -1444,7 +1490,15 @@ class PatientController extends Controller
             // Format to 3 digits with leading zeros
             $newSessionNo = $month . $year . 'S-' . str_pad($newCount, 3, '0', STR_PAD_LEFT);
             $patient_check = Patient::where('id', $new_patient_id)->first();
-            $session1 = new SessionList();
+
+            $check_patient_session= SessionList::where('patient_id', $new_patient_id)->first();
+            if( $check_patient_session){
+                $session1 =  SessionList::where('patient_id', $new_patient_id)->first();
+
+            }
+            else{
+                $session1 = new SessionList();
+            }
             $session1->doctor_id = $session->doctor_id;
             $session1->patient_id = $patient_check->id;
             $session1->session_no = $newSessionNo;
@@ -1465,27 +1519,55 @@ class PatientController extends Controller
             $session1->branch_id = $branch;
 
             $session1->save();
-            $appointment = new SessionDetail();
 
-            $session_data = SessionList::find($request->session_id);
+            $update_main_id= SessionData::where('id', $id)->first();
+
+            $update_main_id->main_session_id=$session1->id;
+            $update_main_id->main_appointment_id=null;
+            $update_main_id->save();
+
+            $sessio_det= SessionDetail::Where('session_id', $session1->id)->first();
+
+            if ($sessio_det) {
+                $appointment = SessionDetail::where('session_id', $session1->id)->first();
+
+                $appointment->total_fee += $session1->session_fee;
+
+                $appointment->total_sessions += 1;
+
+                if (!empty($session1->ot_sessions)) {
+                    $appointment->ot_sessions += $session1->ot_sessions;
+                }
+
+                if (!empty($session1->pt_sessions)) {
+                    $appointment->pt_sessions += $session1->pt_sessions;
+                }
+
+            } else {
+                $appointment = new SessionDetail();
+
+                // Initialize values for a new record
+                $appointment->total_fee = $session1->session_fee;
+                $appointment->total_sessions = 1;
+                $appointment->ot_sessions = $session1->ot_sessions ?? 0;
+                $appointment->pt_sessions = $session1->pt_sessions ?? 0;
+            }
+
+            // Common assignments
             $appointment->session_id = $session1->id;
             $appointment->patient_id = $session1->patient_id;
             $appointment->doctor_id = $session1->doctor_id;
-            $appointment->total_fee = $session1->session_fee;
             $appointment->session_data = 1;
-
             $appointment->session_type = $session1->session_type;
-            $appointment->total_sessions =  $session1->no_of_sessions;
-
             $appointment->session_cat = $session1->session_cat;
-            $appointment->ot_sessions = $session1->ot_sessions ?? 0;
-            $appointment->pt_sessions = $session1->pt_sessions ?? 0;
-            $appointment->contract_payment = 1;
+            $appointment->contract_payment = 3;
             $appointment->single_session_price = $session1->session_fee;
             $appointment->user_id = $user->id;
             $appointment->added_by = $user->id;
             $appointment->branch_id = $user->branch_id;
+
             $appointment->save();
+
 
             return response()->json(['message' => 'Session transferred and logged successfully!']);
         } else {
@@ -1577,6 +1659,29 @@ class PatientController extends Controller
                 $account_amounts = [];
             }
 
+            if ($detail->contract_payment == 3) {
+                $total_paid_amount = 'Transffered';
+                $account_amounts = [];
+            }
+
+            if ($isContractPayment && $contractPaymentStatus == 2) {
+                $payments = SessionsPayment::where('appointment_id', $appointment->appointment_id)->whereNotNull('account_id')->where('contract_payment', 2)->get();
+                foreach ($payments as $payment) {
+                    $total_paid_amount += $payment->amount ?? 0;
+                    if ($payment->account_id) {
+                        $account_name = Account::where('id', $payment->account_id)->value('account_name');
+                        if ($account_name) {
+                            if (!isset($account_amounts[$account_name])) {
+                                $account_amounts[$account_name] = 0;
+                            }
+                            $account_amounts[$account_name] += $payment->amount ?? 0;
+                        }
+                    }
+
+
+                }
+            }
+
 
             $appointment_fee = Appointment::where('id', $appointment->appointment_id)->value('appointment_fee') ?? '';
             $appointmentPayments = AppointmentPayment::where('appointment_id', $appointment->appointment_id)->get();
@@ -1600,7 +1705,7 @@ class PatientController extends Controller
             $apt_no = Appointment::where('id', $appointment->appointment_id)->value('appointment_no') ?? '';
             $total_sessions = SessionData::where('main_appointment_id', $appointment->appointment_id)->count();
             $taken_session = SessionData::where('main_appointment_id', $appointment->appointment_id)->where('status', 2)->count();
-            $pending = SessionData::where('main_appointment_id', $appointment->appointment_id)->where('status', 1)->count();
+            $pending = SessionData::where('main_appointment_id', $appointment->appointment_id)->whereIn('status', [1, 3])->count();
             $ot = SessionData::where('main_appointment_id', $appointment->appointment_id)->where('session_cat', 'OT')->count();
             $pt = SessionData::where('main_appointment_id', $appointment->appointment_id)->where('session_cat', 'PT')->count();
 
@@ -1683,10 +1788,34 @@ class PatientController extends Controller
                 $account_amounts = [];
             }
 
+            if ($detail->contract_payment == 3) {
+                $total_paid_amount = 'Transffered';
+                $account_amounts = [];
+            }
+
+            if ($contractPaymentStatus == 2) {
+                $payments = SessionsonlyPayment::where('session_id', $session->session_id)->whereNotNull('account_id')->where('contract_payment', 2)->get();
+                foreach ($payments as $payment) {
+                    $total_paid_amount += $payment->amount ?? 0;
+
+                    if ($payment->account_id) {
+                        $account_name = Account::where('id', $payment->account_id)->value('account_name');
+                        if ($account_name) {
+                            if (!isset($account_amounts[$account_name])) {
+                                $account_amounts[$account_name] = 0;
+                            }
+                            $account_amounts[$account_name] += $payment->amount ?? 0;
+                        }
+                    }
+
+
+                }
+            }
+
             $session_no = SessionList::where('id', $session->session_id)->value('session_no') ?? '';
             $total_sessions = SessionData::where('main_session_id', $session->session_id)->count();
             $taken_session = SessionData::where('main_session_id', $session->session_id)->where('status', 2)->count();
-            $pending = SessionData::where('main_session_id', $session->session_id)->where('status', 1)->count();
+            $pending = SessionData::where('main_session_id', $session->session_id)->whereIn('status', [1, 3])->count();
             $ot = SessionData::where('main_session_id', $session->session_id)->where('session_cat', 'OT')->count();
             $pt = SessionData::where('main_session_id', $session->session_id)->where('session_cat', 'PT')->count();
 
@@ -1721,4 +1850,126 @@ class PatientController extends Controller
 
         return response()->json($appointmentsAndSessions);
     }
+
+
+    public function session_recipt($id){
+
+        $session= SessionData::where('id', $id)->first();
+
+        $patient= Patient::where('id', $session->patient_id)->first();
+        $doctor= Doctor::where('id', $session->doctor_id)->first();
+        $startTime = \Carbon\Carbon::parse($session->session_time);
+        $endTime = $startTime->copy()->addHour();
+
+        $session->start_time = $startTime->format('h:i A');
+        $session->end_time = $endTime->format('h:i A');
+
+
+        return view ('patients.session_recipt', compact('session','patient', 'doctor' ));
+
+    }
+
+    public function apt_invoice($id)
+{
+    $appointment = Appointment::where('id', $id)->first();
+    $patient = Patient::find($appointment->patient_id);
+    $doctor = Doctor::find($appointment->doctor_id);
+
+
+    $special= Speciality::where('id', $doctor->specialization)->value('speciality_name');
+
+    return view('patients.apt_invoice', compact('appointment', 'patient', 'doctor', 'special'));
+}
+
+
+public function apt_session_invoice($id)
+{
+    $appointment = Appointment::findOrFail($id);
+
+    $paymentStatus = $appointment->payment_status;
+
+    if (is_null($paymentStatus) || $paymentStatus == 0 || $paymentStatus == 1) {
+        $sessionType = 'Normal Session';
+    } elseif ($paymentStatus == 2) {
+        $sessionType = 'Offer Session';
+    } elseif ($paymentStatus == 3) {
+        $sessionType = 'Contract Session';
+    } else {
+        $sessionType = 'Unknown';
+    }
+
+
+
+    $sessions = SessionData::where('main_appointment_id', $id)->get();
+    $total_sessions = $sessions->count();
+    $session_done = $sessions->where('status', 2)->count();
+    $session_remaining = $sessions->whereIn('status', [1, 3])->count();
+
+    $session_price = $sessions->first()?->session_price ?? 0;
+    $total_price = $session_price * $total_sessions;
+
+    $patient = Patient::find($appointment->patient_id);
+    $doctor = Doctor::find($appointment->doctor_id);
+    $special = Speciality::where('id', $doctor->specialization)->value('speciality_name');
+
+    return view('patients.apt_session_invoice', compact(
+        'appointment',
+        'patient',
+        'doctor',
+        'special',
+        'sessions',
+        'sessionType',
+        'total_sessions',
+        'session_done',
+        'session_remaining',
+        'session_price',
+        'total_price'
+    ));
+}
+
+public function dir_session_invoice($id)
+{
+    $appointment = SessionList::findOrFail($id);
+
+    $paymentStatus = $appointment->payment_status;
+
+    if (is_null($paymentStatus) || $paymentStatus == 0 || $paymentStatus == 1) {
+        $sessionType = 'Normal Session';
+    } elseif ($paymentStatus == 2) {
+        $sessionType = 'Offer Session';
+    } elseif ($paymentStatus == 3) {
+        $sessionType = 'Contract Session';
+    } else {
+        $sessionType = 'Unknown';
+    }
+
+
+
+    $sessions = SessionData::where('main_session_id', $id)->get();
+    $total_sessions = $sessions->count();
+    $session_done = $sessions->where('status', 2)->count();
+    $session_remaining = $sessions->whereIn('status', [1, 3])->count();
+
+    $session_price = $sessions->first()?->session_price ?? 0;
+    $total_price = $session_price * $total_sessions;
+
+    $patient = Patient::find($appointment->patient_id);
+    $doctor = Doctor::find($appointment->doctor_id);
+    $special = Speciality::where('id', $doctor->specialization)->value('speciality_name');
+
+    return view('patients.dir_session_invoice', compact(
+        'appointment',
+        'patient',
+        'doctor',
+        'special',
+        'sessions',
+        'sessionType',
+        'total_sessions',
+        'session_done',
+        'session_remaining',
+        'session_price',
+        'total_price'
+    ));
+}
+
 }

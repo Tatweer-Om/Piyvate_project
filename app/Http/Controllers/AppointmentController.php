@@ -223,7 +223,9 @@ class AppointmentController extends Controller
                     'status' => 9,
                     'message' => 'Doctor already has an appointment during this time.',
                 ]);
+                exit();
             }
+
         }
 
         // 2. Check for session with status = 4 that overlaps
@@ -1262,7 +1264,7 @@ return view('patients.patient_appointment', compact('patient', 'data_check', 'ap
         $appointment->pt_sessions = $data->where('session_cat', 'PT')->count();
         $appointment->ot_sessions = $data->where('session_cat', 'OT')->count();
         $appointment->session_taken = $data->where('status', 2)->count();
-        $appointment->session_remain = $data->where('status', 1)->count();
+        $appointment->session_remain = $data->whereIn('status', [1, 3])->count();
 
         // File attachments
         $files = Patientfiles::where('appointment_id', $appointment->id)->get();
@@ -1541,7 +1543,6 @@ public function getNextAvailableTime(Request $request)
         'time_to' => $endTime->format('H:i')
     ]);
 }
-
 
 
 

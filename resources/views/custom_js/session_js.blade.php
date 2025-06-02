@@ -685,7 +685,6 @@ $('.session-checkbox').on('change', function() {
     // Update total sessions
     updateNoOfSessions();
     fetchSessionPrice();
-
 });
 
 // Update the total number of sessions automatically
@@ -693,67 +692,66 @@ function updateNoOfSessions() {
     let otSessions = parseInt($('#ot_sessions').val()) || 0;
     let ptSessions = parseInt($('#pt_sessions').val()) || 0;
     let totalSessions = otSessions + ptSessions;
+    const basePrice = parseFloat($('#session_fee_input').val()) || 0;
+
+    let totalFee =  basePrice * totalSessions;
 
     $('#no_of_sessions').val(totalSessions);
+    $('#total_fee_input').val('OMR ' + totalFee.toFixed(2));
+
 }
 
 // When user types in session number fields, update the total
 $('#ot_sessions, #pt_sessions').on('input', function() {
     updateNoOfSessions();
     fetchSessionPrice();
-});
+
+
 
 });
+
+
+
+});
+
+
+
+//     $(document).ready(function () {
+//     function updateFees() {
+//         const sessionType = $('input[name="session_type"]:checked').val();
+//         const numSessions = parseInt($('#no_of_sessions').val()) || 0;
+//         const basePrice = parseFloat($('#session_fee_input').val()) || 0;
+
+//         let totalFee = 0;
+//         let sessionFee = 0;
+
+//         if (sessionType === 'offer') {
+//             totalFee = basePrice; // offer has fixed total fee
+//             sessionFee = numSessions > 0 ? totalFee / numSessions : 0;
+//         } else {
+//             sessionFee = basePrice; // normal or pact session fee
+//             totalFee = sessionFee * numSessions;
+//         }
+
+//         // Set formatted values
+//         $('#session_fee').text('OMR ' + sessionFee.toFixed(2));
+//         $('#total_fee_input').val('OMR ' + totalFee.toFixed(2));
+//     }
+
+//     // Trigger on changes
+//     $('#no_of_sessions, #session_fee_input').on('input', updateFees);
+//     $('input[name="session_type"]').on('change', updateFees);
+
+//     // Optional: call once on load
+//     updateFees();
+// });
+
 
     </script>
 
 
 
-   <script>
-document.addEventListener("DOMContentLoaded", function () {
-    const addBtn = document.getElementById("addSessionBtn");
-    const removeBtn = document.getElementById("removeSessionBtn");
 
-    const totalSessionsSpan = document.getElementById("total_sessions");
-    const totalFeeSpan = document.getElementById("total_fee");
-    const totalAmountSpan = document.getElementById("total_amount");
-    const afterDiscountSpan = document.getElementById("after_discount");
-
-    const sessionFee = parseFloat(document.querySelector("input[name='session_fee']").value) || 0;
-
-    let sessionCount = parseInt(document.querySelector("input[name='no_of_sessions']").value) || 0;
-
-    function updateDisplay() {
-        const totalFee = sessionCount * sessionFee;
-
-        // Fixed discount (example: 10%)
-
-        const discountInput = document.getElementById(" voucher_discount");
-        const afterDiscount = totalFee - discountInput;
-
-        totalSessionsSpan.textContent = sessionCount;
-        totalFeeSpan.textContent = totalFee.toFixed(2);
-        totalAmountSpan.textContent = totalFee.toFixed(2);
-        afterDiscountSpan.textContent = afterDiscount.toFixed(2);
-
-        document.querySelector("input[name='no_of_sessions']").value = sessionCount;
-    }
-
-    addBtn.addEventListener("click", function () {
-        sessionCount++;
-        updateDisplay();
-    });
-
-    removeBtn.addEventListener("click", function () {
-        if (sessionCount > 0) {
-            sessionCount--;
-            updateDisplay();
-        }
-    });
-
-    updateDisplay();
-});
-</script>
 
 
 

@@ -35,7 +35,7 @@
                                     <h5>Total Sessions: <span id="total_sessions" class="fw-normal">{{ $session->no_of_sessions ?? '' }}</span></h5>
                                     <h5>Total Fee:
                                         <span id="total_fee" class="fw-normal">
-                                            {{ $session->session_fee ?? '' }}
+                                            {{ $session->session_fee * $session->no_of_sessions ?? ''}}
                                         </span>
                                     </h5>
 
@@ -71,10 +71,10 @@
                         </div>
 
                         <!-- Footer Buttons -->
-                        <div class="card-footer text-end">
+                        <div class="card-footer text-end ">
                             @if(empty($offer_name))
-                            <button type="button" class="btn btn-info btn-sm px-2 py-1" id="addSessionBtn">➕ Session</button>
-                            <button type="button" class="btn btn-warning btn-sm px-2 py-1" id="removeSessionBtn">➖ Session</button>
+                            <button type="button" class="btn btn-info btn-sm px-2 py-1 d-none" id="addSessionBtn">➕ Session</button>
+                            <button type="button" class="btn btn-warning btn-sm px-2 py-1 d-none" id="removeSessionBtn">➖ Session</button>
                         @endif
 
                             <button type="submit" class="btn btn-primary btn-sm px-2 py-1">Save Sessions</button>
