@@ -50,6 +50,13 @@ Route::get('patient_profile/{id}', [PatientController::class, 'patient_profile']
 Route::get('patient_session/{id}', [PatientController::class, 'patient_session'])->name('patient_session');
 
 Route::get('show_patient', [PatientController::class, 'show_patient'])->name('show_patient');
+Route::get('session_recipt/{id}', [PatientController::class, 'session_recipt'])->name('session_recipt');
+Route::get('apt_invoice/{id}', [PatientController::class, 'apt_invoice'])->name('apt_invoice');
+Route::get('apt_session_invoice/{id}', [PatientController::class, 'apt_session_invoice'])->name('apt_session_invoice');
+Route::get('dir_session_invoice/{id}', [PatientController::class, 'dir_session_invoice'])->name('dir_session_invoice');
+
+
+
 Route::post('add_patient', [PatientController::class, 'add_patient'])->name('add_patient');
 Route::post('update_patient', [PatientController::class, 'update_patient'])->name('update_patient');
 Route::post('edit_patient', [PatientController::class, 'edit_patient'])->name('edit_patient');

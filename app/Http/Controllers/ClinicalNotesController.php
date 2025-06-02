@@ -659,35 +659,33 @@ class ClinicalNotesController extends Controller
         }
 
         if (!is_null($soap->main_session_id)) {
-            $nextSession = AllSessioDetail::where('session_id', $soap->main_session_id)->where('id', $id)->first();
+            // $nextSession = AllSessioDetail::where('session_id', $soap->main_session_id)->where('id', $id)->first();
             $session_data = SessionData::where('source', 1)
                 ->where('main_session_id', $soap->main_session_id)->where('id', $id)
                 ->first();
 
-            if (!$nextSession || !$session_data) {
+            if ( !$session_data) {
                 return redirect()->back()->with('error', 'You do not have a session on the selected date.');
             }
 
-            $nextSession->status = 2;
+            // $nextSession->status = 2;
             $session_data->status = 2;
-            $nextSession->save();
+            // $nextSession->save();
             $session_data->save();
         }
 
         if (!is_null($soap->main_appointment_id)) {
-            $nextAppSession = AppointmentSession::where('appointment_id', $soap->main_appointment_id)->where('id', $id)->first();
+            // $nextAppSession = AppointmentSession::where('appointment_id', $soap->main_appointment_id)->where('id', $id)->first();
             $sessiondata = SessionData::where('main_appointment_id', $soap->main_appointment_id)->where('id', $id)
                 ->where('session_cat', 'OT')
                 ->where('source', 2)
                 ->first();
 
-            if (!$nextAppSession || !$sessiondata) {
+            if ( !$sessiondata) {
                 return redirect()->back()->with('error', 'You do not have session on the selected date.');
             }
 
-            $nextAppSession->status = 2;
             $sessiondata->status = 2;
-            $nextAppSession->save();
             $sessiondata->save();
         }
 

@@ -84,6 +84,14 @@
                                 title="View Appointment Notes">
                                 <i class="fas fa-file-alt" style="font-size: 14px;"></i>
                             </button>
+                             <a href="/apt_invoice/${appointment.id}"
+                            target="_blank"
+                            class="btn btn-sm btn-outline-primary p-1 rounded-circle"
+                            data-bs-toggle="tooltip"
+                            data-bs-placement="top"
+                            title="Print Invoice">
+                                <i class="fas fa-print" style="font-size: 14px;"></i>
+                            </a>
                         </td>
                     <td style="font-size: 10px; padding: 4px;">
                     ${

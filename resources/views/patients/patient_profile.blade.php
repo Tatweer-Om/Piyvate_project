@@ -266,6 +266,7 @@
                                                         <th>Status</th>
                                                         <th>Info</th>
                                                         <th>Fee/Session</th>
+                                                        <th>Invoice</th>
 
                                                     </tr>
                                                 </thead>

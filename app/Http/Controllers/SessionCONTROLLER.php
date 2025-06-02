@@ -576,7 +576,7 @@ public function show_sessions()
                     $session_payment = '<span class="badge bg-danger bg-sm text-center">' . $session->amount . ' OMR (Normal)</span>'; // Red
                 }
             } else {
-                 $session_payment = '<span class="badge bg-info bg-sm text-center">Unknown</span>'; // Red
+                 $session_payment = '<span class="badge bg-info bg-sm text-center">Transffered</span>'; // Red
 
             }
 
@@ -659,7 +659,7 @@ public function show_sessions()
             foreach ($sessions as $appointment) {
                 $modal = '';
 
-                if ($appointment->status == 1) {
+                if (in_array($appointment->status, [1, 3])) {
                     // Pending → edit pencil with tooltip
                     $modal = '
                     <a href="javascript:void(0);" class="me-3 edit-staff" data-bs-toggle="modal" data-bs-target="#editSessionModal2" onclick="edit('. $appointment->id.' )" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit Appointment">
@@ -670,7 +670,10 @@ public function show_sessions()
                     $modal = '
                     <a href="javascript:void(0);" class="me-3" data-bs-toggle="tooltip" data-bs-placement="top" title="Session Done">
                         <i class="fa fa-check-double fs-18 text-secondary"></i>
-                    </a>';
+                    </a>
+                      <a href="'. url('session_recipt/' . $appointment->id) .'" class="me-3 text-decoration-none text-dark" title="Print Receipt">
+                    <i class="bi bi-printer fs-3"></i>
+                </a>';
                 } elseif ($appointment->status == 4) {
                     $modal = '
                     <a href="javascript:void(0);" class="me-3" data-bs-toggle="tooltip" data-bs-placement="top" title="On-going Session">
@@ -690,7 +693,7 @@ public function show_sessions()
                 if ($appointment->status == 4) {
                     // On-going (Green)
                     $statusBadge = '<span class="badge bg-success">On-going</span>';
-                } elseif ($appointment->status == 1) {
+                } elseif  (in_array($appointment->status, [1, 3])){
                     // Pending (Yellow)
                     $statusBadge = '<span class="badge bg-warning">Pending</span>';
                 } elseif ($appointment->status == 2) {

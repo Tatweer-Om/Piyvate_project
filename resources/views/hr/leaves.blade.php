@@ -4,7 +4,7 @@
     @push('title')
         <title> {{ trans('messages.leave_lang', [], session('locale')) }}</title>
     @endpush
-     
+
 <div class="content-body">
     <!-- row -->
     <div class="container-fluid">
@@ -37,11 +37,11 @@
                                         <th>{{ trans('messages.to_date_lang',[],session('locale')) }}</th>
                                         <th>{{ trans('messages.reason_lang',[],session('locale')) }}</th>
                                         <th>{{ trans('messages.action_lang',[],session('locale')) }}</th>
-                                        
+
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    
+
                                 </tbody>
                             </table>
                         </div>
@@ -63,7 +63,7 @@
             <div class="modal-body">
               <form class="add_leaves">
                   @csrf
-                   
+
                   <div class="row">
                     <div class="col-lg-4 col-xl-4">
                         <div class="form-group">
@@ -84,8 +84,8 @@
                             <label class="col-form-label">{{ trans('messages.leaves_type_lang',[],session('locale')) }}</label>
                             <select class="leaves_type form-control default-select wide mb-3" name="leaves_type" id="leaves_type">
                                <option value="1">{{ trans('messages.annual_leaves_lang',[],session('locale')) }}</option>
-                               <option value="2">{{ trans('messages.emergency_leaves_lang',[],session('locale')) }}</option>
-                               <option value="3">{{ trans('messages.sick_leaves_lang',[],session('locale')) }}</option>
+                               {{-- <option value="2">{{ trans('messages.emergency_leaves_lang',[],session('locale')) }}</option> --}}
+                               <option value="3">{{ trans('messages.sick_leaves_and_emergency_lang',[],session('locale')) }}</option>
                             </select>
                         </div>
                     </div>
@@ -131,32 +131,32 @@
                                     <th>{{ trans('messages.total_leaves_lang',[],session('locale')) }}</th>
                                     <th>{{ trans('messages.from_date_lang',[],session('locale')) }}</th>
                                     <th>{{ trans('messages.to_date_lang',[],session('locale')) }}</th>
-                                    <th>{{ trans('messages.reason_lang',[],session('locale')) }}</th> 
-                                    
+                                    <th>{{ trans('messages.reason_lang',[],session('locale')) }}</th>
+
                                 </tr>
                             </thead>
                             <tbody>
-                                
+
                             </tbody>
                         </table>
                     </div>
 
                   </div>
-  
+
                   <div class="modal-footer">
                       <button type="button" class="btn btn-danger light" data-bs-dismiss="modal">{{ trans('messages.close_lang',[],session('locale')) }}</button>
                       <button type="submit" class="btn btn-primary">{{ trans('messages.add_data_lang',[],session('locale')) }}</button>
                     </div>
               </form>
             </div>
-  
+
           </div>
         </div>
     </div>
 
 
-    
-   
+
+
 </div>
 
 @include('layouts.footer')

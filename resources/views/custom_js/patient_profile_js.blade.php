@@ -111,6 +111,14 @@
                                 title="View Appointment Notes">
                                 <i class="fas fa-file-alt" style="font-size: 14px;"></i>
                             </button>
+                          <a href="/apt_invoice/${appointment.id}"
+                            target="_blank"
+                            class="btn btn-sm btn-outline-primary p-1 rounded-circle"
+                            data-bs-toggle="tooltip"
+                            data-bs-placement="top"
+                            title="Print Invoice">
+                                <i class="fas fa-print" style="font-size: 14px;"></i>
+                            </a>
                         </td>
                   <td style="font-size: 10px; padding: 4px;">
                     ${
@@ -165,15 +173,25 @@
                             // If the type is 'appointment', add session-related info
                             let badgeLabel = '';
                             let badgeClass = '';
+                            let invoice = '';
                             let source = '';
+
                             if (item.type === 'appointment') {
                                 badgeLabel = 'Appointment Sessions';
                                 badgeClass = 'bg-info';
                                 source = 10;
+                                invoice = `<a href="/apt_session_invoice/${item.id}" style="text-decoration: none;" target="_blank"
+                                    data-bs-toggle="tooltip" data-bs-placement="top" title="Print Invoice">
+                                    <i class="fas fa-print text-primary" style="font-size: 16px;"></i>
+                                </a>`;
                             } else if (item.type === 'session') {
                                 badgeLabel = 'Direct Sessions';
                                 badgeClass = 'bg-success';
                                 source = 11;
+                                invoice = `<a href="/dir_session_invoice/${item.id}" style="text-decoration: none;" target="_blank"
+                                    data-bs-toggle="tooltip" data-bs-placement="top" title="Print Invoice">
+                                    <i class="fas fa-print text-primary" style="font-size: 16px;"></i>
+                                </a>`;
                             }
 
 
@@ -182,6 +200,8 @@
                                     ${badgeLabel}
                                 </a>
                             `;
+
+
                             // Append data to the table
                             tableBody.append(`
                                 <tr>
@@ -196,7 +216,9 @@
                                     Payment Type:    ${item.payment_type} <br>
                                         ${item.name}
                                     </td>
-                                    <td>${item.single_session_fee}</td>
+                                    <td>${parseFloat(item.single_session_fee).toFixed(3)}</td>
+                                    <td>${invoice}</td>
+
                                 </tr>
                             `);
 
